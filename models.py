@@ -151,6 +151,8 @@ class DoseResponseCurve(ToDictMixin, Base):
     ic50 = sa.Column(sa.Float)
     auc = sa.Column(sa.Float)
     emax = sa.Column(sa.Float)
+    xmid = sa.Column(sa.Float)
+    scal = sa.Column(sa.Float)
 
     matrix_result = relationship("MatrixResult", back_populates='combination_curves')
 
