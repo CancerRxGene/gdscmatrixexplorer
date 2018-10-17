@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 import plotly.graph_objs as go
 from scipy.stats import pearsonr
+from sqlalchemy.orm import scoped_session
 
 from db import session
 from app import app
@@ -88,7 +89,8 @@ def update_scatter(x_axis_field, y_axis_field, rows):
                 },
                 text=[f"drug1 - drug2<br />Cell line: {s.model_id}"  # TODO: Fill in real drug names
                       for s in fig_data.itertuples()],
-                customdata=[row for row in fig_data[['model_id']].itertuples(index=False)]
+                customdata=[{"barcode": row.barcode, "cmatrix": row.cmatrix}
+                            for row in fig_data.itertuples(index=False)]
             )
         ],
         'layout': go.Layout(
@@ -117,7 +119,8 @@ def update_correlation(x_axis_field, y_axis_field):
 def go_to_dot(clicked):
     if clicked:
         p = clicked['points'][0]['customdata']
-        return f"/GDSC_007-A/matrix/{p[2]}/{p[0]}/{p[1]}"
+        print(p)
+        return f"/matrix/{p['barcode']}/{p['cmatrix']}"
     else:
         return "/GDSC_007-A/free_scatter"
 

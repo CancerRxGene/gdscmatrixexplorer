@@ -9,7 +9,6 @@ header = html.Div(
             html.Ul(className="navbar-nav mr-auto", children=[
                 html.Li(dcc.Link("GDSC_007-A Home", href="/GDSC_007-A", className='nav-link'), className='nav-item'),
                 html.Li(dcc.Link("GDSC_007-A FlexiScatter", href="/GDSC_007-A/free_scatter", className='nav-link'), className='nav-item'),
-                html.Li(dcc.Link("Dose Response Plot", href="/GDSC_007-A/dose_response", className='nav-link'), className='nav-item')
             ])
         )
     ]
