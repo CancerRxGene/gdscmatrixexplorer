@@ -34,6 +34,7 @@ def dose_response_plot(drug, curve):
             "layout": go.Layout(
                 title=f'Single Agent Response for {drug.drug_name}',
                 xaxis={'type': 'log', 'title': 'Log Concentration (M)'},
+                yaxis={'title': 'Viability'},
                 shapes=[{
                     'type': 'rect',
                     'x0': float(curve.maxc) / 1000000000,
@@ -46,8 +47,8 @@ def dose_response_plot(drug, curve):
                     },
                     'fillcolor': 'rgba(51,46,44, 0.2)',
                 }],
-                margin=go.layout.Margin(l=20, r=0, b=200, t=50, pad=0),
-                legend=dict(orientation="h")
+                margin=go.layout.Margin(l=40, r=0, b=50, t=50, pad=0),
+                showlegend=False
             )
 
         }

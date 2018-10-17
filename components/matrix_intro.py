@@ -26,7 +26,7 @@ def layout(matrix):
     return html.Div([
         html.Div(className="row my-5 d-flex flex-row", children=[
             html.Div(className="col-12", children=[
-                html.H2(f"{drug1.drug_name} + {drug2.drug_name} in {model.name}")
+                dcc.Markdown(f"# Combination Report for **{drug1.drug_name}** + **{drug2.drug_name}** in cell model **{model.name}**")
             ])
         ]),
         html.Div(className="row my-5 d-flex flex-row", children=[
@@ -59,7 +59,7 @@ def layout(matrix):
                         **Target:** {drug2.target}  
                         **Drug ID:** {drug2.id}  **Owner:** {drug2.owner}
                           
-                        #### Sensitivity  
+                        #### Sensitivity of {model.name}  
                         **IC50:** {round(np.exp(curve2.ic50), 3)} uM  
                         **AUC:** {round(curve2.auc, 3)}
                           ''')),
