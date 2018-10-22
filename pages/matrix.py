@@ -4,14 +4,12 @@ from db import session
 
 from models import MatrixResult
 from components.matrix_intro import layout as intro
+from components.matrix_table import layout as table
 
 def viability(matrix):
     return html.Div("")
 
 def synergy(matrix):
-    return html.Div("")
-
-def table(matrix):
     return html.Div("")
 
 def layout(barcode=None, cmatrix=None):

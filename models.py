@@ -1,4 +1,5 @@
 import sqlalchemy as sa
+import numpy as np
 from sqlalchemy.orm import relationship
 from sqlalchemy_utils import generic_repr
 from db import Base
@@ -115,7 +116,9 @@ class WellResult(ToDictMixin, Base):
     cmatrix = sa.Column(sa.Integer, nullable=False)
     position = sa.Column(sa.Integer, nullable=False)
     lib1_dose = sa.Column(sa.String, nullable=False)
+    lib1_conc = sa.Column(sa.Float, nullable=False)
     lib2_dose = sa.Column(sa.String, nullable=False)
+    lib2_conc = sa.Column(sa.Float, nullable=False)
     viability = sa.Column(sa.Float)
     HSA = sa.Column(sa.Float)
     HSA_excess = sa.Column(sa.Float)
@@ -136,6 +139,19 @@ class WellResult(ToDictMixin, Base):
 
 
 @generic_repr
+class SingleAgentWellResult(ToDictMixin, Base):
+    __tablename__ = 'single_agent_well_results'
+    id = sa.Column(sa.Integer, primary_key=True)
+    barcode = sa.Column(sa.Integer, nullable=False)
+    drugset_id = sa.Column(sa.Integer, nullable=False)
+    lib_drug = sa.Column(sa.String, nullable=False)
+    position = sa.Column(sa.Integer, nullable=False)
+    dose = sa.Column(sa.String, nullable=False)
+    conc = sa.Column(sa.Float, nullable=False)
+    viability = sa.Column(sa.Float, nullable=False)
+
+
+@generic_repr
 class DoseResponseCurve(ToDictMixin, Base):
     __tablename__ = 'dose_response_curves'
     id = sa.Column(sa.Integer, primary_key=True)
@@ -146,7 +162,7 @@ class DoseResponseCurve(ToDictMixin, Base):
     fixed_dose = sa.Column(sa.String, nullable=True)
     dosed_tag = sa.Column(sa.String, nullable=False)
     treatment_type = sa.Column(sa.String(1), nullable=False)
-    maxc = sa.Column(sa.String, nullable=False)
+    maxc = sa.Column(sa.Float, nullable=False)
     rmse = sa.Column(sa.Float)
     ic50 = sa.Column(sa.Float)
     auc = sa.Column(sa.Float)
@@ -162,3 +178,32 @@ class DoseResponseCurve(ToDictMixin, Base):
                       {}
     )
 
+    @property
+    def single_agent_well_results(self):
+        if self.treatment_type != 'S':
+            return []
+
+        return sa.orm.object_session(self).query(SingleAgentWellResult) \
+            .filter(
+                SingleAgentWellResult.drugset_id == self.drugset_id,
+                SingleAgentWellResult.lib_drug == self.dosed_tag,
+                SingleAgentWellResult.barcode == self.barcode
+
+            ).all()
+
+    def x_to_conc(self, x):
+        try:
+            return self.maxc * np.power(2, (x - 9)) / 1000000
+        except ValueError:
+            x = float(x)
+            return self.maxc * np.power(2, (x - 9)) / 1000000
+
+    def conc_to_x(self, conc):
+        conc = conc * 1000000
+        return (np.log(conc / self.maxc) / np.log(2)) + 9
+
+    def nlme_model(self, x):
+        return 1 - (1 / (1 + np.exp(-(x - self.xmid) / self.scal)))
+
+    def y_hat(self, x):
+        return self.nlme_model(x)
