@@ -34,7 +34,7 @@ def layout(matrix):
                     id=f"drug-info-{drug1.id}",
                     className="bg-white pt-4 px-4 pb-1 border border-info h-100",
                     children=[
-                        infoblock(drug1, curve1),
+                        infoblock(drug1),
                         curve1.plot()
                     ]
                 ),
@@ -44,7 +44,7 @@ def layout(matrix):
                     id=f"drug-info-{drug1.id}",
                     className="bg-white pt-4 px-4 pb-1 border border-info h-100",
                     children=[
-                        infoblock(drug2, curve2),
+                        infoblock(drug2),
                         curve2.plot()
                     ]
                 ),
