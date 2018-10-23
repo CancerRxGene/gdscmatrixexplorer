@@ -39,8 +39,9 @@ def display_page(pathname):
         return level1_2.layout
     elif pathname == '/GDSC_007-A/free_scatter':
         return level1_1.layout
-    elif pathname == '/GDSC_007-A/heatmap':
-        return heatmap.layout
+    elif isinstance(pathname, str) and pathname.startswith('/matrix'):
+        segments = pathname.split("/")
+        return matrix.layout(*segments[2:])
     else:
         return '404'
 

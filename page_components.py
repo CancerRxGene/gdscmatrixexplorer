@@ -4,7 +4,7 @@ import dash_core_components as dcc
 header = html.Div(
     className="navbar navbar-expand-sm navbar-light bg-light",
     children=[
-        dcc.Link("GDSC Combinator", href="/", className="navbar-brand"),
+        dcc.Link("GDSC Matrix Explorer", href="/", className="navbar-brand"),
         html.Div(
             html.Ul(className="navbar-nav mr-auto", children=[
                 html.Li(dcc.Link("GDSC_007-A Home", href="/GDSC_007-A", className='nav-link'), className='nav-item'),
