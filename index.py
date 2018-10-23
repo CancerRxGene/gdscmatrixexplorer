@@ -4,7 +4,7 @@ from dash.dependencies import Input, Output
 import dash_table_experiments as dt
 
 from app import app
-from pages import level1_1, level1_2, home, heatmap
+from pages import level1_1, level1_2, home, matrix
 from page_components import header
 
 app.layout = html.Div([
@@ -39,8 +39,6 @@ def display_page(pathname):
         return level1_2.layout
     elif pathname == '/GDSC_007-A/free_scatter':
         return level1_1.layout
-    elif pathname == '/GDSC_007-A/heatmap':
-        return heatmap.layout
     elif isinstance(pathname, str) and pathname.startswith('/matrix'):
         segments = pathname.split("/")
         return matrix.layout(*segments[2:])

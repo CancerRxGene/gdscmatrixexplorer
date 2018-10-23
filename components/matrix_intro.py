@@ -3,10 +3,9 @@ from textwrap import dedent
 import dash_html_components as html
 import dash_core_components as dcc
 import requests
-import numpy as np
 
 from app import app
-from plots import dose_response_plot
+from components.single_agent.info import infoblock
 
 def layout(matrix):
     curve1 = matrix.single_agent_curves[0]
@@ -35,17 +34,8 @@ def layout(matrix):
                     id=f"drug-info-{drug1.id}",
                     className="bg-white pt-4 px-4 pb-1 border border-info h-100",
                     children=[
-                        dcc.Markdown(dedent(f'''
-                          ### Single Agent Response of **{drug1.drug_name}**
-                          ---
-                          **Target:** {drug1.target}  
-                          **Drug ID:** {drug1.id}  **Owner:** {drug1.owner}
-                            
-                          #### Sensitivity  
-                          **IC50:** {round(np.exp(curve1.ic50), 3)} uM  
-                          **AUC:** {round(curve1.auc, 3)}
-                        ''')),
-                        dose_response_plot(drug1, curve1)
+                        infoblock(drug1),
+                        curve1.plot()
                     ]
                 ),
             ]),
@@ -53,17 +43,9 @@ def layout(matrix):
                 html.Div(
                     id=f"drug-info-{drug1.id}",
                     className="bg-white pt-4 px-4 pb-1 border border-info h-100",
-                    children=[dcc.Markdown(dedent(f'''
-                        ### Single Agent Response of **{drug2.drug_name}**
-                        ---
-                        **Target:** {drug2.target}  
-                        **Drug ID:** {drug2.id}  **Owner:** {drug2.owner}
-                          
-                        #### Sensitivity of {model.name}  
-                        **IC50:** {round(np.exp(curve2.ic50), 3)} uM  
-                        **AUC:** {round(curve2.auc, 3)}
-                          ''')),
-                        dose_response_plot(drug2, curve2)
+                    children=[
+                        infoblock(drug2),
+                        curve2.plot()
                     ]
                 ),
             ]),
@@ -72,7 +54,7 @@ def layout(matrix):
                     id=f"cell-info-{model.id}",
                     className="bg-white pt-4 px-4 pb-1 border border-warning h-100",
                     children=[dcc.Markdown(dedent(f'''
-                        ### **{model.name}** properties
+                        ### Cell Line **{model.name}**
                         ---
                         **Tissue:** {model.tissue}  
                         **Cancer Type:** {model.cancer_type}  
@@ -80,10 +62,10 @@ def layout(matrix):
                         **Sample Tissue Status:** {model_information['included'][0]['attributes']['tissue_status']}  
                           
                         #### Genetic information  
-                        **Mutated Driver Genes:** {'  '.join(dg for dg in driver_genes)}  
+                        **Mutated Driver Genes:** {'  '.join(dg for dg in sorted(driver_genes))}  
                         **MSI Status:** {model_information['data']['attributes']['msi_status']}  
                         **Ploidy:** {round(model_information['data']['attributes']['ploidy'], 3)}  
-                        **Mutational Burden:** {model_information['data']['attributes']['mutations_per_mb']} mutations per Mb  
+                        **Mutational Burden:** {round(model_information['data']['attributes']['mutations_per_mb'],2)} mutations per Mb  
                           
                         [View {model.name} on Cell Model Passports](https://cellmodelpassports.sanger.ac.uk/passports/{model.id})
                           '''))

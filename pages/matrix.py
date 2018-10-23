@@ -4,15 +4,10 @@ from db import session
 
 from models import MatrixResult
 from components.matrix_intro import layout as intro
+from components.matrix_table import layout as table
+from components.matrix_viability import layout as viability
+from components.matrix_synergy import layout as synergy
 
-def viability(matrix):
-    return html.Div("")
-
-def synergy(matrix):
-    return html.Div("")
-
-def table(matrix):
-    return html.Div("")
 
 def layout(barcode=None, cmatrix=None):
     my_matrix = session.query(MatrixResult)\

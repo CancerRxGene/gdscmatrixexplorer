@@ -1,13 +1,39 @@
-import numpy as np
+from enum import Enum
 
 
-def viability_curve(x, xmid, slope):
-    return 1 - (1 / (1 + np.exp(-(x - xmid)/slope)))
+class Colors:
+    LIGHTGREEN = "rgb(117,171,61)"
+    LEAFGREEN = "rgb(85,164,112)"
+    BROWNORANGE = "rgb(177,150,64)"
+    RUST = "rgb(196,118,67)"
+    PINKPURPLE = "rgb(194,93,186)"
+    PINKPURPLE_LIGHT = "rgb(223,170,218)"
+    PINKPURPLE_TRANS = "rgba(194,93,186,0.6)"
+    DARKPINK = "rgb(199,89,128)"
+    DEEPDARKBLUE = "rgb(117,97,207)"
+    DEEPDARKBLUE_LIGHT = "rgb(225, 222, 239)"
+    DEEPDARKBLUE_TRANS = "rgba(117,97,207,0.6)"
+    DEEPDARKBLUE_ULTRATRANS = "rgba(117,97,207,0.2)"
+    FLATDARKBLUE = "rgb(127,128,197)"
+    LIGHTBLUE = "rgb(69,176,207)"
+    RED = "rgb(208,76,66)"
+    RED_LIGHT = "rgb(241,205,203)"
+    RED_TRANS = "rgb(208,76,66, 0.6)"
+    DARKGREY = "rgb(51,46,44)"
+    DARKGREY_LIGHT = "rgb(204,202,202)"
+    DARKGREY_TRANS = "rgba(51,46,44,0.6)"
+    DARKGREY_SUPERLIGHT = "rgb(222,222,222)"
+    DARKGREY_SUPERTRANS = "rgba(51,46,44,0.2)"
+    DARKGREY_ULTRALIGHT = "rgb(246, 246, 246)"
+    DARKGREY_ULTRATRANS = "rgba(51,46,44,0.05)"
 
 
-def x_to_conc(x, maxc):
-    return maxc * np.power(2, (x - 9)) / 1000000
 
 
-def conc_to_x(conc, maxc):
-    return (np.log(conc / maxc) / np.log(2)) + 9
+
+
+
+
+
+
+
