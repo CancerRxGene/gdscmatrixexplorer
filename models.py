@@ -2,6 +2,8 @@ import sqlalchemy as sa
 import numpy as np
 from sqlalchemy.orm import relationship
 from sqlalchemy_utils import generic_repr
+
+from components.dr_plot import DoseResponsePlot
 from db import Base
 
 
@@ -78,6 +80,9 @@ class MatrixResult(ToDictMixin, Base):
     Bliss_excess_window_syn = sa.Column(sa.Float)
     Bliss_excess_window_syn_dose_lib1 = sa.Column(sa.String)
     Bliss_excess_window_syn_dose_lib2 = sa.Column(sa.String)
+    combo_max_effect = sa.Column(sa.Float)
+    lib1_max_effect = sa.Column(sa.Float)
+    lib2_max_effect = sa.Column(sa.Float)
 
     drug_matrix = relationship("DrugMatrix")
     well_results = relationship("WellResult")
@@ -207,3 +212,6 @@ class DoseResponseCurve(ToDictMixin, Base):
 
     def y_hat(self, x):
         return self.nlme_model(x)
+
+    def plot(self, *args, **kwargs):
+        return DoseResponsePlot(self, *args, **kwargs).plot()

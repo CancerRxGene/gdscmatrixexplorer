@@ -3,12 +3,9 @@ from textwrap import dedent
 import dash_html_components as html
 import dash_core_components as dcc
 import requests
-import numpy as np
 
 from app import app
 from components.single_agent.info import infoblock
-from components.single_agent.plots import dose_response_plot
-
 
 def layout(matrix):
     curve1 = matrix.single_agent_curves[0]
@@ -38,7 +35,7 @@ def layout(matrix):
                     className="bg-white pt-4 px-4 pb-1 border border-info h-100",
                     children=[
                         infoblock(drug1, curve1),
-                        dose_response_plot(drug1, curve1)
+                        curve1.plot()
                     ]
                 ),
             ]),
@@ -48,7 +45,7 @@ def layout(matrix):
                     className="bg-white pt-4 px-4 pb-1 border border-info h-100",
                     children=[
                         infoblock(drug2, curve2),
-                        dose_response_plot(drug2, curve2)
+                        curve2.plot()
                     ]
                 ),
             ]),

@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 import json
 import time
 
@@ -150,8 +153,9 @@ def extract_matrix_results(combo_matrix_stats):
     hsa_wells = [c for c in combo_matrix_stats.columns if c.startswith("HSA")]
     bliss_wells = [c for c in combo_matrix_stats.columns if c.startswith("Bliss")]
 
-    matrix_results = combo_matrix_stats[["COSMIC_ID", "DRUGSET_ID", "cmatrix", "BARCODE"] +
-                                        hsa_wells + bliss_wells]
+    matrix_results = combo_matrix_stats[
+        ["COSMIC_ID", "DRUGSET_ID", "cmatrix", "BARCODE", 'combo_max_effect',
+         'lib1_max_effect', 'lib2_max_effect'] + hsa_wells + bliss_wells]
 
     matrix_results = matrix_results.rename(
         columns={
@@ -258,8 +262,8 @@ def sa_wells_to_db(wells):
 
 if __name__ == '__main__':
 
-    combo_matrix_stats = pd.read_csv("data/combo_matrix_statistics_GDSC_007-A_28Sep18_2110.csv.bz2")
-    combo_well_stats = pd.read_csv("data/combo_well_statistics_GDSC_007-A_28Sep18_1551.csv")
+    combo_matrix_stats = pd.read_csv("data/combo_matrix_statistics_GDSC_007-A_22Oct18_2049.csv")
+    combo_well_stats = pd.read_csv("data/combo_well_statistics_GDSC_007-A_22Oct18_1534.csv")
     nlme_stats = pd.read_csv("data/nlme_stats_matrix_fit_GDSC_007-A_28Sep18_1543.csv.bz2")
 
     create_db(combo_matrix_stats, combo_well_stats, nlme_stats)
