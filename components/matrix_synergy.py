@@ -8,8 +8,8 @@ from app import app
 
 
 def layout(matrix):
-    available_combo_metrics = ['HSA_excess', 'Bliss_excess']
-
+    available_combo_metrics = ["HSA_excess", "Bliss_excess", "HSA",
+                               "Bliss_additivity", "Bliss_index",  "Loewe_index"]
     matrix_df = pd.DataFrame([w.to_dict() for w in matrix.well_results])
 
     matrix_df = matrix_df.assign(
@@ -24,13 +24,16 @@ def layout(matrix):
 
                 dcc.Dropdown(
                     id='combo-heatmap-zvalue',
-                    options=[{'label': i, 'value': i} for i in available_combo_metrics],
+                    options=[{'label': i, 'value': i} for i in
+                             available_combo_metrics],
                     value='HSA_excess'
                 ),
                 dcc.Graph(id='combo-heatmap'),
-                dcc.Graph(id='combo-surface'),
+
             ])
         ]),
+        html.Div(children=[dcc.Graph(id='combo-surface')],
+                 className='col-6'),
         html.Div(id='combo-values', style={'display': 'none'},
                  children=matrix_df.to_json(date_format='iso',
                                             orient='split'))
@@ -68,8 +71,9 @@ def update_combo_heatmap(combo_heatmap_zvalue, combo_json):
 )
 def update_combo_surface(combo_heatmap_zvalue, combo_json):
     matrix_df = pd.read_json(combo_json, orient='split')
-    zvalue = matrix_df[['lib1_dose', 'lib2_dose', combo_heatmap_zvalue]]\
-        .pivot(index='lib2_dose', columns='lib1_dose', values=combo_heatmap_zvalue)
+    zvalue = matrix_df[['lib1_dose', 'lib2_dose', combo_heatmap_zvalue]] \
+        .pivot(index='lib2_dose', columns='lib1_dose',
+               values=combo_heatmap_zvalue)
 
     return {
         'data': [

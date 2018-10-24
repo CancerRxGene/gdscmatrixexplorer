@@ -17,7 +17,8 @@ class DoseResponsePlot:
                  label_ic50=True,
                  mark_emax=True,
                  label_emax=True,
-                 label_rmse=True):
+                 label_rmse=True,
+                 style=None):
         self.curve = curve
 
         self.plot_data = pd.DataFrame({'xfit': np.linspace(-10, 30, 25)})
@@ -37,9 +38,10 @@ class DoseResponsePlot:
         self.mark_emax = mark_emax
         self.label_emax = label_emax
         self.label_rmse = label_rmse
+        self.style = style
 
     def plot(self):
-        return dcc.Graph(id=self.id, figure=self.figure)
+        return dcc.Graph(id=self.id, figure=self.figure, style=self.style)
 
     def __call__(self, *args, **kwargs):
         return self.plot()
