@@ -8,7 +8,6 @@ def infoblock(drug):
         html.H3([
             "Drug ",
             html.Strong(drug.drug_name),
-            " (single agent)"
         ]),
         html.Table(
             html.Tr([
@@ -33,7 +32,6 @@ def infoblock_curve(drug, curve):
         html.H3([
             "Drug ",
             html.Strong(drug.drug_name),
-            " (single agent)"
         ]),
         html.Table(
             html.Tr([

@@ -198,13 +198,13 @@ class DoseResponsePlot:
             text=f'<b>Emax</b> {round(1 - self.curve.emax, 3)}',
             showarrow=True,
             arrowhead=6,
-            ax=40,
-            ay=10,
+            ax=30,
+            ay=30,
             xanchor="left",
             bgcolor=C.DARKGREY_ULTRALIGHT,
             bordercolor=C.PINKPURPLE_TRANS,
-            borderpad=3,
-            font={"size": 14}
+            borderpad=2,
+            font={"size": 12}
         )
 
     @property
@@ -217,13 +217,13 @@ class DoseResponsePlot:
             text=f'<b>IC50</b> {round(self.curve.x_to_conc(self.curve.xmid) * 1000000, 3)}µM',
             showarrow=True,
             arrowhead=6,
-            ax=-60,
-            ay=-10,
+            ax=-40,
+            ay=-20,
             xanchor="right",
             bgcolor=C.DARKGREY_ULTRALIGHT,
             bordercolor=C.RED_TRANS,
-            borderpad=3,
-            font={"size": 14}
+            borderpad=2,
+            font={"size": 12}
         )
 
     @property
@@ -236,13 +236,13 @@ class DoseResponsePlot:
             text=f'<b>AUC</b> {round(self.curve.auc, 3)}',
             showarrow=True,
             arrowhead=0,
-            ax=-40,
-            ay=-40,
+            ax=-20,
+            ay=-20,
             xanchor="right",
             bgcolor=C.DARKGREY_ULTRALIGHT,
             bordercolor=C.DEEPDARKBLUE_TRANS,
-            borderpad=3,
-            font={"size": 14}
+            borderpad=2,
+            font={"size": 12}
         )
     @property
     def rmse_label(self):
@@ -257,8 +257,8 @@ class DoseResponsePlot:
             yanchor="top",
             bgcolor=C.DARKGREY_ULTRALIGHT,
             bordercolor=C.DARKGREY_LIGHT,
-            borderpad=3,
-            font={"size": 14}
+            borderpad=2,
+            font={"size": 12}
         )
 
 def dose_response_plot(drug, curve, display_auc_area=True):

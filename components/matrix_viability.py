@@ -32,7 +32,7 @@ def layout(matrix: MatrixResult):
         html.Div(className='col-12', children=[
             html.Div(className='border bg-white d-flex flex-row p-2', children=[
 
-                html.Div(className='col-4 d-flex flex-column', children=[
+                html.Div(className='col-3 d-flex flex-column', children=[
                     html.Div(className="p-2",
                              children=[
                                  html.H2("Viability"),
@@ -55,7 +55,7 @@ def layout(matrix: MatrixResult):
                                       scene=dict(
                                           aspectratio=dict(x=1, y=1, z=0.5),
                                           camera=dict(
-                                              eye=dict(x=-1.0, y=1.0, z=0.5))
+                                              eye=dict(x=-2.0, y=1.25, z=0.8))
                                       ),
                                   )
                               }
@@ -72,17 +72,18 @@ def layout(matrix: MatrixResult):
                                           zmax=1,
                                           zmin=0,
                                           colorscale='Viridis',
-                                          colorbar={'x': -.2}
+                                          colorbar={'x': -.3}
                                       )
                                   ],
                                   'layout': go.Layout(
                                       # title='Viability',
-                                      xaxis=dict(autorange='reversed',range=[1, 7]),
-                                      yaxis=dict(autorange='reversed',range=[1, 7]),
-                              )
+                                      xaxis=dict(autorange='reversed', range=[1, 7]),
+                                      yaxis=dict(autorange='reversed', range=[1, 7]),
+                                      margin=dict(t=10, r=20, b=30, l=20)
+                                  )
                               })
                 ]),
-                html.Div(className='col-3 d-flex flex-column h-100', children=[
+                html.Div(className='col-4 d-flex flex-column h-100', children=[
                     html.Div(id='dr_row', className='h-50'),
                     html.Div(id='dr_column', className='h-50')
                 ]),

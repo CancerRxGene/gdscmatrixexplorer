@@ -11,7 +11,7 @@ app.layout = html.Div([
     dcc.Location(id='url', refresh=False),
     html.Div(
         id='wrapper',
-        className="container-fluid",
+        className="container",
         children=[
             header,
             html.Div(
