@@ -4,6 +4,7 @@ import dash_html_components as html
 import dash_table_experiments as dt
 import numpy as np
 import pandas as pd
+import sqlalchemy as sa
 import plotly.graph_objs as go
 
 from app import app
@@ -11,8 +12,12 @@ from db import session
 from models import MatrixResult, Project
 
 
-def layout(project_name):
-    print(project_name)
+def layout(project_slug):
+    try:
+        project = session.query(Project).filter_by(slug=project_slug).one()
+    except sa.orm.exc.NoResultFound:
+        return html.Div("Project not found")
+
     metrics = ["HSA_excess", "HSA_excess_syn", "HSA_excess_well_count",
                "HSA_excess_window", "HSA_excess_window_syn", "Bliss_excess",
                "Bliss_excess_syn", "Bliss_excess_well_count", "Bliss_excess_window",
@@ -21,14 +26,14 @@ def layout(project_name):
 
     all_matrices = session.query(MatrixResult)\
         .join(Project)\
-        .filter(Project.name == project_name)\
+        .filter(Project.name == project.name)\
         .all()
 
     summary = pd.DataFrame([x.to_dict() for x in all_matrices])
 
 
     return html.Div([
-        html.H2(f"{project_name} Overview"),
+        html.H2(f"{project.name} Overview"),
         html.Div(
             children=[
                 html.Label('y-axis', htmlFor='y-axis-select-boxplot'),
@@ -60,7 +65,7 @@ def layout(project_name):
                 id='datatable1_2'
             )
         ),
-        html.Div(style={"display": "none"}, children=project_name,
+        html.Div(style={"display": "none"}, children=project.name,
                  id='project-name')
     ],
     style={'width':'100%'})

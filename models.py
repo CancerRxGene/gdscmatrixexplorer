@@ -18,6 +18,7 @@ class Project(ToDictMixin, Base):
     __tablename__ = 'projects'
     id = sa.Column(sa.Integer, primary_key=True)
     name = sa.Column(sa.String, unique=True)
+    slug = sa.Column(sa.String, unique=True)
     matrices = relationship("MatrixResult", back_populates='project')
 
     @property
@@ -211,7 +212,7 @@ class DoseResponseCurve(ToDictMixin, Base):
     )
 
     @property
-    def single_agent_well_results(self):
+    def well_results(self):
         if self.treatment_type != 'S':
             return sa.orm.object_session(self).query(WellResult)\
                 .filter(
@@ -230,6 +231,15 @@ class DoseResponseCurve(ToDictMixin, Base):
                     SingleAgentWellResult.lib_drug == self.dosed_tag,
                     SingleAgentWellResult.barcode == self.barcode
                 ).all()
+
+    @property
+    def minc(self):
+        if self.treatment_type == 'S':
+            return min([w.conc for w in self.well_results])
+        else:
+            lib1_doses = {w.lib1_conc for w in self.well_results}
+            lib2_doses = {w.lib2_conc for w in self.well_results}
+            return min(lib1_doses) if len(lib1_doses) > 1 else min(lib2_doses)
 
     def x_to_conc(self, x):
         try:

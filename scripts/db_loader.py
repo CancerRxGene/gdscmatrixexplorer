@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import json
+import re
 import time
 
 import pandas as pd
@@ -31,12 +32,10 @@ def upload_project(combo_matrix_stats_path: str,
 
     project = get_project(project_name)
 
-    models = get_models_with_sidm(combo_matrix_stats)
-    if models is not None and not models.empty:
-        models_to_db(models)
+    add_new_models(combo_matrix_stats)
+    models = pd.read_sql(session.query(Model).statement, session.bind)
 
-    drugs = extract_drugs(combo_matrix_stats)
-    drugs_to_db(drugs)
+    add_new_drugs(combo_matrix_stats)
 
     drug_matrices = extract_drug_matrices(combo_matrix_stats)
     drug_matrices_to_db(drug_matrices)
@@ -46,29 +45,38 @@ def upload_project(combo_matrix_stats_path: str,
     matrix_results = add_project_id(matrix_results, project)
     matrix_results_to_db(matrix_results)
 
+    valid_barcodes = set(matrix_results.barcode)
+
     well_results = extract_well_results(combo_well_stats)
+    well_results = well_results[well_results.barcode.isin(valid_barcodes)]
     well_results_to_db(well_results)
 
     dr_curves = extract_dose_response_curves(nlme_stats)
+    dr_curves = dr_curves[dr_curves.barcode.isin(valid_barcodes)]
     dr_curves_to_db(dr_curves)
 
     sa_wells = extract_single_agent_wells(nlme_stats)
+    sa_wells = sa_wells[sa_wells.barcode.isin(valid_barcodes)]
     sa_wells_to_db(sa_wells)
 
 
 def get_project(project_name):
     db_p = session.query(Project).filter_by(name=project_name).first()
     if not db_p:
-        db_p = Project(name=project_name)
+        slug = '-'.join([c.lower() for c in re.split("[, \-!?:_]+", project_name)])
+        db_p = Project(name=project_name, slug=slug)
         session.add(db_p)
         session.commit()
     return db_p
 
 
-def get_models_with_sidm(combo_matrix_stats):
+def add_new_models(combo_matrix_stats):
     models = extract_models(combo_matrix_stats)
-    models = add_sidms(models)
-    return models
+    new_models = get_new(Model, models)
+    new_models = add_sidms(new_models)
+    new_models = new_models[pd.notna(new_models.id)]
+    if not new_models.empty:
+        models_to_db(new_models)
 
 
 def extract_models(combo_matrix_stats):
@@ -76,7 +84,10 @@ def extract_models(combo_matrix_stats):
 
     for c in ["TISSUE", "CANCER_TYPE", 'MASTER_CELL_ID', 'COSMIC_ID']:
         if c in combo_matrix_stats.columns:
-            models[c] = combo_matrix_stats[c]
+            if c.endswith("ID"):
+                models[c] = combo_matrix_stats[c].astype(int)
+            else:
+                models[c] = combo_matrix_stats[c]
 
     models = models.rename(columns={"CELL_LINE_NAME": "name"})
     models.columns = [c.lower() for c in models.columns]
@@ -92,23 +103,26 @@ def get_new(model, df):
     # Make sure the column types match
     for col in db_models.columns:
         if col in df.columns:
-            df[col] = df[col].astype(db_models[col].dtype)
+            if db_models[col].dtype == 'object':
+                df[col] = df[col].astype(str)
+            else:
+                df[col] = df[col].astype(db_models[col].dtype)
 
     # new as in 'not yet in database'
-    new = pd.concat([df, db_models, db_models], ignore_index=True, sort=True)\
+    new = pd.concat([db_models, db_models, df], ignore_index=True, sort=False)\
         .drop_duplicates(keep=False)[df.columns]
 
     return new
 
 
-def add_sidms(models: int, verbose: bool=False) -> pd.DataFrame:
+def add_sidms(models: pd.DataFrame, verbose: bool=False) -> pd.DataFrame:
     if verbose:
         print("Adding Sanger IDs from Passports...")
     models = models.copy()
     sidms = []
     pbar = tqdm(total=len(models))
     for m in models.itertuples():
-        pbar.set_description(f"Processing {m.cosmic_id}")
+        pbar.set_description(f"Processing {m.cosmic_id:>10}")
         pbar.update(1)
         sidms.append(get_sidm(m.cosmic_id))
 
@@ -156,7 +170,14 @@ def to_db(model, df, append=False):
         model.__table__.insert(),
         df.drop_duplicates().to_dict('records')
     )
+    session.commit()
     return
+
+
+def add_new_drugs(combo_matrix_stats):
+    drugs = extract_drugs(combo_matrix_stats)
+    new_drugs = get_new(Drug, drugs)
+    drugs_to_db(new_drugs)
 
 
 def extract_drugs(combo_matrix_stats):
@@ -233,7 +254,7 @@ def extract_matrix_results(combo_matrix_stats):
 
 
 def add_model_id(df, models, model_id_field='cosmic_id'):
-    res = df.merge(models[['id', model_id_field]], on=model_id_field)\
+    res = df.merge(models[['id', model_id_field]], on=model_id_field, how='inner')\
         .rename(columns={"id": "model_id"})
     del res[model_id_field]
     return res
