@@ -40,7 +40,7 @@ def display_page(pathname):
         if len(segments) == 3:
             return project_home.layout(segments[2])
         elif len(segments) == 4 and segments[-1] == "scatter":
-            return project_scatter.layout('GDSC_007')
+            return project_scatter.layout(segments[-2])
     elif isinstance(pathname, str) and pathname.startswith('/matrix'):
         segments = pathname.split("/")
         return matrix.layout(*segments[2:])
