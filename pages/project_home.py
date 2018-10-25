@@ -65,8 +65,8 @@ def layout(project_slug):
                 id='datatable1_2'
             )
         ),
-        html.Div(style={"display": "none"}, children=project.name,
-                 id='project-name')
+        html.Div(style={"display": "none"}, children=str(project.id),
+                 id='project-id')
     ],
     style={'width':'100%'})
 
@@ -74,13 +74,12 @@ def layout(project_slug):
 @app.callback(
     dash.dependencies.Output('project-boxplot', 'figure'),
     [dash.dependencies.Input('y-axis-select-boxplot', 'value'),
-     dash.dependencies.Input('project-name', 'children')]
+     dash.dependencies.Input('project-id', 'children')]
 )
-def update_boxplot(y_axis_field, project_name):
+def update_boxplot(y_axis_field, project_id):
 
     all_matrices_query = session.query(MatrixResult) \
-        .join(Project) \
-        .filter(Project.name == project_name)
+        .filter_by(project_id=int(project_id))
 
     summary = pd.read_sql(all_matrices_query.statement, all_matrices_query.session.bind)
     return {

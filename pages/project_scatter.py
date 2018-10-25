@@ -6,15 +6,19 @@ import numpy as np
 import pandas as pd
 import plotly.graph_objs as go
 from scipy.stats import pearsonr
-from sqlalchemy.orm import scoped_session
+import sqlalchemy as sa
 
 from db import session
 from app import app
 from models import MatrixResult, Project
 
 
-def layout(project_name):
-    print(project_name)
+def layout(project_slug):
+    try:
+        project = session.query(Project).filter_by(slug=project_slug).one()
+    except sa.orm.exc.NoResultFound:
+        return html.Div("Project not found")
+
     metrics = ["HSA_excess", "HSA_excess_syn", "HSA_excess_well_count",
                "HSA_excess_window", "HSA_excess_window_syn", "Bliss_excess",
                "Bliss_excess_syn", "Bliss_excess_well_count",
@@ -24,14 +28,14 @@ def layout(project_name):
 
     all_matrices = session.query(MatrixResult)\
         .join(Project)\
-        .filter(Project.name == project_name)\
+        .filter(Project.name == project.name)\
         .all()
 
     summary = pd.DataFrame([x.to_dict() for x in all_matrices])
 
 
     return html.Div([
-        html.H2(f"{project_name} Scatterplot"),
+        html.H2(f"{project.name} Scatterplot"),
         html.Div(
             children=[
                 html.Label('x-axis'),
@@ -70,8 +74,8 @@ def layout(project_name):
                 id='datatable'
             )
         ),
-        html.Div(style={"display": "none"}, children=project_name,
-                 id='project-name')
+        html.Div(style={"display": "none"}, children=str(project.id),
+                 id='project-id')
     ],
         style={'width':'100%'}
     )
@@ -117,11 +121,10 @@ def update_scatter(x_axis_field, y_axis_field, rows):
     dash.dependencies.Output('correlation', 'children'),
     [dash.dependencies.Input('x-axis-select', 'value'),
      dash.dependencies.Input('y-axis-select', 'value'),
-     dash.dependencies.Input('project-name', 'children')])
-def update_correlation(x_axis_field, y_axis_field, project_name):
+     dash.dependencies.Input('project-id', 'children')])
+def update_correlation(x_axis_field, y_axis_field, project_id):
     all_matrices_query = session.query(MatrixResult) \
-        .join(Project) \
-        .filter(Project.name == project_name)
+        .filter_by(project_id=int(project_id))
 
     summary = pd.read_sql(all_matrices_query.statement,
                           all_matrices_query.session.bind)
