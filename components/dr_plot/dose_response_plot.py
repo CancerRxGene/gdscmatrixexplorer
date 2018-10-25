@@ -17,7 +17,8 @@ class DoseResponsePlot:
                  label_ic50=True,
                  mark_emax=True,
                  label_emax=True,
-                 label_rmse=True):
+                 label_rmse=True,
+                 style=None):
         self.curve = curve
 
         self.plot_data = pd.DataFrame({'xfit': np.linspace(-10, 30, 25)})
@@ -25,7 +26,7 @@ class DoseResponsePlot:
         self.plot_data['nlme_model'] = curve.nlme_model(self.plot_data.xfit)
 
         self.datapoints = pd.DataFrame(
-            [w.to_dict() for w in curve.single_agent_well_results]
+            [w.to_dict() for w in curve.well_results]
         )
         self.id = f'dose-response-{curve.id}'
         self.display_datapoints = display_datapoints
@@ -37,9 +38,10 @@ class DoseResponsePlot:
         self.mark_emax = mark_emax
         self.label_emax = label_emax
         self.label_rmse = label_rmse
+        self.style = style
 
     def plot(self):
-        return dcc.Graph(id=self.id, figure=self.figure)
+        return dcc.Graph(id=self.id, figure=self.figure, style=self.style)
 
     def __call__(self, *args, **kwargs):
         return self.plot()
@@ -63,9 +65,11 @@ class DoseResponsePlot:
 
     @property
     def auc_area(self):
+
+
         auc_data = pd.DataFrame({
             'xfit': np.linspace(
-                self.curve.conc_to_x(self.curve.maxc / 1000000000),
+                self.curve.conc_to_x(self.curve.minc / 1000000),
                 self.curve.conc_to_x(self.curve.maxc / 1000000),
                 15)
         })
@@ -96,8 +100,17 @@ class DoseResponsePlot:
 
     @property
     def datapoint_markers(self):
+
+        if hasattr(self.datapoints, 'conc'):
+            x = self.datapoints.conc
+        elif self.datapoints.lib1_conc.nunique() > 1:
+            x = self.datapoints.lib1_conc
+        elif self.datapoints.lib2_conc.nunique() > 1:
+            x = self.datapoints.lib2_conc
+        else:
+            x = (0,)
         return go.Scatter(
-            x=self.datapoints.conc / 1000000,
+            x=x / 1000000,
             y=self.datapoints.viability,
             mode='markers',
             name="measurement",
@@ -136,7 +149,7 @@ class DoseResponsePlot:
     def screening_range(self):
         return {
             'type': 'rect',
-            'x0': self.curve.maxc / 1000000000,
+            'x0': self.curve.minc / 1000000,
             'y0': 0,
             'x1': self.curve.maxc / 1000000,
             'y1': 1,
@@ -196,13 +209,13 @@ class DoseResponsePlot:
             text=f'<b>Emax</b> {round(1 - self.curve.emax, 3)}',
             showarrow=True,
             arrowhead=6,
-            ax=40,
-            ay=10,
+            ax=30,
+            ay=30,
             xanchor="left",
             bgcolor=C.DARKGREY_ULTRALIGHT,
             bordercolor=C.PINKPURPLE_TRANS,
-            borderpad=3,
-            font={"size": 14}
+            borderpad=2,
+            font={"size": 12}
         )
 
     @property
@@ -215,13 +228,13 @@ class DoseResponsePlot:
             text=f'<b>IC50</b> {round(self.curve.x_to_conc(self.curve.xmid) * 1000000, 3)}µM',
             showarrow=True,
             arrowhead=6,
-            ax=-60,
-            ay=-10,
+            ax=-40,
+            ay=-20,
             xanchor="right",
             bgcolor=C.DARKGREY_ULTRALIGHT,
             bordercolor=C.RED_TRANS,
-            borderpad=3,
-            font={"size": 14}
+            borderpad=2,
+            font={"size": 12}
         )
 
     @property
@@ -234,13 +247,13 @@ class DoseResponsePlot:
             text=f'<b>AUC</b> {round(self.curve.auc, 3)}',
             showarrow=True,
             arrowhead=0,
-            ax=-40,
-            ay=-40,
+            ax=-20,
+            ay=-20,
             xanchor="right",
             bgcolor=C.DARKGREY_ULTRALIGHT,
             bordercolor=C.DEEPDARKBLUE_TRANS,
-            borderpad=3,
-            font={"size": 14}
+            borderpad=2,
+            font={"size": 12}
         )
     @property
     def rmse_label(self):
@@ -255,169 +268,6 @@ class DoseResponsePlot:
             yanchor="top",
             bgcolor=C.DARKGREY_ULTRALIGHT,
             bordercolor=C.DARKGREY_LIGHT,
-            borderpad=3,
-            font={"size": 14}
+            borderpad=2,
+            font={"size": 12}
         )
-
-def dose_response_plot(drug, curve, display_auc_area=True):
-    plot_data = pd.DataFrame({'xfit': np.linspace(-10, 30, 25)})
-    plot_data['conc_fit'] = curve.x_to_conc(plot_data.xfit)
-    plot_data['nlme_model'] = curve.nlme_model(plot_data.xfit)
-
-
-
-
-
-    return dcc.Graph(
-        id=f'dose-response-{drug.id}',
-        figure={
-            "data": [
-                auc_area(curve) if display_auc_area else None,
-                go.Scatter(
-                    x=plot_data.conc_fit,
-                    y=plot_data.nlme_model,
-                    mode='lines',
-                    name="Fitted Curve",
-                    line=dict(shape='spline', color='rgb(117,97,207)'),
-                    hoverinfo='none'
-                ),
-                go.Scatter(
-                    x=points.conc / 1000000,
-                    y=points.viability,
-                    mode='markers',
-                    name="measurement",
-                    marker=dict(symbol=4, color='rgb(117,171,61)',
-                                size=10,
-                                line={"width": 1, "color": 'white'}),
-                ),
-                go.Scatter(
-                    x=(curve.x_to_conc(curve.xmid),),
-                    y=(curve.y_hat(curve.xmid),),
-                    mode='markers',
-                    name="IC50",
-                    marker=dict(color='rgba(208,76,66, 0.5)', size=10),
-                    hoverinfo='none'
-                ),
-                go.Scatter(
-                    x=(curve.maxc / 1000000,),
-                    y=(curve.y_hat(curve.conc_to_x(curve.maxc / 1000000)),),
-                    mode='markers',
-                    name="Emax",
-                    marker=dict(color='rgb(194,93,186)', size=10),
-                    hoverinfo='none'
-                ),
-
-
-            ],
-            "layout": go.Layout(
-                # title=f'Single Agent Response for {drug.drug_name}',
-                xaxis={'type': 'log', 'title': 'Log Concentration (M)',
-                       'range': np.log10([curve.x_to_conc(-10), curve.x_to_conc(20)])},
-                yaxis={'title': 'Viability'},
-                shapes=[{
-                        'type': 'rect',
-                        'x0': curve.maxc / 1000000000,
-                        'y0': 0,
-                        'x1': curve.maxc / 1000000,
-                        'y1': 1,
-                        'line': {
-                            'color': 'rgba(51,46,44, 0.3)',
-                            'width': 2,
-                        },
-                        'fillcolor': 'rgba(51,46,44, 0.05)',
-                    },
-                    {
-                        'type': 'line',
-                        'x0': curve.x_to_conc(-10),
-                        'y0': 1 - curve.emax,
-                        'x1': curve.maxc / 1000000,
-                        'y1': 1 - curve.emax,
-                        'line': {
-                            'color': 'rgb(194,93,186)',
-                            'width': 2,
-                            'dash': "dot"
-                        },
-                    },
-                    {
-                        'type': 'line',
-                        'x0': curve.x_to_conc(curve.xmid),
-                        'y0': 0,
-                        'x1': curve.x_to_conc(curve.xmid),
-                        'y1': curve.y_hat(curve.xmid),
-                        'line': {
-                            'color': 'rgb(208,76,66)',
-                            'width': 2,
-                            'dash': "dashdot"
-                        },
-                    }
-                ],
-                margin=go.layout.Margin(l=50, r=20, b=80, t=0, pad=10),
-                showlegend=False,
-                annotations=[
-                    dict(
-                        x=np.log10(curve.maxc / 1000000),
-                        y=1 - curve.emax,
-                        xref='x',
-                        yref='y',
-                        text=f'<b>Emax</b> {round(1 - curve.emax, 3)}',
-                        showarrow=True,
-                        arrowhead=6,
-                        ax=40,
-                        ay=10,
-                        xanchor="left",
-                        bgcolor="rgb(251, 248, 251)",
-                        bordercolor="rgba(194,93,186, 0.6)",
-                        borderpad=3,
-                        font={"size": 14}
-                    ),
-                    dict(
-                        x=np.log10(curve.x_to_conc(curve.xmid)),
-                        y=curve.y_hat(curve.xmid),
-                        xref='x',
-                        yref='y',
-                        text=f'<b>IC50</b> {round(curve.x_to_conc(curve.xmid) * 1000000, 3)}µM',
-                        showarrow=True,
-                        arrowhead=6,
-                        ax=-60,
-                        ay=-10,
-                        xanchor="right",
-                        bgcolor="rgb(252, 247, 247)",
-                        bordercolor="rgba(208,76,66, 0.6)",
-                        borderpad=3,
-                        font={"size": 14}
-                    ),
-                    dict(
-                        x=np.log10(curve.maxc / 500000000),
-                        y=0.15,
-                        xref='x',
-                        yref='y',
-                        text=f'<b>AUC</b> {round(curve.auc, 3)}',
-                        showarrow=True,
-                        arrowhead=0,
-                        ax=-40,
-                        ay=-40,
-                        xanchor="right",
-                        bgcolor="rgb(249, 248, 252)",
-                        bordercolor="rgba(117,97,207, 0.6)",
-                        borderpad=3,
-                        font={"size": 14}
-                    ),
-                    dict(
-                        x=1,
-                        y=0.95,
-                        xref='paper',
-                        yref='paper',
-                        text=f'<b>RMSE</b> {round(curve.rmse, 3)}',
-                        showarrow=False,
-                        xanchor="right",
-                        yanchor="top",
-                        bgcolor="rgb(246, 247, 246)",
-                        bordercolor="rgba(51,46,44, 0.3)",
-                        borderpad=3,
-                        font={"size": 14}
-                    ),
-                ]
-            )
-
-        }
-    )
