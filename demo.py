@@ -1,7 +1,7 @@
 import pandas as pd
 import sqlalchemy as sa
 from db import engine
-from models import Model, Drug, DrugMatrix, MatrixResult, WellResult, DoseResponseCurve
+from models import Model, Drug, Combination, MatrixResult, WellResult, DoseResponseCurve
 
 session = sa.orm.sessionmaker(bind=engine)()
 

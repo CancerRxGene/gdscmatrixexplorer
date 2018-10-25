@@ -98,8 +98,17 @@ class DoseResponsePlot:
 
     @property
     def datapoint_markers(self):
+
+        if hasattr(self.datapoints, 'conc'):
+            x = self.datapoints.conc
+        elif self.datapoints.lib1_conc.nunique() > 1:
+            x = self.datapoints.lib1_conc
+        elif self.datapoints.lib2_conc.nunique() > 1:
+            x = self.datapoints.lib2_conc
+        else:
+            x = (0,)
         return go.Scatter(
-            x=self.datapoints.conc / 1000000,
+            x=x / 1000000,
             y=self.datapoints.viability,
             mode='markers',
             name="measurement",

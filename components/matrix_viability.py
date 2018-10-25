@@ -109,7 +109,7 @@ def display_combo_row(hoverdata, curve_ids):
     curve = session.query(DoseResponseCurve).get(int(curve_row.id))
     return html.Div(className="mb-2 mt-2", children=[
         html.H6([html.Em("Row"), html.Strong(f" {curve_row.fixed_drug_name} @ Dose {row} vs {curve_row.dosed_drug_name}")]),
-        curve.plot(display_datapoints=False, mark_auc=True,
+        curve.plot(display_datapoints=True, mark_auc=True,
                    label_auc=False, mark_ic50=True, label_ic50=True,
                    mark_emax=False, label_emax=False, label_rmse=True,
                    style={'height': '200px'})
@@ -131,7 +131,7 @@ def display_combo_column(hoverdata, curve_ids):
     return html.Div([
         html.H6([html.Em("Column"), html.Strong(
             f" {curve_row.fixed_drug_name} @ Dose {column} vs {curve_row.dosed_drug_name}")]),
-        curve.plot(display_datapoints=False, mark_auc=True,
+        curve.plot(display_datapoints=True, mark_auc=True,
                    label_auc=False, mark_ic50=True, label_ic50=True,
                    mark_emax=False, label_emax=False, label_rmse=True,
                    style={'height': '200px'})
