@@ -53,6 +53,10 @@ def update_viability_heatmap(viability_heatmap_zvalue, matrix_json):
     matrix_df['lib2_conc'] = matrix_df['lib2_conc'].astype('category')
     matrix_df['lib1_conc'] = [np.format_float_scientific(conc, 3) for conc in matrix_df['lib1_conc']]
     matrix_df['lib2_conc'] = [np.format_float_scientific(conc, 3) for conc in matrix_df['lib2_conc']]
+
+    # xaxis_labels = [f"{conc:.2e}" for conc in matrix_df.lib1_conc.sort_values().unique()]
+    # yaxis_labels = [f"{conc:.2e}" for conc in matrix_df.lib2_conc.sort_values(ascending=False).unique()]
+
     zvalue = matrix_df[viability_heatmap_zvalue]
 
     return {
@@ -68,28 +72,17 @@ def update_viability_heatmap(viability_heatmap_zvalue, matrix_json):
         ],
         'layout': go.Layout(title=viability_heatmap_zvalue,
                             xaxis={'type': 'category',
-                                   'title': 'Concentration (uM)'
+                                   'title': 'Drug 1 (uM)'
+                                   # 'ticktext': xaxis_labels,
+                                   # 'tickvals': matrix_df.lib1_conc
                                    },
                             yaxis={'type': 'category',
-                                   'title': 'Concentration (uM)'
+                                   'title': 'Drug 2 (uM)'
+                                   # 'ticktext': yaxis_labels,
+                                   # 'tickvals': matrix_df.lib2_conc
                                    },
                             margin={'l': 100}
                             )
-        # 'layout': go.Layout(title=viability_heatmap_zvalue,
-        #                     xaxis={'type': '-',
-        #                            'title': 'Concentration (uM)',
-        #                            'tickmode': 'array',
-        #                            'tickvals': matrix_df.lib1_conc.unique(),
-        #                            'ticktext': matrix_df.lib1_conc.unique()
-        #                            },
-        #                     yaxis={'type':'-',
-        #                            'title': 'Concentration (uM)',
-        #                            'tickmode': 'array',
-        #                            'tickvals': matrix_df.lib1_conc.unique(),
-        #                            'ticktext': matrix_df.lib1_conc.unique()
-        #                            }
-        #
-        #                     )
     }
 
 
@@ -110,7 +103,7 @@ def update_viability_surface(viability_heatmap_zvalue, matrix_json):
     # xaxis_labels = CategoricalDtype(categories=matrix_df['lib1_conc'].sort_values().unique(), ordered=True)
     # yaxis_labels = CategoricalDtype(categories=matrix_df['lib2_conc'].sort_values().unique(), ordered=True)
 
-    zvalues = matrix_df[['lib1_conc', 'lib2_conc', viability_heatmap_zvalue]].copy()
+    # zvalues = matrix_df[['lib1_conc', 'lib2_conc', viability_heatmap_zvalue]].copy()
     # zvalues['lib1_conc']=zvalues['lib1_conc'].astype(xaxis_labels)
     # zvalues['lib2_conc']=zvalues['lib2_conc'].astype(yaxis_labels)
     # zvalues=zvalues.assign(lib1_conc=lib1_conc.astype(xaxis_labels))
@@ -119,10 +112,12 @@ def update_viability_surface(viability_heatmap_zvalue, matrix_json):
     xaxis_labels = [f"{conc:.2e}" for conc in matrix_df.lib1_conc]
     yaxis_labels = [f"{conc:.2e}" for conc in matrix_df.lib2_conc]
 
-
-    zvalues_table = zvalues.pivot(index='lib2_conc', columns='lib1_conc', values=viability_heatmap_zvalue)
-    lib1_conc_table = zvalues.pivot(index='lib2_conc', columns='lib1_conc', values='lib1_conc')
-    lib2_conc_table = zvalues.pivot(index='lib2_conc', columns='lib1_conc', values='lib2_conc')
+    zvalues_table = matrix_df.pivot(index='lib2_conc', columns='lib1_conc', values=viability_heatmap_zvalue)
+    zvalues_table = zvalues_table.sort_values(by=['lib2_conc'], ascending=0)
+    lib1_conc_table = matrix_df.pivot(index='lib2_conc', columns='lib1_conc', values='lib1_conc')
+    lib1_conc_table = lib1_conc_table.sort_values(by=['lib2_conc'], ascending=0)
+    lib2_conc_table = matrix_df.pivot(index='lib2_conc', columns='lib1_conc', values='lib2_conc')
+    lib2_conc_table = lib2_conc_table.sort_values(by=['lib2_conc'], ascending=0)
 
 
     return {
@@ -145,13 +140,13 @@ def update_viability_surface(viability_heatmap_zvalue, matrix_json):
                     'type': 'category',
                     'title': 'Drug 1 (uM)',
                     'ticktext': xaxis_labels,
-                    'tickvals': zvalues.lib1_conc
+                    'tickvals': matrix_df.lib1_conc
                 },
                 'yaxis': {
                     'type': 'category',
                     'title': 'Drug 2 (uM)',
                     'ticktext': yaxis_labels,
-                    'tickvals': zvalues.lib2_conc
+                    'tickvals': matrix_df.lib2_conc
                 },
                 'zaxis': {
                     'title': viability_heatmap_zvalue
