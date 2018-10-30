@@ -2,6 +2,9 @@ import dash
 import dash_core_components as dcc
 import dash_html_components as html
 import pandas as pd
+from pandas.api.types import CategoricalDtype
+import numpy as np
+
 import plotly.graph_objs as go
 from app import app
 
@@ -48,7 +51,8 @@ def update_viability_heatmap(viability_heatmap_zvalue, matrix_json):
 
     matrix_df['lib1_conc'] = matrix_df['lib1_conc'].astype('category')
     matrix_df['lib2_conc'] = matrix_df['lib2_conc'].astype('category')
-
+    matrix_df['lib1_conc'] = [np.format_float_scientific(conc, 3) for conc in matrix_df['lib1_conc']]
+    matrix_df['lib2_conc'] = [np.format_float_scientific(conc, 3) for conc in matrix_df['lib2_conc']]
     zvalue = matrix_df[viability_heatmap_zvalue]
 
     return {
@@ -68,8 +72,8 @@ def update_viability_heatmap(viability_heatmap_zvalue, matrix_json):
                                    },
                             yaxis={'type': 'category',
                                    'title': 'Concentration (uM)'
-                                   }
-
+                                   },
+                            margin={'l': 100}
                             )
         # 'layout': go.Layout(title=viability_heatmap_zvalue,
         #                     xaxis={'type': '-',
@@ -96,14 +100,37 @@ def update_viability_heatmap(viability_heatmap_zvalue, matrix_json):
 )
 def update_viability_surface(viability_heatmap_zvalue, matrix_json):
     matrix_df = pd.read_json(matrix_json, orient='split')
-    zvalue = matrix_df[['lib1_conc', 'lib2_conc', viability_heatmap_zvalue]]\
-        .pivot(index='lib2_conc', columns='lib1_conc',
-               values=viability_heatmap_zvalue)
+
+    # zvalue = matrix_df[['lib1_conc', 'lib2_conc', viability_heatmap_zvalue]]\
+    #     .pivot(index='lib2_conc', columns='lib1_conc',
+    #            values=viability_heatmap_zvalue)
+    # matrix_df['lib1.conc'] = [np.format_float_scientific(conc, 3) for conc in matrix_df['lib1_conc']]
+    # matrix_df['lib2.conc'] = [np.format_float_scientific(conc, 3) for conc in matrix_df['lib2_conc']]
+    #
+    # xaxis_labels = CategoricalDtype(categories=matrix_df['lib1_conc'].sort_values().unique(), ordered=True)
+    # yaxis_labels = CategoricalDtype(categories=matrix_df['lib2_conc'].sort_values().unique(), ordered=True)
+
+    zvalues = matrix_df[['lib1_conc', 'lib2_conc', viability_heatmap_zvalue]].copy()
+    # zvalues['lib1_conc']=zvalues['lib1_conc'].astype(xaxis_labels)
+    # zvalues['lib2_conc']=zvalues['lib2_conc'].astype(yaxis_labels)
+    # zvalues=zvalues.assign(lib1_conc=lib1_conc.astype(xaxis_labels))
+    # zvalues=zvalues.assign(lib2_conc=lib1_conc.astype(yaxis_labels))
+
+    xaxis_labels = [f"{conc:.2e}" for conc in matrix_df.lib1_conc]
+    yaxis_labels = [f"{conc:.2e}" for conc in matrix_df.lib2_conc]
+
+
+    zvalues_table = zvalues.pivot(index='lib2_conc', columns='lib1_conc', values=viability_heatmap_zvalue)
+    lib1_conc_table = zvalues.pivot(index='lib2_conc', columns='lib1_conc', values='lib1_conc')
+    lib2_conc_table = zvalues.pivot(index='lib2_conc', columns='lib1_conc', values='lib2_conc')
+
 
     return {
         'data': [
             go.Surface(
-                z=zvalue.values,
+                z=zvalues_table.values,
+                x=lib1_conc_table.values,
+                y=lib2_conc_table.values,
                 colorscale='Viridis',
                 cmax=1,
                 cmin=0,
@@ -112,6 +139,23 @@ def update_viability_surface(viability_heatmap_zvalue, matrix_json):
         ],
         'layout': go.Layout(
             width=500,
-            height=500
+            height=500,
+            scene={
+                'xaxis': {
+                    'type': 'category',
+                    'title': 'Drug 1 (uM)',
+                    'ticktext': xaxis_labels,
+                    'tickvals': zvalues.lib1_conc
+                },
+                'yaxis': {
+                    'type': 'category',
+                    'title': 'Drug 2 (uM)',
+                    'ticktext': yaxis_labels,
+                    'tickvals': zvalues.lib2_conc
+                },
+                'zaxis': {
+                    'title': viability_heatmap_zvalue
+                }
+            }
         )
     }
