@@ -2,7 +2,6 @@ import dash
 import dash_core_components as dcc
 import dash_html_components as html
 import pandas as pd
-from pandas.api.types import CategoricalDtype
 import numpy as np
 
 import plotly.graph_objs as go
@@ -12,16 +11,12 @@ from app import app
 def layout(matrix):
     available_viability_metrics = ['viability', 'inhibition']
 
+    drug1 = matrix.drugs[matrix.drug_matrix.lib1_tag].drug_name
+    drug2 = matrix.drugs[matrix.drug_matrix.lib2_tag].drug_name
+
     matrix_df = pd.DataFrame([w.to_dict() for w in matrix.well_results])
 
-    matrix_df = matrix_df.assign(
-    #     # lib1_dose=matrix_df.lib1_dose.str.extract(r'D(?P<lib1_dose>\d+)'),
-    #     # lib2_dose=matrix_df.lib2_dose.str.extract(r'D(?P<lib2_dose>\d+)'),
-    #     lib1_dose=matrix_df.lib1_conc,
-    #     lib2_dose=matrix_df.lib2_conc,
-    #     lib1_conc=matrix_df.lib1_conc / 1000000,
-    #     lib2_conc=matrix_df.lib2_conc / 1000000,
-        inhibition=lambda df: 1 - df.viability)
+    matrix_df = matrix_df.assign(inhibition=lambda df: 1 - df.viability)
     matrix_df = matrix_df[['lib1_conc', 'lib2_conc'] + available_viability_metrics]
 
     return html.Div(className='row', children=[
@@ -36,7 +31,9 @@ def layout(matrix):
                 dcc.Graph(id='viability-surface'),
             ]),
             html.Div(id='viability-values', style={'display': 'none'},
-                     children=matrix_df.to_json(date_format='iso', orient='split'))
+                     children=matrix_df.to_json(date_format='iso', orient='split')),
+            html.Div(id='drug_names', style={'display': 'none'},
+                     children=f"{drug1}:_:{drug2}")
         ])
     ])
 
@@ -44,18 +41,17 @@ def layout(matrix):
 @app.callback(
     dash.dependencies.Output('viability-heatmap', 'figure'),
     [dash.dependencies.Input('viability-heatmap-zvalue', 'value'),
-     dash.dependencies.Input('viability-values', 'children')]
+     dash.dependencies.Input('viability-values', 'children'),
+     dash.dependencies.Input('drug_names', 'children')]
 )
-def update_viability_heatmap(viability_heatmap_zvalue, matrix_json):
+def update_viability_heatmap(viability_heatmap_zvalue, matrix_json, drug_names):
     matrix_df = pd.read_json(matrix_json, orient='split')
+    drug1, drug2 = drug_names.split(':_:')
 
     matrix_df['lib1_conc'] = matrix_df['lib1_conc'].astype('category')
     matrix_df['lib2_conc'] = matrix_df['lib2_conc'].astype('category')
     matrix_df['lib1_conc'] = [np.format_float_scientific(conc, 3) for conc in matrix_df['lib1_conc']]
     matrix_df['lib2_conc'] = [np.format_float_scientific(conc, 3) for conc in matrix_df['lib2_conc']]
-
-    # xaxis_labels = [f"{conc:.2e}" for conc in matrix_df.lib1_conc.sort_values().unique()]
-    # yaxis_labels = [f"{conc:.2e}" for conc in matrix_df.lib2_conc.sort_values(ascending=False).unique()]
 
     zvalue = matrix_df[viability_heatmap_zvalue]
 
@@ -72,14 +68,11 @@ def update_viability_heatmap(viability_heatmap_zvalue, matrix_json):
         ],
         'layout': go.Layout(title=viability_heatmap_zvalue,
                             xaxis={'type': 'category',
-                                   'title': 'Drug 1 (uM)'
-                                   # 'ticktext': xaxis_labels,
-                                   # 'tickvals': matrix_df.lib1_conc
+                                   'title': drug1 + " µM"
                                    },
                             yaxis={'type': 'category',
-                                   'title': 'Drug 2 (uM)'
-                                   # 'ticktext': yaxis_labels,
-                                   # 'tickvals': matrix_df.lib2_conc
+                                   'title': drug2 + " µM"
+
                                    },
                             margin={'l': 100}
                             )
@@ -89,25 +82,12 @@ def update_viability_heatmap(viability_heatmap_zvalue, matrix_json):
 @app.callback(
     dash.dependencies.Output('viability-surface', 'figure'),
     [dash.dependencies.Input('viability-heatmap-zvalue', 'value'),
-     dash.dependencies.Input('viability-values', 'children')]
+     dash.dependencies.Input('viability-values', 'children'),
+     dash.dependencies.Input('drug_names', 'children')]
 )
-def update_viability_surface(viability_heatmap_zvalue, matrix_json):
+def update_viability_surface(viability_heatmap_zvalue, matrix_json, drug_names):
     matrix_df = pd.read_json(matrix_json, orient='split')
-
-    # zvalue = matrix_df[['lib1_conc', 'lib2_conc', viability_heatmap_zvalue]]\
-    #     .pivot(index='lib2_conc', columns='lib1_conc',
-    #            values=viability_heatmap_zvalue)
-    # matrix_df['lib1.conc'] = [np.format_float_scientific(conc, 3) for conc in matrix_df['lib1_conc']]
-    # matrix_df['lib2.conc'] = [np.format_float_scientific(conc, 3) for conc in matrix_df['lib2_conc']]
-    #
-    # xaxis_labels = CategoricalDtype(categories=matrix_df['lib1_conc'].sort_values().unique(), ordered=True)
-    # yaxis_labels = CategoricalDtype(categories=matrix_df['lib2_conc'].sort_values().unique(), ordered=True)
-
-    # zvalues = matrix_df[['lib1_conc', 'lib2_conc', viability_heatmap_zvalue]].copy()
-    # zvalues['lib1_conc']=zvalues['lib1_conc'].astype(xaxis_labels)
-    # zvalues['lib2_conc']=zvalues['lib2_conc'].astype(yaxis_labels)
-    # zvalues=zvalues.assign(lib1_conc=lib1_conc.astype(xaxis_labels))
-    # zvalues=zvalues.assign(lib2_conc=lib1_conc.astype(yaxis_labels))
+    drug1, drug2 = drug_names.split(':_:')
 
     xaxis_labels = [f"{conc:.2e}" for conc in matrix_df.lib1_conc]
     yaxis_labels = [f"{conc:.2e}" for conc in matrix_df.lib2_conc]
@@ -138,18 +118,37 @@ def update_viability_surface(viability_heatmap_zvalue, matrix_json):
             scene={
                 'xaxis': {
                     'type': 'category',
-                    'title': 'Drug 1 (uM)',
+                    'title': drug1 + ' µM',
                     'ticktext': xaxis_labels,
-                    'tickvals': matrix_df.lib1_conc
+                    'tickvals': matrix_df.lib1_conc,
+                    'titlefont': {
+                        'size': 12
+                    },
+                    'tickfont': {
+                        'size': 10
+                    }
                 },
                 'yaxis': {
                     'type': 'category',
-                    'title': 'Drug 2 (uM)',
+                    'title': drug2 + ' µM',
                     'ticktext': yaxis_labels,
-                    'tickvals': matrix_df.lib2_conc
+                    'tickvals': matrix_df.lib2_conc,
+                    'titlefont': {
+                        'size': 12
+                    },
+                    'tickfont': {
+                        'size': 10
+                    }
                 },
                 'zaxis': {
-                    'title': viability_heatmap_zvalue
+                    'range': (0,1),
+                    'title': viability_heatmap_zvalue,
+                    'titlefont': {
+                        'size': 12
+                    },
+                    'tickfont': {
+                        'size': 10
+                    }
                 }
             }
         )
