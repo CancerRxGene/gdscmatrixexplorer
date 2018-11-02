@@ -2,6 +2,7 @@ import dash
 import dash_core_components as dcc
 import dash_html_components as html
 import pandas as pd
+import numpy as np
 import plotly.graph_objs as go
 
 from app import app
@@ -9,14 +10,15 @@ from app import app
 
 def layout(matrix):
     available_combo_metrics = ["HSA_excess", "Bliss_excess", "HSA",
-                               "Bliss_additivity", "Bliss_index",  "Loewe_index"]
+                               "Bliss_additivity", "Bliss_index", "Loewe_index"]
+
+    drug1 = matrix.drugs[matrix.drug_matrix.lib1_tag].drug_name
+    drug2 = matrix.drugs[matrix.drug_matrix.lib2_tag].drug_name
+
     matrix_df = pd.DataFrame([w.to_dict() for w in matrix.well_results])
 
-    matrix_df = matrix_df.assign(
-        lib1_dose=matrix_df.lib1_dose.str.extract(r'D(?P<lib1_dose>\d+)'),
-        lib2_dose=matrix_df.lib2_dose.str.extract(r'D(?P<lib2_dose>\d+)'),
-        inhibition=lambda df: 1 - df.viability)
-    matrix_df = matrix_df[['lib1_dose', 'lib2_dose'] + available_combo_metrics]
+    matrix_df = matrix_df.assign(inhibition=lambda df: 1 - df.viability)
+    matrix_df = matrix_df[['lib1_conc', 'lib2_conc'] + available_combo_metrics]
 
     return html.Div(className='row', children=[
         html.Div(className='col-6', children=[
@@ -35,50 +37,79 @@ def layout(matrix):
         html.Div(children=[dcc.Graph(id='combo-surface')],
                  className='col-6'),
         html.Div(id='combo-values', style={'display': 'none'},
-                 children=matrix_df.to_json(date_format='iso',
-                                            orient='split'))
+                 children=matrix_df.to_json(date_format='iso', orient='split')),
+        html.Div(id='drug_names', style={'display': 'none'},
+                 children=f"{drug1}:_:{drug2}")
     ])
 
 
 @app.callback(
     dash.dependencies.Output('combo-heatmap', 'figure'),
     [dash.dependencies.Input('combo-heatmap-zvalue', 'value'),
-     dash.dependencies.Input('combo-values', 'children')]
+     dash.dependencies.Input('combo-values', 'children'),
+     dash.dependencies.Input('drug_names', 'children')]
 )
-def update_combo_heatmap(combo_heatmap_zvalue, combo_json):
+def update_combo_heatmap(combo_heatmap_zvalue, combo_json, drug_names):
     matrix_df = pd.read_json(combo_json, orient='split')
+    drug1, drug2 = drug_names.split(':_:')
+
+    matrix_df['lib1_conc'] = matrix_df['lib1_conc'].astype('category')
+    matrix_df['lib2_conc'] = matrix_df['lib2_conc'].astype('category')
+    matrix_df['lib1_conc'] = [np.format_float_scientific(conc, 3) for conc in matrix_df['lib1_conc']]
+    matrix_df['lib2_conc'] = [np.format_float_scientific(conc, 3) for conc in matrix_df['lib2_conc']]
+
     zvalue = matrix_df[combo_heatmap_zvalue]
 
     return {
         'data': [
             go.Heatmap(
-                x=matrix_df.lib1_dose,
-                y=matrix_df.lib2_dose,
+                x=matrix_df.lib1_conc,
+                y=matrix_df.lib2_conc,
                 z=zvalue,
                 zmax=1,
                 zmin=0,
                 colorscale='Reds'
             )
         ],
-        'layout': go.Layout(title=combo_heatmap_zvalue)
+        'layout': go.Layout(title=combo_heatmap_zvalue,
+                            xaxis={'type': 'category',
+                                   'title': drug1 + " µM"
+                                   },
+                            yaxis={'type': 'category',
+                                   'title': drug2 + " µM"
+                                   },
+                            margin={'l': 100}
+                            )
     }
 
 
 @app.callback(
     dash.dependencies.Output('combo-surface', 'figure'),
     [dash.dependencies.Input('combo-heatmap-zvalue', 'value'),
-     dash.dependencies.Input('combo-values', 'children')]
+     dash.dependencies.Input('combo-values', 'children'),
+     dash.dependencies.Input('drug_names', 'children')]
 )
-def update_combo_surface(combo_heatmap_zvalue, combo_json):
+def update_combo_surface(combo_heatmap_zvalue, combo_json, drug_names):
     matrix_df = pd.read_json(combo_json, orient='split')
-    zvalue = matrix_df[['lib1_dose', 'lib2_dose', combo_heatmap_zvalue]] \
-        .pivot(index='lib2_dose', columns='lib1_dose',
-               values=combo_heatmap_zvalue)
+
+    drug1, drug2 = drug_names.split(':_:')
+
+    xaxis_labels = [f"{conc:.2e}" for conc in matrix_df.lib1_conc]
+    yaxis_labels = [f"{conc:.2e}" for conc in matrix_df.lib2_conc]
+
+    zvalues_table = matrix_df.pivot(index='lib2_conc', columns='lib1_conc', values=combo_heatmap_zvalue)
+    zvalues_table = zvalues_table.sort_values(by=['lib2_conc'], ascending=0)
+    lib1_conc_table = matrix_df.pivot(index='lib2_conc', columns='lib1_conc', values='lib1_conc')
+    lib1_conc_table = lib1_conc_table.sort_values(by=['lib2_conc'], ascending=0)
+    lib2_conc_table = matrix_df.pivot(index='lib2_conc', columns='lib1_conc', values='lib2_conc')
+    lib2_conc_table = lib2_conc_table.sort_values(by=['lib2_conc'], ascending=0)
 
     return {
         'data': [
             go.Surface(
-                z=zvalue.values,
+                z=zvalues_table.values,
+                x=lib1_conc_table.values,
+                y=lib2_conc_table.values,
                 colorscale='Reds',
                 cmax=1,
                 cmin=0,
@@ -87,6 +118,42 @@ def update_combo_surface(combo_heatmap_zvalue, combo_json):
         ],
         'layout': go.Layout(
             width=500,
-            height=500
+            height=500,
+            scene={
+                'xaxis': {
+                    'type': 'category',
+                    'title': drug1 + ' µM',
+                    'ticktext': xaxis_labels,
+                    'tickvals': matrix_df.lib1_conc,
+                    'titlefont': {
+                        'size': 12
+                    },
+                    'tickfont': {
+                        'size': 10
+                    }
+                },
+                'yaxis': {
+                    'type': 'category',
+                    'title': drug2 + ' µM',
+                    'ticktext': yaxis_labels,
+                    'tickvals': matrix_df.lib2_conc,
+                    'titlefont': {
+                        'size': 12
+                    },
+                    'tickfont': {
+                        'size': 10
+                    }
+                },
+                'zaxis': {
+                    'range': (-0.2, 0.3),
+                    'title': combo_heatmap_zvalue,
+                    'titlefont': {
+                        'size': 12
+                    },
+                    'tickfont': {
+                        'size': 10
+                    }
+                }
+            }
         )
     }
