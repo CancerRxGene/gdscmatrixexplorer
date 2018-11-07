@@ -108,6 +108,8 @@ class MatrixResult(ToDictMixin, Base):
     combo_max_effect = sa.Column(sa.Float)
     lib1_max_effect = sa.Column(sa.Float)
     lib2_max_effect = sa.Column(sa.Float)
+    lib1_delta_max_effect = sa.Column(sa.Float)
+    lib2_delta_max_effect = sa.Column(sa.Float)
 
     drug_matrix = relationship("Combination")
     well_results = relationship("WellResult")
@@ -196,6 +198,7 @@ class DoseResponseCurve(ToDictMixin, Base):
     dosed_tag = sa.Column(sa.String, nullable=False)
     treatment_type = sa.Column(sa.String(1), nullable=False)
     maxc = sa.Column(sa.Float, nullable=False)
+    minc = sa.Column(sa.Float, nullable=False)
     rmse = sa.Column(sa.Float)
     ic50 = sa.Column(sa.Float)
     auc = sa.Column(sa.Float)
@@ -232,14 +235,14 @@ class DoseResponseCurve(ToDictMixin, Base):
                     SingleAgentWellResult.barcode == self.barcode
                 ).all()
 
-    @property
-    def minc(self):
-        if self.treatment_type == 'S':
-            return min([w.conc for w in self.well_results])
-        else:
-            lib1_doses = {w.lib1_conc for w in self.well_results}
-            lib2_doses = {w.lib2_conc for w in self.well_results}
-            return min(lib1_doses) if len(lib1_doses) > 1 else min(lib2_doses)
+    # @property
+    # def minc(self):
+    #     if self.treatment_type == 'S':
+    #         return min([w.conc for w in self.well_results])
+    #     else:
+    #         lib1_doses = {w.lib1_conc for w in self.well_results}
+    #         lib2_doses = {w.lib2_conc for w in self.well_results}
+    #         return min(lib1_doses) if len(lib1_doses) > 1 else min(lib2_doses)
 
     def x_to_conc(self, x):
         try:
