@@ -54,27 +54,46 @@ def layout(matrix: MatrixResult):
         html.Div(className='col-12', children=[
             html.Div(className='border bg-white d-flex flex-row p-2', children=[
 
-                html.Div(className='col-4 d-flex flex-column', children=[
-                    html.Div(className="p-2",
-                             children=[
-                                 html.H2("Viability"),
-                                 html.P("Maybe an interesting stat here"),
-                             ]),
-                    dcc.Graph(id='viability-surface'
-                              )
+                # html.Div(className='col-4 d-flex flex-column', children=[
+                #     html.Div(className="p-2",
+                #              children=[
+                #                  html.H2("Viability"),
+                #                  html.P("Maybe an interesting stat here"),
+                #              ])
+                #
+                # ]),
+                html.Div(className='col-12', children=[
+                    html.Div(className='row pb-5', children=[
+                        dcc.Dropdown(
+                            id='viability-heatmap-zvalue',
+                            options=[{'label': i, 'value': i} for i in available_viability_metrics],
+                            value='viability'
+                        )
+                    ]),
+                    html.Div(className='row', children=[
+                        html.Div(className='col-4', children=[
+                            html.Div(id='dr_row', className='h-50')
+                        ]),
+                        html.Div(className='col-4', children=[
+                            html.Div(id='dr_column', className='h-50')
+                        ]),
+                        # dcc.Graph(id='dr_row', className='h-50'),
+                        # dcc.Graph(id='dr_column', className='h-50')
+                    ]),
+                    html.Div(className='row pb-5', children=[
+                        html.Div(className='col-6', children=[
+                            dcc.Graph(id='viability-heatmap')
+                        ]),
+                        html.Div(className='col-6', children=[
+                            dcc.Graph(id='viability-surface')
+                        ])
+                    ])
                 ]),
-                html.Div(className='col-5', children=[
-                    dcc.Dropdown(
-                        id='viability-heatmap-zvalue',
-                        options=[{'label': i, 'value': i} for i in available_viability_metrics],
-                        value='viability'
-                    ),
-                    dcc.Graph(id='viability-heatmap')
-                ]),
-                html.Div(className='col-3 d-flex flex-column h-100', children=[
-                    html.Div(id='dr_row', className='h-50'),
-                    html.Div(id='dr_column', className='h-50')
-                ]),
+
+                # html.Div(className='col-4 d-flex flex-column h-100', children=[
+                #     html.Div(id='dr_row', className='h-50'),
+                #     html.Div(id='dr_column', className='h-50')
+                # ]),
                 html.Div(id='curve-ids', style={'display': 'none'},
                          children=sliced_plot_ids.to_json(date_format='iso',
                                                           orient='split')),
@@ -98,9 +117,14 @@ def display_combo_row(hoverdata, curve_ids):
     row = hoverdata['points'][0]['y']
     curve_row = next(curve_ids.query('orient == "row" and conc == @row').itertuples())
     curve = session.query(DoseResponseCurve).get(int(curve_row.id))
+    newline = '\n'
     return html.Div(className="mb-2 mt-2", children=[
         html.H6(
-            [html.Em("Row"), html.Strong(f" {curve_row.fixed_drug_name} @ Dose {row} vs {curve_row.dosed_drug_name}")]),
+            [html.Em("Row"),
+             html.Strong(f" {curve_row.dosed_drug_name} titrated"),
+             html.Br(),
+             html.Strong(f"with {curve_row.fixed_drug_name} @ {row} µM")
+             ]),
         curve.plot(display_datapoints=True, mark_auc=True,
                    label_auc=False, mark_ic50=True, label_ic50=True,
                    mark_emax=False, label_emax=False, label_rmse=True,
@@ -118,12 +142,17 @@ def display_combo_column(hoverdata, curve_ids):
         return ""
     print(hoverdata)
     column = hoverdata['points'][0]['x']
-    curve_row = next(
+    curve_col = next(
         curve_ids.query('orient == "column" and conc == @column').itertuples())
-    curve = session.query(DoseResponseCurve).get(int(curve_row.id))
-    return html.Div([
-        html.H6([html.Em("Column"), html.Strong(
-            f" {curve_row.fixed_drug_name} @ Dose {column} vs {curve_row.dosed_drug_name}")]),
+    curve = session.query(DoseResponseCurve).get(int(curve_col.id))
+    return html.Div(className="mb-2 mt-2", children=[
+        html.H6(
+            [html.Em("Column"),
+             html.Strong(f" {curve_col.dosed_drug_name} titrated"),
+             html.Br(),
+             html.Strong(f"with {curve_col.fixed_drug_name} @ {column} µM")
+             ]),
+
         curve.plot(display_datapoints=True, mark_auc=True,
                    label_auc=False, mark_ic50=True, label_ic50=True,
                    mark_emax=False, label_emax=False, label_rmse=True,
