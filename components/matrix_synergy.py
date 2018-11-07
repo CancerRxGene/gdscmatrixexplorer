@@ -21,26 +21,32 @@ def layout(matrix):
     matrix_df = matrix_df[['lib1_conc', 'lib2_conc'] + available_combo_metrics]
 
     return html.Div(className='row', children=[
-        html.Div(className='col-6', children=[
+        html.Div(className='col-12', children=[
             html.Div(className='border p-3', children=[
-
-                dcc.Dropdown(
-                    id='combo-heatmap-zvalue',
-                    options=[{'label': i, 'value': i} for i in
-                             available_combo_metrics],
-                    value='HSA_excess'
-                ),
-                dcc.Graph(id='combo-heatmap'),
-
+                html.Div(className='row', children=[
+                    dcc.Dropdown(
+                        id='combo-heatmap-zvalue',
+                        options=[{'label': i, 'value': i} for i in
+                                 available_combo_metrics],
+                        value='HSA_excess'
+                    )
+                    ]),
+                html.Div(className='row', children=[
+                    html.Div(className='col-6', children=[
+                        dcc.Graph(id='combo-heatmap')
+                    ]),
+                    html.Div(className='col-6', children=[
+                        dcc.Graph(id='combo-surface')
+                    ])
+                ])
             ])
         ]),
-        html.Div(children=[dcc.Graph(id='combo-surface')],
-                 className='col-6'),
         html.Div(id='combo-values', style={'display': 'none'},
                  children=matrix_df.to_json(date_format='iso', orient='split')),
         html.Div(id='drug_names', style={'display': 'none'},
                  children=f"{drug1}:_:{drug2}")
     ])
+
 
 
 @app.callback(
