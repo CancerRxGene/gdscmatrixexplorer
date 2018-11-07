@@ -10,9 +10,9 @@ from scripts.db_loader import upload_project as up
               help='Combo Matrix Statistics File (CSV format)',
               prompt='Matrix Stats File')
 @click.option('--well-stats', help='Combo Well Statistics File (CSV format)',
-              type=click.Path(exists=True), prompt='Matrix Stats File')
+              type=click.Path(exists=True), prompt='Well Stats File')
 @click.option('--nlme-stats', help='NLME Stats File (CSV format)',
-              type=click.Path(exists=True), prompt='Matrix Stats File')
+              type=click.Path(exists=True), prompt='NLME Stats File')
 @click.option('--name', '--project-name', prompt='Project Name',
               help='Project Name', required=True)
 def upload_project(matrix_stats, well_stats, nlme_stats, project_name):
