@@ -5,6 +5,8 @@ import pandas as pd
 import numpy as np
 import plotly.graph_objs as go
 
+from components.synergy_info.syn_info import infoblock_matrix
+
 from app import app
 
 
@@ -21,30 +23,52 @@ def layout(matrix):
     matrix_df = matrix_df[['lib1_conc', 'lib2_conc'] + available_combo_metrics]
 
     return html.Div(className='row', children=[
+        # html.Div(className='col-12 d-flex flex-column', children=[
         html.Div(className='col-12', children=[
-            html.Div(className='border p-3', children=[
-                html.Div(className='row', children=[
-                    dcc.Dropdown(
-                        id='combo-heatmap-zvalue',
-                        options=[{'label': i, 'value': i} for i in
-                                 available_combo_metrics],
-                        value='HSA_excess'
-                    )
+            html.Div(className='border p-3 bg-white', children=[
+                html.Div(className='row pb-3', children=[
+                    html.Div(className='col-3', children=[
+                        dcc.Dropdown(
+                            id='combo-heatmap-zvalue',
+                            options=[{'label': i, 'value': i} for i in
+                                     available_combo_metrics],
+                            value='HSA_excess',
+                            searchable=False,
+                            clearable=False
+                        )
                     ]),
+                    html.Div(className='col-9 text-right', children=[
+                        html.H2(["Drug combination interaction"])
+                    ])
+                ]),
                 html.Div(className='row', children=[
-                    html.Div(className='col-6', children=[
-                        dcc.Graph(id='combo-heatmap')
+                    html.Div(className='col-7', children=[
+                        html.Div(className='row ', children=[
+                            html.Div(className='col-12', children=[
+                                dcc.Graph(id='combo-heatmap')
+                            ])
+                        ]),
+                        html.Div(className='row', children=[
+                            html.Div(className='col-12', children=[
+                                dcc.Graph(id='combo-surface')
+                            ])
+                        ])
                     ]),
-                    html.Div(className='col-6', children=[
-                        dcc.Graph(id='combo-surface')
+                    html.Div(className="col-5", children=[
+                        html.Div(
+                            className="bg-white pt-4 px-4 pb-1 border border-info h-100",
+                            children=[
+                                infoblock_matrix(matrix)
+                            ]
+                        ),
                     ])
                 ])
-            ])
-        ]),
-        html.Div(id='combo-values', style={'display': 'none'},
-                 children=matrix_df.to_json(date_format='iso', orient='split')),
-        html.Div(id='drug_names', style={'display': 'none'},
-                 children=f"{drug1}:_:{drug2}")
+            ]),
+            html.Div(id='combo-values', style={'display': 'none'},
+                     children=matrix_df.to_json(date_format='iso', orient='split')),
+            html.Div(id='drug_names', style={'display': 'none'},
+                     children=f"{drug1}:_:{drug2}")
+        ])
     ])
 
 
@@ -123,8 +147,15 @@ def update_combo_surface(combo_heatmap_zvalue, combo_json, drug_names):
             )
         ],
         'layout': go.Layout(
-            width=500,
-            height=500,
+            # width=500,
+            # height=500,
+            margin=go.layout.Margin(
+                l=40,
+                r=40,
+                b=40,
+                t=40,
+                pad=10
+            ),
             scene={
                 'xaxis': {
                     'type': 'category',

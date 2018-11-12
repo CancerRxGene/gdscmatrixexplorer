@@ -52,7 +52,8 @@ def layout(matrix: MatrixResult):
 
     return html.Div(className='row pb-5', children=[
         html.Div(className='col-12', children=[
-            html.Div(className='border bg-white d-flex flex-row p-2', children=[
+            # html.Div(className='border bg-white d-flex flex-row p-2', children=[
+            html.Div(className='border bg-white p-2', children=[
 
                 # html.Div(className='col-4 d-flex flex-column', children=[
                 #     html.Div(className="p-2",
@@ -62,46 +63,50 @@ def layout(matrix: MatrixResult):
                 #              ])
                 #
                 # ]),
-                html.Div(className='col-12', children=[
-                    html.Div(className='row pb-5', children=[
+                html.Div(className='row pb-3', children=[
+                    html.Div(className='col-3', children=[
                         dcc.Dropdown(
                             id='viability-heatmap-zvalue',
                             options=[{'label': i, 'value': i} for i in available_viability_metrics],
-                            value='viability'
+                            value='viability',
+                            searchable=False,
+                            clearable=False
                         )
                     ]),
-                    html.Div(className='row', children=[
-                        html.Div(className='col-4', children=[
-                            html.Div(id='dr_row', className='h-50')
-                        ]),
-                        html.Div(className='col-4', children=[
-                            html.Div(id='dr_column', className='h-50')
-                        ]),
-                        # dcc.Graph(id='dr_row', className='h-50'),
-                        # dcc.Graph(id='dr_column', className='h-50')
-                    ]),
-                    html.Div(className='row pb-5', children=[
-                        html.Div(className='col-6', children=[
-                            dcc.Graph(id='viability-heatmap')
-                        ]),
-                        html.Div(className='col-6', children=[
-                            dcc.Graph(id='viability-surface')
-                        ])
+                    html.Div(className='col-9 text-right', children=[
+                        html.H2(["Measured activity"])
                     ])
                 ]),
+                html.Div(className='row', children=[
+                    html.Div(className='col-6', children=[
+                        dcc.Graph(id='viability-heatmap')
+                    ]),
+                    html.Div(className='col-6 flex-column d-flex align-self-center', children=[
+                        html.Div(id='dr_row')
+                    ])
+                ]),
+                html.Div(className='row pb-5', children=[
+                    html.Div(className='col-6', children=[
+                        dcc.Graph(id='viability-surface')
+                    ]),
+                    html.Div(className='col-6', children=[
+                        html.Div(id='dr_column')
+                    ])
+                ])
+            ]),
 
-                # html.Div(className='col-4 d-flex flex-column h-100', children=[
-                #     html.Div(id='dr_row', className='h-50'),
-                #     html.Div(id='dr_column', className='h-50')
-                # ]),
-                html.Div(id='curve-ids', style={'display': 'none'},
-                         children=sliced_plot_ids.to_json(date_format='iso',
-                                                          orient='split')),
-                html.Div(id='viability-values', style={'display': 'none'},
-                         children=matrix_df.to_json(date_format='iso', orient='split')),
-                html.Div(id='drug_names', style={'display': 'none'},
-                         children=f"{drug1}:_:{drug2}")
-            ])
+            # html.Div(className='col-4 d-flex flex-column h-100', children=[
+            #     html.Div(id='dr_row', className='h-50'),
+            #     html.Div(id='dr_column', className='h-50')
+            # ]),
+            html.Div(id='curve-ids', style={'display': 'none'},
+                     children=sliced_plot_ids.to_json(date_format='iso',
+                                                      orient='split')),
+            html.Div(id='viability-values', style={'display': 'none'},
+                     children=matrix_df.to_json(date_format='iso', orient='split')),
+            html.Div(id='drug_names', style={'display': 'none'},
+                     children=f"{drug1}:_:{drug2}")
+
         ])
     ])
 
@@ -128,7 +133,8 @@ def display_combo_row(hoverdata, curve_ids):
         curve.plot(display_datapoints=True, mark_auc=True,
                    label_auc=False, mark_ic50=True, label_ic50=True,
                    mark_emax=False, label_emax=False, label_rmse=True,
-                   style={'height': '200px'})
+                   # style={'height': '350px'}
+    )
     ])
 
 
@@ -156,7 +162,8 @@ def display_combo_column(hoverdata, curve_ids):
         curve.plot(display_datapoints=True, mark_auc=True,
                    label_auc=False, mark_ic50=True, label_ic50=True,
                    mark_emax=False, label_emax=False, label_rmse=True,
-                   style={'height': '200px'})
+                   # style={'height': '350px'}
+                   )
     ])
 
 
