@@ -10,12 +10,12 @@ from components.matrix_synergy import layout as synergy
 
 
 def layout(barcode=None, cmatrix=None):
-    my_matrix = session.query(MatrixResult)\
+    my_matrix = session.query(MatrixResult) \
         .filter_by(barcode=barcode, cmatrix=cmatrix).one()
 
     return html.Div([
         intro(my_matrix),
         viability(my_matrix),
         synergy(my_matrix),
-        table(my_matrix),
+        table(my_matrix)
     ])
