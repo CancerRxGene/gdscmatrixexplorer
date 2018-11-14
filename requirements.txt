@@ -1,4 +1,5 @@
 alembic==1.0.0
+certifi==2018.10.15
 chardet==3.0.4
 click==6.7
 dash==0.27.0
@@ -32,6 +33,7 @@ scipy==1.1.0
 six==1.11.0
 SQLAlchemy==1.2.12
 SQLAlchemy-Utils==0.33.6
+tqdm==4.28.1
 traitlets==4.3.2
 urllib3==1.23
 Werkzeug==0.14.1
