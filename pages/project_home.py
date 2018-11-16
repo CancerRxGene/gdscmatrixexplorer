@@ -32,6 +32,17 @@ def layout(project_slug):
 
     summary = pd.DataFrame([x.to_dict() for x in all_matrices])
 
+    # Get the combination names for the project
+    # ....
+    def format_combo_links(combo):
+        drug1 = session.query(Drug.drug_name).filter(Drug.id == combo.lib1_id).first()
+        drug2 = session.query(Drug.drug_name).filter(Drug.id == combo.lib2_id).first()
+        combo_string = (f"{drug1[0]} + {drug2[0]}")
+        combo_ref = f"/combination/{drug1[0]}+{drug2[0]}"
+        return(dcc.Link(combo_string, href=combo_ref))
+
+    combo_links = [format_combo_links(combo) for combo in project.combinations]
+
     return html.Div([
         html.H2(f"{project.name} Overview"),
         html.Div(
@@ -53,17 +64,31 @@ def layout(project_slug):
             ],
             style={'width': '75%', 'float': 'left'}
         ),
+        html.Br(),
+        html.H3("Drug combinations screened"),
         html.Div(
-            dt.DataTable(
-                rows=summary.to_dict('records'),
-                columns=table_columns,
-                row_selectable=True,
-                filterable=True,
-                sortable=True,
-                selected_row_indices=[],
-                editable=False,
-                id='datatable1_2'
-            )
+            #     Add selection for the combinations here - link to combination page.
+            children=[
+                html.Div(children =[
+                    combo_link,
+                    html.Br()])
+                for combo_link in combo_links
+            ]
+        ),
+        html.Div(
+            children=[
+                dt.DataTable(
+                    rows=summary.to_dict('records'),
+                    columns=table_columns,
+                    row_selectable=True,
+                    filterable=True,
+                    sortable=True,
+                    selected_row_indices=[],
+                    editable=False,
+                    id='datatable1_2'
+                )
+            ]
+
         ),
         html.Div(style={"display": "none"}, children=str(project.id),
                  id='project-id')
@@ -135,6 +160,15 @@ def update_boxplot(y_axis_field, project_id):
         )
     }
 
+# @app.callback(
+#     dash.dependencies.Output('combos-screened', 'figure'),
+#     [dash.dependencies.Input('project-id', 'children')]
+# )
+# def update_combos_screened(project_id):
+#     # Get all the combos for the project
+#     return html.Div([
+#         dcc.link('foo')
+#     ])
 
 
 if __name__ == '__main__':
