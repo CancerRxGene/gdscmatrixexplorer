@@ -8,10 +8,11 @@ import plotly.graph_objs as go
 from scipy.stats import pearsonr
 import sqlalchemy as sa
 
+from app import app, cpr
 from db import session
-from app import app
 from models import MatrixResult, Project
 
+cpr.register_plot('project-scatter')
 
 def layout(project_slug):
     try:
@@ -54,13 +55,8 @@ def layout(project_slug):
             style={'width': '20%', 'float': 'left'}
         ),
         html.Div(
-            children=[
-                dcc.Graph(
-                    id='project-scatter'
-                ),
-                html.Div(id='correlation'),
-                html.Div(id='tst')
-            ],
+            children=cpr.generate_plots('project-scatter') +
+                     [html.Div(id='correlation'), html.Div(id='tst')],
             style={'width': '75%', 'float': 'left'}
         ),
         html.Div(
@@ -103,7 +99,8 @@ def update_scatter(x_axis_field, y_axis_field, rows):
                 },
                 text=[f"drug1 - drug2<br />Cell line: {s.model_id}"  # TODO: Fill in real drug names
                       for s in fig_data.itertuples()],
-                customdata=[{"barcode": row.barcode, "cmatrix": row.cmatrix}
+                customdata=[{"barcode": row.barcode, "cmatrix": row.cmatrix,
+                             "to": f"/matrix/{row.barcode}/{row.cmatrix}"}
                             for row in fig_data.itertuples(index=False)]
             )
         ],

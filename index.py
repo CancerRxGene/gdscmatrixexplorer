@@ -1,10 +1,9 @@
 import dash_core_components as dcc
 import dash_html_components as html
-import flask
 from dash.dependencies import Input, Output
 import dash_table_experiments as dt
 
-from app import app
+from app import app, cpr
 from pages import project_scatter, project_home, home, matrix, combinations
 from page_components import header
 
@@ -50,9 +49,10 @@ def display_page(pathname):
     else:
         return '404'
 
+
 @app.callback(
     Output('url', 'pathname'),
-    [Input('project-boxplot', 'clickData')])
+    [Input(plot_id, 'clickData') for plot_id in cpr.plot_ids()])
 def go_to_dot(*args):
     print("Click!")
     print(args)
@@ -62,7 +62,8 @@ def go_to_dot(*args):
         print(p)
         return p['to']
     else:
-        return "/GDSC_007-A/free_scatter"
+        return "/"
+
 
 if __name__ == '__main__':
     app.run_server(debug=True)

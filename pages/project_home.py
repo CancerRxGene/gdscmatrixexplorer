@@ -7,10 +7,12 @@ import pandas as pd
 import sqlalchemy as sa
 import plotly.graph_objs as go
 
-from app import app
+from app import app, cpr
 from db import session
 from models import MatrixResult, Project, Combination, Drug
 
+
+cpr.register_plot('project-boxplot')
 
 def layout(project_slug):
     try:
@@ -45,51 +47,45 @@ def layout(project_slug):
 
     return html.Div([
         html.H2(f"{project.name} Overview"),
-        html.Div(
-            children=[
-                html.Label('y-axis', htmlFor='y-axis-select-boxplot'),
-                dcc.Dropdown(
-                    options=[{'label': c, 'value': c} for c in metrics],
-                    value='Bliss_excess',
-                    id='y-axis-select-boxplot'
-                )
-            ],
-            style={'width': '20%', 'float': 'left'}
-        ),
-        html.Div(
-            children=[
-                dcc.Graph(
-                    id='project-boxplot'
-                )
-            ],
-            style={'width': '75%', 'float': 'left'}
-        ),
-        html.Br(),
-        html.H3("Drug combinations screened"),
-        html.Div(
-            #     Add selection for the combinations here - link to combination page.
-            children=[
-                html.Div(children =[
-                    combo_link,
-                    html.Br()])
-                for combo_link in combo_links
-            ]
-        ),
-        html.Div(
-            children=[
-                dt.DataTable(
-                    rows=summary.to_dict('records'),
-                    columns=table_columns,
-                    row_selectable=True,
-                    filterable=True,
-                    sortable=True,
-                    selected_row_indices=[],
-                    editable=False,
-                    id='datatable1_2'
-                )
-            ]
+        html.Div(className='row', children=[
+            html.Div(
+                className="col-3",
+                children=[
+                    html.Label('y-axis', htmlFor='y-axis-select-boxplot'),
+                    dcc.Dropdown(
+                        options=[{'label': c, 'value': c} for c in metrics],
+                        value='Bliss_excess',
+                        id='y-axis-select-boxplot'
+                    )
+                ]
+            ),
+            html.Div(
+                className="col-9",
+                children=cpr.generate_plots('project-boxplot')
+            ),
+            html.Div(
+                children=[html.H3("Drug combinations screened")] +
+                         [html.Div(children =[combo_link, html.Br()])
+                            for combo_link in combo_links],
+                className='col-12'
+            ),
+            html.Div(
+                className='col-12',
+                children=[
+                    dt.DataTable(
+                        rows=summary.to_dict('records'),
+                        columns=table_columns,
+                        row_selectable=True,
+                        filterable=True,
+                        sortable=True,
+                        selected_row_indices=[],
+                        editable=False,
+                        id='datatable1_2'
+                    )
+                ]
 
-        ),
+            )
+        ]),
         html.Div(style={"display": "none"}, children=str(project.id),
                  id='project-id')
     ],
@@ -152,8 +148,8 @@ def update_boxplot(y_axis_field, project_id):
             ) for cm in summary.cm.unique()
         ],
         'layout': go.Layout(
-            height=700,
-            margin=dict(l=40, r=30, b=80, t=100),
+            height=500,
+            margin=dict(l=40, r=50, b=80, t=20),
             showlegend=False,
             yaxis={'type': 'log' if 'index' in y_axis_field else 'linear',
                    'title': y_axis_field.replace('_', ' ')}
