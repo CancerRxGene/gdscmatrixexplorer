@@ -15,7 +15,7 @@ def infoblock(drug):
                     html.Strong("Target "), drug.target
                 ], className="pl-0"),
                 html.Td([
-                    html.Strong("Drug ID "), drug.id
+                    html.Strong("ID "), drug.id
                 ]),
                 html.Td([
                     html.Strong("Owner "), drug.owner
