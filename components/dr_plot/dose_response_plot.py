@@ -126,7 +126,7 @@ class DoseResponsePlot:
 
         return go.Layout(
                 # title=f'Single Agent Response for {drug.drug_name}',
-                xaxis={'type': 'log', 'title': 'Log Concentration (M)',
+                xaxis={'type': 'log', 'title': 'Concentration (M)',
                        'range': np.log10([self.curve.x_to_conc(-10),
                                           self.curve.x_to_conc(20)])},
                 yaxis={'title': 'Viability'},

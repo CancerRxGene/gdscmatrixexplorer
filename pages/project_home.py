@@ -9,7 +9,7 @@ import plotly.graph_objs as go
 
 from app import app
 from db import session
-from models import MatrixResult, Project
+from models import MatrixResult, Project, Combination, Drug
 
 
 def layout(project_slug):
@@ -21,7 +21,8 @@ def layout(project_slug):
     metrics = ["HSA_excess", "HSA_excess_syn", "HSA_excess_well_count",
                "HSA_excess_window", "HSA_excess_window_syn", "Bliss_excess",
                "Bliss_excess_syn", "Bliss_excess_well_count", "Bliss_excess_window",
-               "Bliss_excess_window_syn"]
+               "Bliss_excess_window_syn"
+               ]
     table_columns = ['model_id', 'cmatrix', 'barcode', 'drugset_id'] + metrics
 
     all_matrices = session.query(MatrixResult)\
@@ -30,7 +31,6 @@ def layout(project_slug):
         .all()
 
     summary = pd.DataFrame([x.to_dict() for x in all_matrices])
-
 
     return html.Div([
         html.H2(f"{project.name} Overview"),
@@ -82,21 +82,49 @@ def update_boxplot(y_axis_field, project_id):
         .filter_by(project_id=int(project_id))
 
     summary = pd.read_sql(all_matrices_query.statement, all_matrices_query.session.bind)
+
+    ds = []
+    cmatrix = []
+    lib1 = []
+    lib2 = []
+    lib_names = []
+    cm = []
+
+    for matrix in all_matrices_query.all():
+        ds.append(matrix.drugset_id)
+        cmatrix.append(matrix.cmatrix)
+        lib1.append(matrix.drug_matrix.lib1.drug_name)
+        lib2.append(matrix.drug_matrix.lib2.drug_name)
+        lib_names.append(f"{matrix.drug_matrix.lib1.drug_name} {matrix.drug_matrix.lib2.drug_name}")
+        cm.append(f"{matrix.drugset_id}::{matrix.cmatrix}")
+
+    lib_names_df = pd.DataFrame({
+        'drugset_id' : ds,
+        'cmatrix' : cmatrix,
+        'lib1_name' : lib1,
+        'lib2_name' : lib2,
+        'lib_names' : lib_names,
+        'cm' : cm
+    }).drop_duplicates()
+
+    summary = pd.merge(lib_names_df, summary, "right")
+
     return {
         'data': [
             go.Box(
-                name=str(cm),
-                y=summary.query("cmatrix == @cm")[y_axis_field],
+                # name=str(cm),
+                name=np.array2string(summary.query("cm == @cm")['lib_names'].unique()),
+                y=summary.query("cm == @cm")[y_axis_field],
                 opacity=0.7,
                 boxpoints='all',
                 jitter=0.3,
                 marker=dict(
-                    size=2,
+                    size=4,
                     opacity=0.5
                 ),
                 customdata=[{"to": f"/matrix/{row.barcode}/{row.cmatrix}"}
-                            for row in summary.query("cmatrix == @cm").itertuples(index=False)]
-            ) for cm in summary.cmatrix.unique()
+                            for row in summary.query("cm == @cm").itertuples(index=False)]
+            ) for cm in summary.cm.unique()
         ],
         'layout': go.Layout(
             height=700,
