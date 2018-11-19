@@ -38,7 +38,7 @@ def layout(project_slug):
         drug1 = session.query(Drug.drug_name).filter(Drug.id == combo.lib1_id).first()
         drug2 = session.query(Drug.drug_name).filter(Drug.id == combo.lib2_id).first()
         combo_string = (f"{drug1[0]} + {drug2[0]}")
-        combo_ref = f"/combination/{drug1[0]}+{drug2[0]}"
+        combo_ref = f"/combination/{combo.lib1_id}+{combo.lib2_id}"
         return(dcc.Link(combo_string, href=combo_ref))
 
     combo_links = [format_combo_links(combo) for combo in project.combinations]
