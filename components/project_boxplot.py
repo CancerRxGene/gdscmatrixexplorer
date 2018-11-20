@@ -2,28 +2,23 @@ import dash
 import dash_core_components as dcc
 import dash_html_components as html
 import pandas as pd
-import numpy as np
 import plotly.graph_objs as go
+from sqlalchemy import and_
 
 from app import app
 from db import session
-from models import MatrixResult, DoseResponseCurve
+from models import MatrixResult, Combination
+from utils import metrics
 
 
 def layout(project_id):
-    metrics = ["HSA_excess", "HSA_excess_syn", "HSA_excess_well_count",
-               "HSA_excess_window", "HSA_excess_window_syn", "Bliss_excess",
-               "Bliss_excess_syn", "Bliss_excess_well_count",
-               "Bliss_excess_window",
-               "Bliss_excess_window_syn"
-               ]
 
     return html.Div(className='row', children=[
         dcc.Location('project-boxplot-url'),
         html.Div(
                 className="col-12 mt-2 mb-4",
                 children=[
-                    html.Label('y-axis', htmlFor='y-axis-select-boxplot'),
+                    html.Label('Y-Axis', htmlFor='y-axis-select-boxplot'),
                     dcc.Dropdown(
                         options=[{'label': c, 'value': c} for c in metrics],
                         value='Bliss_excess',
@@ -45,43 +40,30 @@ def layout(project_id):
 )
 def update_boxplot(y_axis_field, project_id):
 
-    all_matrices_query = session.query(MatrixResult) \
-        .filter_by(project_id=int(project_id))
+    all_matrices_query = session.query(getattr(MatrixResult, y_axis_field), MatrixResult.barcode, MatrixResult.cmatrix, MatrixResult.drugset_id, Combination.lib1_id, Combination.lib2_id)\
+        .join(Combination)\
+        .filter(and_(MatrixResult.drugset_id == Combination.drugset_id,
+                     MatrixResult.cmatrix == Combination.cmatrix))\
+        .filter(MatrixResult.project_id == int(project_id))
 
     summary = pd.read_sql(all_matrices_query.statement, all_matrices_query.session.bind)
 
-    ds = []
-    cmatrix = []
-    lib1 = []
-    lib2 = []
-    lib_names = []
-    cm = []
+    all_drugs = pd.read_sql_table('drugs', session.bind)
 
-    for matrix in all_matrices_query.all():
-        ds.append(matrix.drugset_id)
-        cmatrix.append(matrix.cmatrix)
-        lib1.append(matrix.combination.lib1.drug_name)
-        lib2.append(matrix.combination.lib2.drug_name)
-        lib_names.append(f"{matrix.combination.lib1.drug_name} {matrix.combination.lib2.drug_name}")
-        cm.append(f"{matrix.drugset_id}::{matrix.cmatrix}")
+    summary = summary.merge(all_drugs, left_on='lib1_id', right_on='id')\
+        .merge(all_drugs, left_on='lib2_id', right_on='id', suffixes=['_lib1', '_lib2'])
+    summary['combo_id'] = summary.cmatrix.astype(str) + "::" + summary.drugset_id.astype(str)
 
-    lib_names_df = pd.DataFrame({
-        'drugset_id' : ds,
-        'cmatrix' : cmatrix,
-        'lib1_name' : lib1,
-        'lib2_name' : lib2,
-        'lib_names' : lib_names,
-        'cm' : cm
-    }).drop_duplicates()
-
-    summary = pd.merge(lib_names_df, summary, "right")
+    def get_drug_names(summary, combo_id):
+        row = next(summary.drop_duplicates(subset=['combo_id']).query("combo_id == @combo_id").itertuples())
+        return f"{row.drug_name_lib1} - {row.drug_name_lib2}"
 
     return {
         'data': [
             go.Box(
                 # name=str(cm),
-                name=np.array2string(summary.query("cm == @cm")['lib_names'].unique()),
-                y=summary.query("cm == @cm")[y_axis_field],
+                name=get_drug_names(summary, combo_id),
+                y=summary.query("combo_id == @combo_id")[y_axis_field],
                 opacity=0.7,
                 boxpoints='all',
                 jitter=0.3,
@@ -90,8 +72,9 @@ def update_boxplot(y_axis_field, project_id):
                     opacity=0.5
                 ),
                 customdata=[{"to": f"/matrix/{row.barcode}/{row.cmatrix}"}
-                            for row in summary.query("cm == @cm").itertuples(index=False)]
-            ) for cm in summary.cm.unique()
+                            for row in summary.query("combo_id == @combo_id").itertuples(index=False)],
+                hoveron='points'
+            ) for combo_id in summary.combo_id.unique()
         ],
         'layout': go.Layout(
             height=500,

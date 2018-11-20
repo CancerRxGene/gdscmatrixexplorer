@@ -1,6 +1,3 @@
-from enum import Enum
-
-
 class Colors:
     LIGHTGREEN = "rgb(117,171,61)"
     LEAFGREEN = "rgb(85,164,112)"
@@ -28,12 +25,20 @@ class Colors:
     DARKGREY_ULTRATRANS = "rgba(51,46,44,0.05)"
 
 
+metrics = ["HSA_excess", "HSA_excess_syn", "HSA_excess_well_count",
+           "HSA_excess_window", "HSA_excess_window_syn", "Bliss_excess",
+           "Bliss_excess_syn", "Bliss_excess_well_count",
+           "Bliss_excess_window",
+           "Bliss_excess_window_syn"
+           ]
 
-
-
-
-
-
-
-
-
+plot_colors = ["rgb(215,150,209)", "rgb(164,250,201)", "rgb(245,167,221)",
+               "rgb(124,191,134)", "rgb(220,173,241)", "rgb(168,199,127)",
+               "rgb(195,186,255)", "rgb(201,176,105)", "rgb(39,200,238)",
+               "rgb(241,169,124)", "rgb(101,231,214)", "rgb(255,193,233)",
+               "rgb(163,255,221)", "rgb(212,162,112)", "rgb(109,180,217)",
+               "rgb(252,209,141)", "rgb(56,189,186)", "rgb(255,194,162)",
+               "rgb(177,249,255)", "rgb(204,162,160)", "rgb(214,255,202)",
+               "rgb(222,206,255)", "rgb(122,185,149)", "rgb(255,209,192)",
+               "rgb(172,168,198)", "rgb(255,250,203)", "rgb(196,166,142)",
+               "rgb(197,237,225)", "rgb(170,175,138)", "rgb(255,235,208)"]
