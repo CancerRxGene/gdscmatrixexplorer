@@ -7,14 +7,9 @@ from app import app
 
 def layout(drug1, drug2, combo_details):
     return (
-        html.Div(className="bg-white pt-4 px-4 pb-1 border border-info h-100",
+        html.Div(className="bg-white p-4 border border-info ",
                  children=[
-            # html.Div(className="row", children=[
-            #     html.Div(className="col-12", children=[
-            #         html.H2(f"{drug1.drug_name} + {drug2.drug_name}")
-            #     ])
-            # ]),
-            html.Div(className="row", children=[
+            html.Div(className="row pb-4", children=[
                 html.Div(className="col-3", children=[
                     html.H2(f"{drug1.drug_name}"),
                     html.Table(children=[

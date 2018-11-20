@@ -24,6 +24,13 @@ def layout(combination=None):
 
     all_matrices = session.query(MatrixResult).filter(MatrixResult.drugset_id == all_combos[0].drugset_id, MatrixResult.cmatrix == all_combos[0].cmatrix).all()
 
+    all_cell_models = pd.DataFrame([dict(barcode=res.barcode,
+                                         model_id=res.model.id,
+                                         model_name=res.model.name,
+                                         tissue=res.model.tissue,
+                                         cancer_type=res.model.cancer_type)
+                                    for res in all_matrices])
+
     all_dr_curves = pd.DataFrame([curve.to_dict() for res in all_matrices for curve in res.single_agent_curves])
 
     all_matrices = pd.DataFrame([x.to_dict() for x in all_matrices])
@@ -50,6 +57,10 @@ def layout(combination=None):
                                                  }, index=str)\
                        [['barcode', 'lib2_tag', 'lib2_ic50', 'lib2_auc', 'lib2_rmse']],
                    on=['barcode', 'lib2_tag'])
+
+    all_matrices = pd.merge(all_matrices,
+                            all_cell_models,
+                            on=['barcode'])
 
 
     if len(all_combos) == 1:
