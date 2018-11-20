@@ -20,7 +20,7 @@ def layout(project_slug):
 
     def format_combo_links(combo):
         combo_string = (f"{combo.lib1.drug_name} + {combo.lib2.drug_name}")
-        combo_ref = f"/combination/{combo.lib1_id}+{combo.lib2_id}"
+        combo_ref = f"/project/{project_slug}/combination/{combo.lib1_id}+{combo.lib2_id}"
         return dcc.Link(combo_string, href=combo_ref)
 
     combo_links = [format_combo_links(combo) for combo in

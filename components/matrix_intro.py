@@ -21,22 +21,28 @@ def layout(matrix):
     try:
         model_information = requests.get(
             f"https://api.cellmodelpassports.sanger.ac.uk/models/{model.id}?include=sample.tissue,sample.cancer_type,sample.patient").json()
-        model_drivers = requests.get(
-            f"https://api.cellmodelpassports.sanger.ac.uk/models/{model.id}/datasets/cancer_drivers?page[size]=0&fields[mutation]=gene&include=gene&fields[gene]=symbol").json()
-        driver_genes = []
-        for g in model_drivers['included']:
-            driver_genes.append(g['attributes']['symbol'])
     except requests.exceptions.ConnectionError:
         model_information, model_drivers, driver_genes = None, None, None
 
+    if model_information:
+        try:
+            model_drivers = requests.get(
+                f"https://api.cellmodelpassports.sanger.ac.uk/models/{model.id}/datasets/cancer_drivers?page[size]=0&fields[mutation]=gene&include=gene&fields[gene]=symbol").json()
+            driver_genes = []
+            for g in model_drivers['included']:
+                driver_genes.append(g['attributes']['symbol'])
+        except KeyError:
+            model_drivers, driver_genes = None, None
+
     return html.Div([
-        html.Div(className="row mt-5 mb-3 d-flex flex-row", children=[
+
+        html.Div(className="row mt-3 mb-2 d-flex flex-row", children=[
             html.Div(className="col-12", children=[
                 dcc.Markdown(f"# **{drug1.drug_name}** + **{drug2.drug_name}** in cell model **{model.name}**"),
-                html.P("Combination Report", className='lead')
+                html.P("Combination Matrix Report", className='lead')
             ])
         ]),
-        html.Div(className="row my-5", children=[
+        html.Div(className="row mt-2 mb-5", children=[
             html.Div(className="col-9 d-flex flex-column", children=[
                 html.Div(className="row mb-3", children=[
                     html.Div(className='col-12', children=[
@@ -54,7 +60,7 @@ def layout(matrix):
                                             html.Strong("Sample Tissue Status "), model_information['included'][0]['attributes']['tissue_status'], html.Br(),
                                         ], className="pl-0", style={"width": "50%"}),
                                         html.Td([
-                                            html.Strong("Mutated Driver Genes "), '  '.join(dg for dg in sorted(driver_genes)), html.Br(),
+                                            html.Strong("Mutated Cancer Genes "), '  '.join(dg for dg in sorted(driver_genes)) if driver_genes else "No mutated cancer genes found", html.Br(),
                                             html.Strong("MSI Status "), model_information['data']['attributes']['msi_status'], html.Br(),
                                             html.Strong("Ploidy "), round(model_information['data']['attributes']['ploidy'], 3), html.Br(),
                                             html.Strong("Mutational Burden "), round(model_information['data']['attributes']['mutations_per_mb'],2), " mutations per Mb", html.Br(),html.Br(),

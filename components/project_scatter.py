@@ -1,7 +1,6 @@
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
-import dash_table_experiments as dt
 import numpy as np
 import pandas as pd
 import plotly.graph_objs as go
@@ -25,6 +24,7 @@ def layout(project_id):
         dcc.Location('project-scatter-url'),
         html.Div(
             children=[
+
                 html.Div(className='row mt-2 mb-4', children=[
                     html.Div(className='col-4', children=[
                         html.Label('X-Axis'),
