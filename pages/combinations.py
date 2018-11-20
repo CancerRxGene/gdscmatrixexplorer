@@ -6,6 +6,7 @@ from db import session
 from models import Drug, Combination, MatrixResult
 from components.combination_intro import layout as intro
 from components.combination_mm_plot import layout as mm_plot
+from components.breadcrumbs import breadcrumb_generator as crumbs
 
 def layout(combination=None):
     #     Select combination - dropdown?
@@ -65,6 +66,7 @@ def layout(combination=None):
 
     if len(all_combos) == 1:
         return html.Div([
+            crumbs([("Home", "/")])
             intro(drug1, drug2, all_combos[0]),
             mm_plot(all_matrices)
             #  matrix_link(my_combination), link to cell line replicates
