@@ -114,9 +114,9 @@ def update_boxplot(y_axis_field, project_id):
     for matrix in all_matrices_query.all():
         ds.append(matrix.drugset_id)
         cmatrix.append(matrix.cmatrix)
-        lib1.append(matrix.drug_matrix.lib1.drug_name)
-        lib2.append(matrix.drug_matrix.lib2.drug_name)
-        lib_names.append(f"{matrix.drug_matrix.lib1.drug_name} {matrix.drug_matrix.lib2.drug_name}")
+        lib1.append(matrix.combination.lib1.drug_name)
+        lib2.append(matrix.combination.lib2.drug_name)
+        lib_names.append(f"{matrix.combination.lib1.drug_name} {matrix.combination.lib2.drug_name}")
         cm.append(f"{matrix.drugset_id}::{matrix.cmatrix}")
 
     lib_names_df = pd.DataFrame({
@@ -166,6 +166,3 @@ def update_boxplot(y_axis_field, project_id):
 #         dcc.link('foo')
 #     ])
 
-
-if __name__ == '__main__':
-    app.run_server(debug=True)

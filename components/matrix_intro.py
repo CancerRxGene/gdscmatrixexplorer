@@ -1,10 +1,13 @@
 from textwrap import dedent
 
+import dash
 import dash_html_components as html
 import dash_core_components as dcc
 import requests
 
 from app import app
+from components.matrix_navigation import replicate_links, links_to_other_models, \
+    links_to_other_combos
 from components.single_agent.info import infoblock, infoblock_curve
 
 
@@ -104,37 +107,27 @@ def layout(matrix):
             ]),
             html.Div(className='col-3', children=[
                 html.Div(className='bg bg-light border pt-4 px-4 pb-1', children=[
-                    dcc.Markdown(dedent("""
-                        ### Quick Navigation  
-                        ---  
-                        ##### Links to Replicates (if any)  
-                        [Replicate 1](rep1)  
-                        [Replicate 2](rep1)  
-                        [Replicate 3](rep1)  
-                        [Replicate 4](rep1)  
-                          
-                          
-                        ##### Links to all combinations for the same model
-                        [Combo 1](rep1)&nbsp;&nbsp;&nbsp;&nbsp;[Combo 8](rep1)  
-                        [Combo 2](rep1)&nbsp;&nbsp;&nbsp;&nbsp;[Combo 9](rep1)  
-                        [Combo 3](rep1)&nbsp;&nbsp;&nbsp;&nbsp;[Combo 10](rep1)  
-                        [Combo 4](rep1)&nbsp;&nbsp;&nbsp;&nbsp;[Combo 11](rep1)  
-                        [Combo 5](rep1)&nbsp;&nbsp;&nbsp;&nbsp;[Combo 12](rep1)  
-                        [Combo 6](rep1)&nbsp;&nbsp;&nbsp;&nbsp;[Combo 13](rep1)  
-                        [Combo 7](rep1)&nbsp;&nbsp;&nbsp;&nbsp;[Combo 14](rep1)  
-                          
-                          
-                        ##### Links to all models for the same combination
-                        [Model 1](rep1)  
-                        [Model 2](rep1)  
-                        [Model 3](rep1)  
-                        [Model 4](rep1) 
-                        ... Probably a dropdown
-                    """))
+                    html.H3("Quick Navigation"),
+                    html.Hr(),
+                    replicate_links(matrix),
+                    links_to_other_models(matrix),
+                    links_to_other_combos(matrix)
                 ])
             ])
-        ])]
+        ]),
+        html.Div(id='hidden-div', className='d-none')
+    ]
     )
 
-if __name__ == '__main__':
-    app.run_server(debug=True)
+
+
+
+@app.callback(dash.dependencies.Output('matrix-url', 'pathname'),
+              [dash.dependencies.Input('dropdown-models', 'value'),
+               dash.dependencies.Input('dropdown-combos', 'value')])
+def dropdown_handler(dropdown_models_value, dropdown_combos_value):
+
+    value = dropdown_models_value or dropdown_combos_value
+    barcode, cmatrix = value.split('__')
+    return f"/matrix/{barcode}/{cmatrix}"
+

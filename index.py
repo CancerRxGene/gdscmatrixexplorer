@@ -8,7 +8,7 @@ from pages import project_scatter, project_home, home, matrix, combinations
 from page_components import header
 
 app.layout = html.Div([
-        dcc.Location(id='url', refresh=False),
+        dcc.Location(id='url', refresh=True),
         html.Div(
             id='wrapper',
             className="container",
