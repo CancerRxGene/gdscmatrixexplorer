@@ -21,7 +21,6 @@ def layout(project_id):
     except sa.orm.exc.NoResultFound:
         return html.Div("Project not found")
 
-
     return html.Div([
         dcc.Location('project-scatter-url'),
         html.Div(
@@ -46,18 +45,23 @@ def layout(project_id):
                     html.Div(className='col-4', children=[
                         html.Label('Color'),
                         dcc.Dropdown(
-                            options=[{'label': l, 'value': v} for l, v in [('Default', 'default'), ("Cell Line", 'model_name'), ("Tissue", 'tissue'), ("Combination", 'combo_id')]],
+                            options=[{'label': l, 'value': v} for l, v in
+                                     [('Default', 'default'),
+                                      ("Cell Line", 'model_name'),
+                                      ("Tissue", 'tissue'),
+                                      ("Combination", 'combo_id')]],
                             value='default',
                             id='color-select'
                         )
                     ]),
-                    html.Div(id='correlation')
+                    html.Div(id='correlation', className='ml-3 mt-2')
                 ])
             ]
         ),
         html.Div(
             className='row',
-            children=html.Div(dcc.Graph(id='project-scatter'), className='col-12')
+            children=html.Div(dcc.Graph(id='project-scatter'),
+                              className='col-12')
         )]
     )
 
@@ -70,15 +74,17 @@ def layout(project_id):
      dash.dependencies.Input('project-id', 'children')])
 def update_scatter(x_axis_field, y_axis_field, color_field, project_id):
     all_matrices_query = session.query(
-            getattr(MatrixResult, x_axis_field), getattr(MatrixResult, y_axis_field),
-            MatrixResult.barcode, MatrixResult.cmatrix, MatrixResult.drugset_id,
-            Combination.lib1_id, Combination.lib2_id, Model.name.label('model_name'), Model.tissue
-        ) \
+        getattr(MatrixResult, x_axis_field),
+        getattr(MatrixResult, y_axis_field),
+        MatrixResult.barcode, MatrixResult.cmatrix, MatrixResult.drugset_id,
+        Combination.lib1_id, Combination.lib2_id,
+        Model.name.label('model_name'), Model.tissue
+    ) \
         .join(Combination) \
         .join(Model) \
         .filter(and_(MatrixResult.drugset_id == Combination.drugset_id,
                      MatrixResult.cmatrix == Combination.cmatrix)) \
-        .filter(MatrixResult.model_id == Model.id)\
+        .filter(MatrixResult.model_id == Model.id) \
         .filter(MatrixResult.project_id == int(project_id))
 
     summary = pd.read_sql(all_matrices_query.statement,
@@ -97,7 +103,6 @@ def update_scatter(x_axis_field, y_axis_field, color_field, project_id):
         for i, v in enumerate(summary[color_field].unique()):
             color_values[v] = plot_colors[i % len(plot_colors)]
 
-
     fig_data = summary
     return {
         'data': [
@@ -108,12 +113,16 @@ def update_scatter(x_axis_field, y_axis_field, color_field, project_id):
                 opacity=0.7,
                 marker={
                     'size': 4,
-                    'color':[ord(x) for x in fig_data.model_name.str[0]] if color_field == 'default' else [color_values[x] for x in fig_data[color_field]]
+                    'color': [ord(x) for x in fig_data.model_name.str[
+                        0]] if color_field == 'default' else [color_values[x]
+                                                              for x in fig_data[
+                                                                  color_field]]
                 },
-                text=[f"{s.drug_name_lib1} ({s.target_lib1}) - {s.drug_name_lib2} ({s.target_lib2})<br />"
-                      f"Cell line: {s.model_name}<br />"
-                      f"Tissue: {s.tissue}"
-                      for s in fig_data.itertuples()],
+                text=[
+                    f"{s.drug_name_lib1} ({s.target_lib1}) - {s.drug_name_lib2} ({s.target_lib2})<br />"
+                    f"Cell line: {s.model_name}<br />"
+                    f"Tissue: {s.tissue}"
+                    for s in fig_data.itertuples()],
                 customdata=[{"barcode": row.barcode, "cmatrix": row.cmatrix,
                              "to": f"/matrix/{row.barcode}/{row.cmatrix}"}
                             for row in fig_data.itertuples(index=False)]
@@ -142,9 +151,11 @@ def update_correlation(x_axis_field, y_axis_field, project_id):
     summary = pd.read_sql(all_matrices_query.statement,
                           all_matrices_query.session.bind)
     corr = pearsonr(
-        np.log(summary[x_axis_field]) if 'index' in x_axis_field else summary[x_axis_field],
-        np.log(summary[y_axis_field]) if 'index' in y_axis_field else summary[y_axis_field])
-    return f"Correlation: {round(corr[0], 3)}"
+        np.log(summary[x_axis_field]) if 'index' in x_axis_field else summary[
+            x_axis_field],
+        np.log(summary[y_axis_field]) if 'index' in y_axis_field else summary[
+            y_axis_field])
+    return html.Div([html.Span("Pearson correlation: "), html.Strong(f"{round(corr[0], 3)}")])
 
 
 @app.callback(
