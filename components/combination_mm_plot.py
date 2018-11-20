@@ -93,8 +93,6 @@ def update_scatter(plot_data, colorscale_select):
 def update_tissue_plot(plot_data, colorscale_select):
 
     plot_data = pd.read_json(plot_data, orient='split')
-    # drug1 = plot_data['lib1_name'].unique()
-    # drug2 = plot_data['lib2_name'].unique()
 
     return {
         'data': [ go.Box(
@@ -125,5 +123,3 @@ def go_to_dot(clicked_points):
         p = clicked_points['points'][0]['customdata']
         print(p)
         return f"/matrix/{p[0]}/{p[1]}"
-    else:
-        return "/GDSC_007-A/free_scatter"
