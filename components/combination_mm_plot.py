@@ -19,8 +19,8 @@ def layout(plot_data=None):
         {'label': 'HSA_excess_window', 'value': 'HSA_excess_window'},
         {'label': 'HSA_excess_window_syn', 'value': 'HSA_excess_window_syn'}]
 
-    return html.Div(className='border bg-white p-2', children=[
-        dcc.Location(id='foo-url', refresh=True),
+    return html.Div(className='border bg-white p-2 my-2', children=[
+        dcc.Location(id='combo-url', refresh=True),
         html.Div(className='row',
                  children=[
                      html.Div(className='col-4',
@@ -67,8 +67,8 @@ def update_scatter(plot_data, colorscale_select):
 
     return {
         'data': [go.Scatter(
-            x=plot_data['lib1_ic50'],
-            y=plot_data['lib2_ic50'],
+            x=plot_data['ic50_lib1'],
+            y=plot_data['ic50_lib2'],
             mode='markers',
             opacity=0.7,
             marker={
@@ -115,7 +115,7 @@ def update_tissue_plot(plot_data, colorscale_select):
 
 
 @app.callback(
-    dash.dependencies.Output('foo-url', 'pathname'),
+    dash.dependencies.Output('combo-url', 'pathname'),
     [dash.dependencies.Input('mm-scatter', 'clickData')])
 def go_to_dot(clicked_points):
     print("Click!")

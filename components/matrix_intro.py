@@ -33,7 +33,7 @@ def layout(matrix):
         html.Div(className="row mt-5 mb-3 d-flex flex-row", children=[
             html.Div(className="col-12", children=[
                 dcc.Markdown(f"# **{drug1.drug_name}** + **{drug2.drug_name}** in cell model **{model.name}**"),
-                html.P("Combination Report", className='lead')
+                html.P("Combination Matrix Report", className='lead')
             ])
         ]),
         html.Div(className="row my-5", children=[

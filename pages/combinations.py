@@ -1,79 +1,66 @@
 import dash_html_components as html
 import pandas as pd
-
+import sqlalchemy as sa
 from db import session
 
-from models import Drug, Combination, MatrixResult
+from models import Combination, Project, DoseResponseCurve
 from components.combination_intro import layout as intro
 from components.combination_mm_plot import layout as mm_plot
 from components.breadcrumbs import breadcrumb_generator as crumbs
 
-def layout(combination=None):
-    #     Select combination - dropdown?
-    #     Infobox for select combination - names, targets etc...
-    #     Michael Menden plot for all cell lines link to selected cell line
-    #     Synergy metric dropdown for MM plot
-    #     Link from plot to replicates for cell line and then link to matrix page
 
-    drug1, drug2 = combination.split("+")
+def layout(project_slug, combination_drug_ids=None):
 
-    drug1 = session.query(Drug).filter(Drug.id == drug1).first()
-    drug2 = session.query(Drug).filter(Drug.id == drug2).first()
+    drug1_id, drug2_id = combination_drug_ids.split("+")
+    try:
+        combination = session.query(Combination)\
+            .join('matrices', 'project')\
+            .filter(Combination.lib1_id == drug1_id,
+                    Combination.lib2_id == drug2_id)\
+            .filter(Project.slug == project_slug)\
+            .one()
+    except sa.orm.exc.NoResultFound:
+        return html.Div("Combination not found")
 
-    # for mm plot need all IC50s and all synergy metric per cell line incl repls.
-    all_combos = session.query(Combination).filter(Combination.lib1_id == drug1.id, Combination.lib2_id == drug2.id).all()
+    try:
+        project = session.query(Project).filter_by(slug=project_slug).one()
+    except sa.orm.exc.NoResultFound:
+        return html.Div("Project not found")
 
-    all_matrices = session.query(MatrixResult).filter(MatrixResult.drugset_id == all_combos[0].drugset_id, MatrixResult.cmatrix == all_combos[0].cmatrix).all()
+    all_cell_models = pd.read_sql_table('models', session.bind)
 
-    all_cell_models = pd.DataFrame([dict(barcode=res.barcode,
-                                         model_id=res.model.id,
-                                         model_name=res.model.name,
-                                         tissue=res.model.tissue,
-                                         cancer_type=res.model.cancer_type)
-                                    for res in all_matrices])
+    # We need the single agent IC50s for the MM plot
+    dr_curves_query = session.query(
+            DoseResponseCurve.dosed_tag,
+            DoseResponseCurve.ic50,
+            DoseResponseCurve.barcode) \
+        .filter(
+            DoseResponseCurve.treatment_type == 'S',
+            DoseResponseCurve.dosed_tag.in_([
+                combination.lib1_tag,
+                combination.lib2_tag]),
+            DoseResponseCurve.drugset_id == combination.drugset_id
+        )
 
-    all_dr_curves = pd.DataFrame([curve.to_dict() for res in all_matrices for curve in res.single_agent_curves])
+    all_dr_curves = pd.read_sql(dr_curves_query.statement, session.bind)
 
-    all_matrices = pd.DataFrame([x.to_dict() for x in all_matrices])
+    all_matrices = pd.read_sql(combination.matrices.statement, session.bind)\
+        .assign(**{'lib1_tag': combination.lib1_tag,
+                   'lib2_tag': combination.lib2_tag,
+                   'lib1_name': combination.lib1.drug_name,
+                   'lib2_name': combination.lib2.drug_name})\
+        .merge(all_dr_curves, left_on=['barcode', 'lib1_tag'],
+               right_on=['barcode', 'dosed_tag'])\
+        .merge(all_dr_curves, left_on=['barcode', 'lib2_tag'],
+               right_on=['barcode', 'dosed_tag'], suffixes=['_lib1', '_lib2'])\
+        .merge(all_cell_models, left_on=['model_id'], right_on=['id'])
 
-    all_matrices['lib1_tag'] = all_combos[0].lib1_tag
-    all_matrices['lib2_tag'] = all_combos[0].lib2_tag
-    all_matrices['lib1_name'] = drug1.drug_name
-    all_matrices['lib2_name'] = drug2.drug_name
-
-    all_matrices = pd.merge(all_matrices,
-                   all_dr_curves.rename(columns={'dosed_tag': 'lib1_tag',
-                                                 'ic50': 'lib1_ic50',
-                                                 'auc': 'lib1_auc',
-                                                 'rmse': 'lib1_rmse'
-                                                 }, index=str)\
-                       [['barcode', 'lib1_tag', 'lib1_ic50', 'lib1_auc', 'lib1_rmse']],
-                   on=['barcode', 'lib1_tag'])
-
-    all_matrices = pd.merge(all_matrices,
-                   all_dr_curves.rename(columns={'dosed_tag': 'lib2_tag',
-                                                 'ic50': 'lib2_ic50',
-                                                 'auc': 'lib2_auc',
-                                                 'rmse': 'lib2_rmse'
-                                                 }, index=str)\
-                       [['barcode', 'lib2_tag', 'lib2_ic50', 'lib2_auc', 'lib2_rmse']],
-                   on=['barcode', 'lib2_tag'])
-
-    all_matrices = pd.merge(all_matrices,
-                            all_cell_models,
-                            on=['barcode'])
-
-
-    if len(all_combos) == 1:
-        return html.Div([
-            crumbs([("Home", "/")])
-            intro(drug1, drug2, all_combos[0]),
-            mm_plot(all_matrices)
-            #  matrix_link(my_combination), link to cell line replicates
-            # tissue specific box plot
-        ])
-    else:
-        return html.Div("More than one screen or drugset for this combo")
+    return html.Div([
+        crumbs([("Home", "/"), (project.name, f"/project/{project.slug}"),
+                (f"{combination.lib1.drug_name} + {combination.lib2.drug_name}",)]),
+        intro(combination),
+        mm_plot(all_matrices)
+    ])
 
 
 
