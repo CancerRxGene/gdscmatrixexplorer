@@ -12,9 +12,10 @@ from app import app
 from db import session
 from models import MatrixResult, Project
 
-def layout(project_slug):
+
+def layout(project_id):
     try:
-        project = session.query(Project).filter_by(slug=project_slug).one()
+        project = session.query(Project).get(project_id)
     except sa.orm.exc.NoResultFound:
         return html.Div("Project not found")
 
@@ -23,57 +24,39 @@ def layout(project_slug):
                "Bliss_excess_syn", "Bliss_excess_well_count",
                "Bliss_excess_window",
                "Bliss_excess_window_syn"]
-    table_columns = ['model_id', 'cmatrix', 'barcode', 'drugset_id'] + metrics
 
-    all_matrices = session.query(MatrixResult)\
-        .join(Project)\
-        .filter(Project.name == project.name)\
-        .all()
 
-    summary = pd.DataFrame([x.to_dict() for x in all_matrices])
 
 
     return html.Div([
         dcc.Location('project-scatter-url'),
-        html.H2(f"{project.name} Scatterplot"),
         html.Div(
             children=[
-                html.Label('x-axis'),
-                dcc.Dropdown(
-                    options=[{'label': c, 'value': c} for c in metrics],
-                    value='HSA_excess',
-                    id='x-axis-select'
-                ),
-                html.Label('y-axis'),
-                dcc.Dropdown(
-                    options=[{'label': c, 'value': c} for c in metrics],
-                    value='Bliss_excess',
-                    id='y-axis-select'
-                )
-            ],
-            style={'width': '20%', 'float': 'left'}
+                html.Div(className='row mt-2 mb-4', children=[
+                    html.Div(className='col-4', children=[
+                        html.Label('x-axis'),
+                        dcc.Dropdown(
+                            options=[{'label': c, 'value': c} for c in metrics],
+                            value='HSA_excess',
+                            id='x-axis-select'
+                        ),
+                    ]),
+                    html.Div(className='col-4', children=[
+                        html.Label('y-axis'),
+                        dcc.Dropdown(
+                            options=[{'label': c, 'value': c} for c in metrics],
+                            value='Bliss_excess',
+                            id='y-axis-select'
+                        )
+                    ]),
+                    html.Div(id='correlation')
+                ])
+            ]
         ),
         html.Div(
-            children=[dcc.Graph(id='project-scatter'),
-                      html.Div(id='correlation'),
-                      html.Div(id='tst')],
-            style={'width': '75%', 'float': 'left'}
-        ),
-        html.Div(
-            dt.DataTable(
-                rows=summary.to_dict('records'),
-                columns=table_columns,
-                row_selectable=True,
-                filterable=True,
-                sortable=True,
-                selected_row_indices=[],
-                id='datatable'
-            )
-        ),
-        html.Div(style={"display": "none"}, children=str(project.id),
-                 id='project-id')
-    ],
-        style={'width':'100%'}
+            className='row',
+            children=html.Div(dcc.Graph(id='project-scatter'), className='col-12')
+        )]
     )
 
 
@@ -81,11 +64,15 @@ def layout(project_slug):
     dash.dependencies.Output('project-scatter', 'figure'),
     [dash.dependencies.Input('x-axis-select', 'value'),
      dash.dependencies.Input('y-axis-select', 'value'),
-     dash.dependencies.Input('datatable', 'rows')])
-def update_scatter(x_axis_field, y_axis_field, rows):
+     dash.dependencies.Input('project-id', 'children')])
+def update_scatter(x_axis_field, y_axis_field, project_id):
+    all_matrices = session.query(MatrixResult) \
+        .filter(MatrixResult.project_id == project_id) \
+        .all()
 
-    fig_data = pd.DataFrame(rows)
-    # fig_data = summary
+    summary = pd.DataFrame([x.to_dict() for x in all_matrices])
+
+    fig_data = summary
     return {
         'data': [
             go.Scatter(
@@ -105,7 +92,7 @@ def update_scatter(x_axis_field, y_axis_field, rows):
             )
         ],
         'layout': go.Layout(
-            height=700,
+            height=500,
             hovermode='closest',
             xaxis={'type': 'log' if 'index' in x_axis_field else 'linear',
                    'title': x_axis_field.replace('_', ' ')},

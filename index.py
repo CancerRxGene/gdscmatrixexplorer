@@ -4,7 +4,8 @@ from dash.dependencies import Input, Output
 import dash_table_experiments as dt
 
 from app import app
-from pages import project_scatter, project_home, home, matrix, combinations
+from pages import project_home, home, matrix, combinations
+from components import project_scatter
 from page_components import header
 
 app.layout = html.Div([
