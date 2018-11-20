@@ -4,7 +4,8 @@ from dash.dependencies import Input, Output
 import dash_table_experiments as dt
 
 from app import app
-from pages import project_scatter, project_home, home, matrix, combinations
+from pages import project, home, matrix, combinations
+from components import project_scatter
 from page_components import header
 
 app.layout = html.Div([
@@ -39,7 +40,7 @@ def display_page(pathname):
     elif pathname.startswith('/project'):
         segments = pathname.split("/")
         if len(segments) == 3:
-            return project_home.layout(segments[2])
+            return project.layout(segments[2])
         elif len(segments) == 4 and segments[-1] == "scatter":
             return project_scatter.layout(segments[-2])
     elif isinstance(pathname, str) and pathname.startswith('/combination'):
