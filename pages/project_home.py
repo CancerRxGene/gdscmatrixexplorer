@@ -9,7 +9,7 @@ import plotly.graph_objs as go
 
 from app import app
 from db import session
-from models import MatrixResult, Project, Combination, Drug
+from models import MatrixResult, Project, Drug
 
 
 def layout(project_slug):
@@ -44,52 +44,47 @@ def layout(project_slug):
     combo_links = [format_combo_links(combo) for combo in project.combinations]
 
     return html.Div([
+        dcc.Location('project-boxplot-url'),
         html.H2(f"{project.name} Overview"),
-        html.Div(
-            children=[
-                html.Label('y-axis', htmlFor='y-axis-select-boxplot'),
-                dcc.Dropdown(
-                    options=[{'label': c, 'value': c} for c in metrics],
-                    value='Bliss_excess',
-                    id='y-axis-select-boxplot'
-                )
-            ],
-            style={'width': '20%', 'float': 'left'}
-        ),
-        html.Div(
-            children=[
-                dcc.Graph(
-                    id='project-boxplot'
-                )
-            ],
-            style={'width': '75%', 'float': 'left'}
-        ),
-        html.Br(),
-        html.H3("Drug combinations screened"),
-        html.Div(
-            #     Add selection for the combinations here - link to combination page.
-            children=[
-                html.Div(children =[
-                    combo_link,
-                    html.Br()])
-                for combo_link in combo_links
-            ]
-        ),
-        html.Div(
-            children=[
-                dt.DataTable(
-                    rows=summary.to_dict('records'),
-                    columns=table_columns,
-                    row_selectable=True,
-                    filterable=True,
-                    sortable=True,
-                    selected_row_indices=[],
-                    editable=False,
-                    id='datatable1_2'
-                )
-            ]
+        html.Div(className='row', children=[
+            html.Div(
+                className="col-3",
+                children=[
+                    html.Label('y-axis', htmlFor='y-axis-select-boxplot'),
+                    dcc.Dropdown(
+                        options=[{'label': c, 'value': c} for c in metrics],
+                        value='Bliss_excess',
+                        id='y-axis-select-boxplot'
+                    )
+                ]
+            ),
+            html.Div(
+                className="col-9",
+                children=dcc.Graph(id='project-boxplot')
+            ),
+            html.Div(
+                children=[html.H3("Drug combinations screened")] +
+                         [html.Div(children =[combo_link, html.Br()])
+                            for combo_link in combo_links],
+                className='col-12'
+            ),
+            html.Div(
+                className='col-12',
+                children=[
+                    dt.DataTable(
+                        rows=summary.to_dict('records'),
+                        columns=table_columns,
+                        row_selectable=True,
+                        filterable=True,
+                        sortable=True,
+                        selected_row_indices=[],
+                        editable=False,
+                        id='datatable1_2'
+                    )
+                ]
 
-        ),
+            )
+        ]),
         html.Div(style={"display": "none"}, children=str(project.id),
                  id='project-id')
     ],
@@ -118,9 +113,9 @@ def update_boxplot(y_axis_field, project_id):
     for matrix in all_matrices_query.all():
         ds.append(matrix.drugset_id)
         cmatrix.append(matrix.cmatrix)
-        lib1.append(matrix.drug_matrix.lib1.drug_name)
-        lib2.append(matrix.drug_matrix.lib2.drug_name)
-        lib_names.append(f"{matrix.drug_matrix.lib1.drug_name} {matrix.drug_matrix.lib2.drug_name}")
+        lib1.append(matrix.combination.lib1.drug_name)
+        lib2.append(matrix.combination.lib2.drug_name)
+        lib_names.append(f"{matrix.combination.lib1.drug_name} {matrix.combination.lib2.drug_name}")
         cm.append(f"{matrix.drugset_id}::{matrix.cmatrix}")
 
     lib_names_df = pd.DataFrame({
@@ -152,8 +147,8 @@ def update_boxplot(y_axis_field, project_id):
             ) for cm in summary.cm.unique()
         ],
         'layout': go.Layout(
-            height=700,
-            margin=dict(l=40, r=30, b=80, t=100),
+            height=500,
+            margin=dict(l=40, r=50, b=80, t=20),
             showlegend=False,
             yaxis={'type': 'log' if 'index' in y_axis_field else 'linear',
                    'title': y_axis_field.replace('_', ' ')}
@@ -171,5 +166,12 @@ def update_boxplot(y_axis_field, project_id):
 #     ])
 
 
-if __name__ == '__main__':
-    app.run_server(debug=True)
+@app.callback(
+    dash.dependencies.Output('project-boxplot-url', 'pathname'),
+    [dash.dependencies.Input('project-boxplot', 'clickData')])
+def go_to_dot(clicked):
+    if clicked:
+        p = clicked['points'][0]['customdata']
+        return p['to']
+    else:
+        return "/"

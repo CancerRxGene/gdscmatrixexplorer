@@ -32,7 +32,7 @@ def layout(matrix: MatrixResult):
 
     sliced_plot_ids = pd.DataFrame([
         {'id': c.id,
-         'orient': 'column' if c.fixed_tag == matrix.drug_matrix.lib1_tag else 'row',
+         'orient': 'column' if c.fixed_tag == matrix.combination.lib1_tag else 'row',
          'position': c.fixed_dose[1:],
          'fixed_drug_name': matrix.drugs[c.fixed_tag].drug_name,
          'dosed_drug_name': matrix.drugs[c.dosed_tag].drug_name
@@ -43,8 +43,8 @@ def layout(matrix: MatrixResult):
 
     available_viability_metrics = ['viability', 'inhibition']
 
-    drug1 = matrix.drugs[matrix.drug_matrix.lib1_tag].drug_name
-    drug2 = matrix.drugs[matrix.drug_matrix.lib2_tag].drug_name
+    drug1 = matrix.drugs[matrix.combination.lib1_tag].drug_name
+    drug2 = matrix.drugs[matrix.combination.lib2_tag].drug_name
 
     matrix_df = matrix_df.assign(inhibition=lambda df: 1 - df.viability)
 

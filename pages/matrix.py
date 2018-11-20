@@ -1,4 +1,5 @@
 import dash_html_components as html
+import dash_core_components as dcc
 
 from db import session
 
@@ -14,8 +15,9 @@ def layout(barcode=None, cmatrix=None):
         .filter_by(barcode=barcode, cmatrix=cmatrix).one()
 
     return html.Div([
+        dcc.Location(id='matrix-url', refresh=True),
         intro(my_matrix),
         viability(my_matrix),
         synergy(my_matrix),
-        table(my_matrix)
+        # table(my_matrix)
     ])

@@ -1,6 +1,5 @@
 import dash_core_components as dcc
 import dash_html_components as html
-import flask
 from dash.dependencies import Input, Output
 import dash_table_experiments as dt
 
@@ -9,7 +8,7 @@ from pages import project_scatter, project_home, home, matrix, combinations
 from page_components import header
 
 app.layout = html.Div([
-        dcc.Location(id='url', refresh=False),
+        dcc.Location(id='url', refresh=True),
         html.Div(
             id='wrapper',
             className="container",
@@ -33,7 +32,9 @@ app.layout = html.Div([
 @app.callback(Output('page-content', 'children'),
               [Input('url', 'pathname')])
 def display_page(pathname):
-    if pathname == '/':
+    if pathname is None:
+        return ""
+    elif pathname == '/':
         return home.layout()
     elif pathname.startswith('/project'):
         segments = pathname.split("/")
@@ -50,19 +51,6 @@ def display_page(pathname):
     else:
         return '404'
 
-@app.callback(
-    Output('url', 'pathname'),
-    [Input('project-boxplot', 'clickData')])
-def go_to_dot(*args):
-    print("Click!")
-    print(args)
-    clicked = next(x for x in args if x)
-    if clicked:
-        p = clicked['points'][0]['customdata']
-        print(p)
-        return p['to']
-    else:
-        return "/GDSC_007-A/free_scatter"
 
 if __name__ == '__main__':
     app.run_server(debug=True)

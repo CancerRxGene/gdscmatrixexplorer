@@ -74,6 +74,27 @@ class Combination(ToDictMixin, Base):
     lib1 = relationship(Drug, foreign_keys=[lib1_id])
     lib2 = relationship(Drug, foreign_keys=[lib2_id])
 
+    matrices = relationship("MatrixResult", lazy='dynamic')
+
+    @property
+    def replicates_query(self):
+        return sa.orm.object_session(self).query(Combination) \
+            .filter(
+             sa.or_(
+                sa.and_(
+                    Combination.lib1_id == self.lib1_id,
+                    Combination.lib2_id == self.lib2_id,
+                ),
+                sa.and_(
+                    Combination.lib1_id == self.lib2_id,
+                    Combination.lib2_id == self.lib1_id,
+                )
+        ))
+
+    @property
+    def replicates(self):
+        return self.replicates_query.all()
+
 
 @generic_repr
 class MatrixResult(ToDictMixin, Base):
@@ -111,7 +132,7 @@ class MatrixResult(ToDictMixin, Base):
     lib1_delta_max_effect = sa.Column(sa.Float)
     lib2_delta_max_effect = sa.Column(sa.Float)
 
-    drug_matrix = relationship("Combination")
+    combination = relationship("Combination", back_populates='matrices')
     well_results = relationship("WellResult")
     combination_curves = relationship("DoseResponseCurve")
     model = relationship("Model")
@@ -124,16 +145,48 @@ class MatrixResult(ToDictMixin, Base):
                 DoseResponseCurve.barcode == self.barcode,
                 DoseResponseCurve.treatment_type == 'S',
                 DoseResponseCurve.dosed_tag.in_([
-                    self.drug_matrix.lib1_tag,
-                    self.drug_matrix.lib2_tag])
+                    self.combination.lib1_tag,
+                    self.combination.lib2_tag])
                 ).all()
 
     @property
     def drugs(self):
         return {
-            self.drug_matrix.lib1_tag: self.drug_matrix.lib1,
-            self.drug_matrix.lib2_tag: self.drug_matrix.lib2
+            self.combination.lib1_tag: self.combination.lib1,
+            self.combination.lib2_tag: self.combination.lib2
         }
+
+    @property
+    def project_replicates_query(self):
+        return sa.orm.object_session(self).query(MatrixResult)\
+            .filter(MatrixResult.model_id == self.model_id)\
+            .filter(MatrixResult.drugset_id == self.drugset_id)\
+            .filter(MatrixResult.cmatrix == self.cmatrix) \
+            .filter(MatrixResult.project_id == self.project_id)
+
+    @property
+    def project_replicates(self):
+        return self.project_replicates_query.all()
+
+
+    @property
+    def all_replicates_query(self):
+        subq = self.combination.replicates_query.subquery()
+        al_reps = sa.orm.aliased(Combination, subq)
+
+        return sa.orm.object_session(self).query(MatrixResult)\
+            .join(Combination) \
+            .filter(
+                sa.and_(
+                    Combination.drugset_id == al_reps.drugset_id,
+                    Combination.cmatrix == al_reps.cmatrix
+                ))\
+            .filter(MatrixResult.model_id == self.model_id)
+
+    @property
+    def all_replicates(self):
+        return self.all_replicates_query.all()
+
 
     __table_args__ = (sa.ForeignKeyConstraint(
         [drugset_id, cmatrix], [Combination.drugset_id, Combination.cmatrix]), {}
