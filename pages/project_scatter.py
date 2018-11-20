@@ -8,11 +8,9 @@ import plotly.graph_objs as go
 from scipy.stats import pearsonr
 import sqlalchemy as sa
 
-from app import app, cpr
+from app import app
 from db import session
 from models import MatrixResult, Project
-
-cpr.register_plot('project-scatter')
 
 def layout(project_slug):
     try:
@@ -36,6 +34,7 @@ def layout(project_slug):
 
 
     return html.Div([
+        dcc.Location('project-scatter-url'),
         html.H2(f"{project.name} Scatterplot"),
         html.Div(
             children=[
@@ -55,8 +54,9 @@ def layout(project_slug):
             style={'width': '20%', 'float': 'left'}
         ),
         html.Div(
-            children=cpr.generate_plots('project-scatter') +
-                     [html.Div(id='correlation'), html.Div(id='tst')],
+            children=[dcc.Graph(id='project-scatter'),
+                      html.Div(id='correlation'),
+                      html.Div(id='tst')],
             style={'width': '75%', 'float': 'left'}
         ),
         html.Div(
@@ -114,6 +114,7 @@ def update_scatter(x_axis_field, y_axis_field, rows):
         )
     }
 
+
 @app.callback(
     dash.dependencies.Output('correlation', 'children'),
     [dash.dependencies.Input('x-axis-select', 'value'),
@@ -130,5 +131,13 @@ def update_correlation(x_axis_field, y_axis_field, project_id):
         np.log(summary[y_axis_field]) if 'index' in y_axis_field else summary[y_axis_field])
     return f"Correlation: {round(corr[0], 3)}"
 
-if __name__ == '__main__':
-    app.run_server(debug=True)
+
+@app.callback(
+    dash.dependencies.Output('project-scatter-url', 'pathname'),
+    [dash.dependencies.Input('project-scatter', 'clickData')])
+def go_to_dot(clicked):
+    if clicked:
+        p = clicked['points'][0]['customdata']
+        return p['to']
+    else:
+        return "/"

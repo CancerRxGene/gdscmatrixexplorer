@@ -7,12 +7,10 @@ import pandas as pd
 import sqlalchemy as sa
 import plotly.graph_objs as go
 
-from app import app, cpr
+from app import app
 from db import session
-from models import MatrixResult, Project, Combination, Drug
+from models import MatrixResult, Project, Drug
 
-
-cpr.register_plot('project-boxplot')
 
 def layout(project_slug):
     try:
@@ -46,6 +44,7 @@ def layout(project_slug):
     combo_links = [format_combo_links(combo) for combo in project.combinations]
 
     return html.Div([
+        dcc.Location('project-boxplot-url'),
         html.H2(f"{project.name} Overview"),
         html.Div(className='row', children=[
             html.Div(
@@ -61,7 +60,7 @@ def layout(project_slug):
             ),
             html.Div(
                 className="col-9",
-                children=cpr.generate_plots('project-boxplot')
+                children=dcc.Graph(id='project-boxplot')
             ),
             html.Div(
                 children=[html.H3("Drug combinations screened")] +
@@ -166,3 +165,13 @@ def update_boxplot(y_axis_field, project_id):
 #         dcc.link('foo')
 #     ])
 
+
+@app.callback(
+    dash.dependencies.Output('project-boxplot-url', 'pathname'),
+    [dash.dependencies.Input('project-boxplot', 'clickData')])
+def go_to_dot(clicked):
+    if clicked:
+        p = clicked['points'][0]['customdata']
+        return p['to']
+    else:
+        return "/"

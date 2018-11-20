@@ -3,7 +3,7 @@ import dash_html_components as html
 from dash.dependencies import Input, Output
 import dash_table_experiments as dt
 
-from app import app, cpr
+from app import app
 from pages import project_scatter, project_home, home, matrix, combinations
 from page_components import header
 
@@ -32,7 +32,9 @@ app.layout = html.Div([
 @app.callback(Output('page-content', 'children'),
               [Input('url', 'pathname')])
 def display_page(pathname):
-    if pathname == '/':
+    if pathname is None:
+        return ""
+    elif pathname == '/':
         return home.layout()
     elif pathname.startswith('/project'):
         segments = pathname.split("/")
@@ -48,21 +50,6 @@ def display_page(pathname):
         return matrix.layout(*segments[2:])
     else:
         return '404'
-
-
-@app.callback(
-    Output('url', 'pathname'),
-    [Input(plot_id, 'clickData') for plot_id in cpr.plot_ids()])
-def go_to_dot(*args):
-    print("Click!")
-    print(args)
-    clicked = next(x for x in args if x)
-    if clicked:
-        p = clicked['points'][0]['customdata']
-        print(p)
-        return p['to']
-    else:
-        return "/"
 
 
 if __name__ == '__main__':
