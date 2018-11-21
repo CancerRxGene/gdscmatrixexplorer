@@ -118,7 +118,7 @@ def layout(matrix):
                     html.Span("Thing 2: "), html.Strong("Good", className='text-success'), html.Br(),
                     html.Span("Measurement 3: "), html.Strong("Low", className="text-primary"), html.Br(),
                 ]),
-                html.Div(className='bg bg-light border pt-4 px-4 pb-1',
+                html.Div(className='bg bg-light border pt-4 px-4 pb-1 d-print-none',
                          children=[
                              html.H3("Quick Navigation"),
                              html.Hr(),

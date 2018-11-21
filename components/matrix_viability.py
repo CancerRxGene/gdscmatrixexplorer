@@ -43,8 +43,8 @@ def layout(matrix: MatrixResult):
 
     available_viability_metrics = ['viability', 'inhibition']
 
-    drug1 = matrix.drugs[matrix.combination.lib1_tag].drug_name
-    drug2 = matrix.drugs[matrix.combination.lib2_tag].drug_name
+    drug1 = matrix.combination.lib1.drug_name
+    drug2 = matrix.combination.lib2.drug_name
 
     matrix_df = matrix_df.assign(inhibition=lambda df: 1 - df.viability)
 
@@ -52,17 +52,7 @@ def layout(matrix: MatrixResult):
 
     return html.Div(className='row pb-5', children=[
         html.Div(className='col-12', children=[
-            # html.Div(className='border bg-white d-flex flex-row p-2', children=[
             html.Div(className='border bg-white p-2', children=[
-
-                # html.Div(className='col-4 d-flex flex-column', children=[
-                #     html.Div(className="p-2",
-                #              children=[
-                #                  html.H2("Viability"),
-                #                  html.P("Maybe an interesting stat here"),
-                #              ])
-                #
-                # ]),
                 html.Div(className='row pb-3', children=[
                     html.Div(className='col-3', children=[
                         dcc.Dropdown(
