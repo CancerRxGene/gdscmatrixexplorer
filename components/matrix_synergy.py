@@ -23,23 +23,25 @@ def layout(matrix):
     matrix_df = matrix_df[['lib1_conc', 'lib2_conc'] + available_combo_metrics]
 
     return html.Div(className='row', children=[
-        # html.Div(className='col-12 d-flex flex-column', children=[
         html.Div(className='col-12', children=[
             html.Div(className='border p-3 bg-white', children=[
                 html.Div(className='row pb-3', children=[
-                    html.Div(className='col-3', children=[
-                        dcc.Dropdown(
-                            id='combo-heatmap-zvalue',
-                            options=[{'label': i, 'value': i} for i in
-                                     available_combo_metrics],
-                            value='HSA_excess',
-                            searchable=False,
-                            clearable=False
-                        )
+                    html.Div(className='col-12 d-flex flex-row', children=[
+                        html.Div(className='col-auto', children=[
+                            html.H3(["Drug combination interaction"], className='pt-1'),
+                        ]),
+                        html.Div(className='col-3', children=[
+                            dcc.Dropdown(
+                                id='combo-heatmap-zvalue',
+                                options=[{'label': i, 'value': i} for i in
+                                         available_combo_metrics],
+                                value='HSA_excess',
+                                searchable=False,
+                                clearable=False
+                            )
+                        ]),
                     ]),
-                    html.Div(className='col-9 text-right', children=[
-                        html.H2(["Drug combination interaction"])
-                    ])
+                    html.Div(html.Hr(), className='col-12'),
                 ]),
                 html.Div(className='row', children=[
                     html.Div(className='col-7', children=[
@@ -54,9 +56,8 @@ def layout(matrix):
                             ])
                         ])
                     ]),
-                    html.Div(className="col-5", children=[
+                    html.Div(className="col-4 offset-1", children=[
                         html.Div(
-                            className="bg-white pt-4 px-4 pb-1 border border-info h-100",
                             children=[
                                 infoblock_matrix(matrix)
                             ]

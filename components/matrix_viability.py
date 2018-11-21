@@ -56,7 +56,7 @@ def layout(matrix: MatrixResult):
                 html.Div(className='row', children=[
                     html.Div(className='col-12 d-flex flex-row', children=[
                         html.Div(className='col-auto', children=[
-                            html.H3(["Measured activity"]),
+                            html.H3(["Measured activity"], className='pt-1'),
                         ]),
                         html.Div(className='col-3', children=[
                             dcc.Dropdown(
