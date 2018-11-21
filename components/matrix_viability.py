@@ -52,43 +52,44 @@ def layout(matrix: MatrixResult):
 
     return html.Div(className='row pb-5', children=[
         html.Div(className='col-12', children=[
-            html.Div(className='border bg-white p-2', children=[
-                html.Div(className='row pb-3', children=[
-                    html.Div(className='col-3', children=[
-                        dcc.Dropdown(
-                            id='viability-heatmap-zvalue',
-                            options=[{'label': i, 'value': i} for i in available_viability_metrics],
-                            value='viability',
-                            searchable=False,
-                            clearable=False
-                        )
+            html.Div(className='border bg-white p-4', children=[
+                html.Div(className='row', children=[
+                    html.Div(className='col-12 d-flex flex-row', children=[
+                        html.Div(className='col-auto', children=[
+                            html.H3(["Measured activity"]),
+                        ]),
+                        html.Div(className='col-3', children=[
+                            dcc.Dropdown(
+                                id='viability-heatmap-zvalue',
+                                options=[{'label': i, 'value': i} for i in
+                                         available_viability_metrics],
+                                value='viability',
+                                searchable=False,
+                                clearable=False
+                            ),
+                        ]),
                     ]),
-                    html.Div(className='col-9 text-right', children=[
-                        html.H2(["Measured activity"])
-                    ])
+                    html.Div(html.Hr(), className='col-12')
                 ]),
                 html.Div(className='row', children=[
-                    html.Div(className='col-6', children=[
-                        dcc.Graph(id='viability-heatmap')
+                    html.Div(className='col-8', children=[
+                        dcc.Graph(id='viability-heatmap'),
+                        html.Div(className='col-8 offset-2', children=[
+                        ])
                     ]),
-                    html.Div(className='col-6 flex-column d-flex align-self-center', children=[
-                        html.Div(id='dr_row')
-                    ])
+                    html.Div(className='col-4', children=[
+                        dcc.Graph(id='viability-surface'),
+                    ]),
                 ]),
-                html.Div(className='row pb-5', children=[
-                    html.Div(className='col-6', children=[
-                        dcc.Graph(id='viability-surface')
+                html.Div(className='row', children=[
+                    html.Div(className='col-4 offset-1', children=[
+                        html.Div(id='dr_row'),
                     ]),
-                    html.Div(className='col-6', children=[
+                    html.Div(className='col-4', children=[
                         html.Div(id='dr_column')
                     ])
                 ])
             ]),
-
-            # html.Div(className='col-4 d-flex flex-column h-100', children=[
-            #     html.Div(id='dr_row', className='h-50'),
-            #     html.Div(id='dr_column', className='h-50')
-            # ]),
             html.Div(id='curve-ids', style={'display': 'none'},
                      children=sliced_plot_ids.to_json(date_format='iso',
                                                       orient='split')),
@@ -112,18 +113,20 @@ def display_combo_row(hoverdata, curve_ids):
     row = hoverdata['points'][0]['y']
     curve_row = next(curve_ids.query('orient == "row" and conc == @row').itertuples())
     curve = session.query(DoseResponseCurve).get(int(curve_row.id))
-    newline = '\n'
     return html.Div(className="mb-2 mt-2", children=[
-        html.H6(
-            [html.Em("Row"),
-             html.Strong(f" {curve_row.dosed_drug_name} titrated"),
-             html.Br(),
-             html.Strong(f"with {curve_row.fixed_drug_name} @ {row} µM")
-             ]),
+        html.H5("Row"),
+        html.P(
+            [
+                html.Span("Fixed: "),
+                html.Strong(f"{curve_row.fixed_drug_name} @ {row} µM"),
+                html.Br(),
+                html.Span("Titrated: "),
+                html.Strong(f"{curve_row.dosed_drug_name}"),
+            ]),
         curve.plot(display_datapoints=True, mark_auc=True,
                    label_auc=False, mark_ic50=True, label_ic50=True,
                    mark_emax=False, label_emax=False, label_rmse=True,
-                   # style={'height': '350px'}
+                   style={'height': '250px'}
     )
     ])
 
@@ -136,23 +139,23 @@ def display_combo_column(hoverdata, curve_ids):
     curve_ids = pd.read_json(curve_ids, orient='split')
     if not hoverdata:
         return ""
-    print(hoverdata)
     column = hoverdata['points'][0]['x']
     curve_col = next(
         curve_ids.query('orient == "column" and conc == @column').itertuples())
     curve = session.query(DoseResponseCurve).get(int(curve_col.id))
     return html.Div(className="mb-2 mt-2", children=[
-        html.H6(
-            [html.Em("Column"),
-             html.Strong(f" {curve_col.dosed_drug_name} titrated"),
+        html.H5("Column"),
+        html.P(
+            [
+             html.Span("Fixed: "), html.Strong(f"{curve_col.fixed_drug_name} @ {column} µM"),
              html.Br(),
-             html.Strong(f"with {curve_col.fixed_drug_name} @ {column} µM")
+             html.Span("Titrated: "), html.Strong(f"{curve_col.dosed_drug_name}"),
              ]),
 
         curve.plot(display_datapoints=True, mark_auc=True,
                    label_auc=False, mark_ic50=True, label_ic50=True,
                    mark_emax=False, label_emax=False, label_rmse=True,
-                   # style={'height': '350px'}
+                   style={'height': '250px'}
                    )
     ])
 
@@ -183,7 +186,7 @@ def update_viability_heatmap(viability_heatmap_zvalue, matrix_json, drug_names):
                 colorscale='Viridis'
             )
         ],
-        'layout': go.Layout(title=viability_heatmap_zvalue,
+        'layout': go.Layout(title=viability_heatmap_zvalue.capitalize(),
                             xaxis={'type': 'category',
                                    'title': drug1 + " µM"
                                    },
@@ -191,7 +194,7 @@ def update_viability_heatmap(viability_heatmap_zvalue, matrix_json, drug_names):
                                    'title': drug2 + " µM"
 
                                    },
-                            margin={'l': 100}
+                            margin={'l': 100, 't': 40}
                             )
     }
 
@@ -205,9 +208,6 @@ def update_viability_heatmap(viability_heatmap_zvalue, matrix_json, drug_names):
 def update_viability_surface(viability_heatmap_zvalue, matrix_json, drug_names):
     matrix_df = pd.read_json(matrix_json, orient='split')
     drug1, drug2 = drug_names.split(':_:')
-
-    xaxis_labels = [f"{conc:.2e}" for conc in matrix_df.lib1_conc]
-    yaxis_labels = [f"{conc:.2e}" for conc in matrix_df.lib2_conc]
 
     zvalues_table = matrix_df.pivot(index='lib2_conc', columns='lib1_conc', values=viability_heatmap_zvalue)
     zvalues_table = zvalues_table.sort_values(by=['lib2_conc'], ascending=0)
@@ -229,37 +229,23 @@ def update_viability_surface(viability_heatmap_zvalue, matrix_json, drug_names):
             )
         ],
         'layout': go.Layout(
-            margin=go.layout.Margin(
-                l=40,
-                r=40,
-                b=40,
-                t=40,
-                pad=10
-            ),
+            margin=go.layout.Margin(l=40, r=40, b=40, t=40),
             scene={
                 'xaxis': {
                     'type': 'category',
-                    'title': drug1 + ' µM',
-                    'ticktext': xaxis_labels,
-                    'tickvals': matrix_df.lib1_conc,
+                    'title': drug1,
+                    'showticklabels': False,
+
                     'titlefont': {
                         'size': 12
                     },
-                    'tickfont': {
-                        'size': 10
-                    }
                 },
                 'yaxis': {
                     'type': 'category',
-                    'title': drug2 + ' µM',
-                    'ticktext': yaxis_labels,
-                    'tickvals': matrix_df.lib2_conc,
-                    'titlefont': {
-                        'size': 12
-                    },
-                    'tickfont': {
-                        'size': 10
-                    }
+                    'title': drug2,
+                    'ticktext': None,
+                    'showticklabels': False,
+                    'titlefont': {'size': 12},
                 },
                 'zaxis': {
                     'range': (0, 1),
@@ -270,7 +256,8 @@ def update_viability_surface(viability_heatmap_zvalue, matrix_json, drug_names):
                     'tickfont': {
                         'size': 10
                     }
-                }
+                },
+                'camera': dict(eye=dict(x=1, y=-2, z=1.25)),
             }
         )
     }
