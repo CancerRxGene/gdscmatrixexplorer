@@ -109,14 +109,23 @@ def layout(matrix):
 
 
             ]),
+
             html.Div(className='col-3', children=[
-                html.Div(className='bg bg-light border pt-4 px-4 pb-1', children=[
-                    html.H3("Quick Navigation"),
+                html.Div(className='bg bg-light border pt-3 px-4 pb-3 mb-3', children=[
+                    html.H3("Summary"),
                     html.Hr(),
-                    replicate_links(matrix),
-                    links_to_other_models(matrix),
-                    links_to_other_combos(matrix)
-                ])
+                    html.Span("Fact 1: "), html.Strong("Value"), html.Br(),
+                    html.Span("Thing 2: "), html.Strong("Good", className='text-success'), html.Br(),
+                    html.Span("Measurement 3: "), html.Strong("Low", className="text-primary"), html.Br(),
+                ]),
+                html.Div(className='bg bg-light border pt-4 px-4 pb-1',
+                         children=[
+                             html.H3("Quick Navigation"),
+                             html.Hr(),
+                             replicate_links(matrix),
+                             links_to_other_models(matrix),
+                             links_to_other_combos(matrix)
+                         ])
             ])
         ]),
         html.Div(id='hidden-div', className='d-none')
