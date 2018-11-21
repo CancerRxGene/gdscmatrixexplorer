@@ -9,6 +9,6 @@ def infoblock(drug):
             html.Strong(drug.drug_name),
             html.Span(f" ({drug.target})")
         ]),
+        html.Hr(),
         html.P("Monotherapy response"),
-        html.Hr()
     ])

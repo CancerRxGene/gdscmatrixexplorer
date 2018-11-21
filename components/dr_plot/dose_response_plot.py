@@ -115,10 +115,10 @@ class DoseResponsePlot:
             mode='markers',
             name="measurement",
             marker=dict(
-                symbol=4,
-                color=C.LIGHTGREEN,
-                size=10,
-                line={"width": 1, "color": 'white'}),
+                symbol="x-thin-open",
+                color=C.DARKGREY,
+                size=7
+                ),
         )
 
     @property
