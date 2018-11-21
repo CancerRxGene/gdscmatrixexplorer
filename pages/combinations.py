@@ -21,6 +21,8 @@ def layout(project_slug, combination_drug_ids=None):
             .one()
     except sa.orm.exc.NoResultFound:
         return html.Div("Combination not found")
+    except sa.orm.exc.MultipleResultsFound:
+        return html.Div("Multiple results found for this combination - cannot display")
 
     try:
         project = session.query(Project).filter_by(slug=project_slug).one()
