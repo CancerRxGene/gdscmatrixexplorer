@@ -18,11 +18,11 @@ def layout(project_id):
         html.Div(
                 className="col-12 mt-2 mb-4",
                 children=[
-                    html.Label('Y-Axis', htmlFor='y-axis-select-boxplot'),
+                    html.Label('X-Axis', htmlFor='boxplot-value'),
                     dcc.Dropdown(
                         options=[{'label': c, 'value': c} for c in metrics],
                         value='Bliss_excess',
-                        id='y-axis-select-boxplot'
+                        id='boxplot-value'
                     )
                 ]
             ),
@@ -35,12 +35,12 @@ def layout(project_id):
 
 @app.callback(
     dash.dependencies.Output('project-boxplot', 'figure'),
-    [dash.dependencies.Input('y-axis-select-boxplot', 'value'),
+    [dash.dependencies.Input('boxplot-value', 'value'),
      dash.dependencies.Input('project-id', 'children')]
 )
-def update_boxplot(y_axis_field, project_id):
+def update_boxplot(boxplot_value, project_id):
 
-    all_matrices_query = session.query(getattr(MatrixResult, y_axis_field), MatrixResult.barcode, MatrixResult.cmatrix, MatrixResult.drugset_id, Combination.lib1_id, Combination.lib2_id)\
+    all_matrices_query = session.query(getattr(MatrixResult, boxplot_value), MatrixResult.barcode, MatrixResult.cmatrix, MatrixResult.drugset_id, Combination.lib1_id, Combination.lib2_id)\
         .join(Combination)\
         .filter(and_(MatrixResult.drugset_id == Combination.drugset_id,
                      MatrixResult.cmatrix == Combination.cmatrix))\
@@ -63,7 +63,7 @@ def update_boxplot(y_axis_field, project_id):
             go.Box(
                 # name=str(cm),
                 name=get_drug_names(summary, combo_id),
-                y=summary.query("combo_id == @combo_id")[y_axis_field],
+                x=summary.query("combo_id == @combo_id")[boxplot_value],
                 opacity=0.7,
                 boxpoints='all',
                 jitter=0.3,
@@ -74,14 +74,14 @@ def update_boxplot(y_axis_field, project_id):
                 customdata=[{"to": f"/matrix/{row.barcode}/{row.cmatrix}"}
                             for row in summary.query("combo_id == @combo_id").itertuples(index=False)],
                 hoveron='points'
-            ) for combo_id in summary.combo_id.unique()
+            ) for combo_id in reversed(sorted(summary.combo_id.unique(), key=lambda x: get_drug_names(summary, x)))
         ],
         'layout': go.Layout(
-            height=500,
-            margin=dict(l=50, r=70, b=80, t=20),
+            height=1000,
+            margin=dict(l=150, r=70, b=80, t=20),
             showlegend=False,
-            yaxis={'type': 'log' if 'index' in y_axis_field else 'linear',
-                   'title': y_axis_field.replace('_', ' ')}
+            xaxis={'type': 'log' if 'index' in boxplot_value else 'linear',
+                   'title': boxplot_value.replace('_', ' ')}
         )
     }
 

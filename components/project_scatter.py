@@ -129,7 +129,7 @@ def update_scatter(x_axis_field, y_axis_field, color_field, project_id):
             )
         ],
         'layout': go.Layout(
-            height=500,
+            height=750,
             hovermode='closest',
             xaxis={'type': 'log' if 'index' in x_axis_field else 'linear',
                    'title': x_axis_field.replace('_', ' ')},
