@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+'''
+!!! Run this program using gdscmatrixexplorer/cli.py !!!
+'''
+
 import json
 import re
 import time
@@ -331,12 +335,4 @@ def sa_wells_to_db(wells):
 
 
 if __name__ == '__main__':
-
-    # combo_matrix_stats = "data/combo_matrix_statistics_GDSC_007-A_22Oct18_2049.csv"
-    # combo_well_stats = "data/combo_well_statistics_GDSC_007-A_22Oct18_1534.csv"
-    # nlme_stats = "data/nlme_stats_matrix_fit_GDSC_007-A_28Sep18_1543.csv.bz2"
-    combo_matrix_stats = "/Volumes/team215_pipeline/Curve_fitting/GDSC_007-A/combinations/combo_matrix_statistics_GDSC_007-A_22Oct18_2049.csv"
-    combo_well_stats = "/Volumes/team215_pipeline/Curve_fitting/GDSC_007-A/combinations/combo_well_statistics_GDSC_007-A_22Oct18_1534.csv"
-    nlme_stats = "/Volumes/team215_pipeline/Curve_fitting/GDSC_007-A/combinations/nlme_stats_matrix_fit_GDSC_007-A_06Nov18_1120.csv"
-
-    upload_project(combo_matrix_stats, combo_well_stats, nlme_stats, "GDSC_007")
+    print("!!! Run this program using gdscmatrixexplorer/cli.py !!!")
