@@ -8,7 +8,7 @@ import requests
 from app import app
 from components.matrix_navigation import replicate_links, links_to_other_models, \
     links_to_other_combos
-from components.single_agent.info import infoblock, infoblock_curve
+from components.single_agent.info import infoblock
 
 
 def layout(matrix):
@@ -90,10 +90,8 @@ def layout(matrix):
                             id=f"drug-info-{drug1.id}",
                             className="bg-white pt-4 px-4 pb-1 border border-info h-100",
                             children=[
-                                infoblock_curve(drug1, curve1),
-                                curve1.plot(mark_auc=False, label_auc=False, mark_ic50=False,
-                                            label_ic50=False, mark_emax=False,
-                                            label_emax=False, label_rmse=False, style={'maxHeight': '250px'})
+                                infoblock(drug1),
+                                curve1.plot(style={'maxHeight': '250px'})
                             ]
                         ),
                     ]),

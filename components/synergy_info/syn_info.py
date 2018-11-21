@@ -35,7 +35,7 @@ def infoblock_matrix(matrix_result):
                 html.Tr([
                     html.Td([html.Strong(f"Average in {matrix_result.HSA_excess_well_count} wells with excess > 0")]),
                     html.Td([html.Span(round(matrix_result.HSA_excess_syn, 3))])
-                ]),
+                ]) if matrix_result.HSA_excess_syn else ''
             ])
         ], className="pb-2"),
         html.Div([
@@ -49,7 +49,7 @@ def infoblock_matrix(matrix_result):
                     html.Td([html.Span(
                         html.Strong(f"Average in {matrix_result.Bliss_excess_well_count} wells with excess > 0"))]),
                     html.Td([html.Span(round(matrix_result.Bliss_excess_syn, 3))])
-                ])
+                ]) if matrix_result.Bliss_excess_syn else ''
             ])
         ], className="pl-0, pb-2"),
 
