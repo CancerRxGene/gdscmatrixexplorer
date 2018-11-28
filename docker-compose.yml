@@ -3,6 +3,8 @@ services:
   web:
     # replace username/repo:tag with your name and image details
     image: registry.production.team215.sanger.ac.uk/matrixexplorer:staging
+    env_file:
+      - matrix_env.env
     deploy:
       replicas: 1
       # labels are needed for traefik
