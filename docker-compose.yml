@@ -1,0 +1,20 @@
+version: "3"
+services:
+  web:
+    # replace username/repo:tag with your name and image details
+    image: registry.production.team215.sanger.ac.uk/matrixexplorer:staging
+    deploy:
+      replicas: 1
+      # labels are needed for traefik
+      labels:
+        # Traefik will redirect requests to this service
+        - "traefik.api.frontend.rule=Host:matrixexplorer.staging.team215.sanger.ac.uk"
+        - "traefik.api.port=8080"
+        - "traefik.docker.network=traefik_net"
+        - "traefik.frontend.entryPoints=http"
+    networks:
+      - traefik_net
+networks:
+  traefik_net:
+    # network already exists and is not created in this compose file
+    external: true
