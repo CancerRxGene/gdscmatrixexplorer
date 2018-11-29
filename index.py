@@ -2,11 +2,18 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
 import dash_table_experiments as dt
+import dash_auth
+import os
 
 from app import app
 from pages import project, home, matrix, combinations
 from components import project_scatter
 from page_components import header
+
+user = os.getenv('MATRIXEXPLORER_USER')
+password = os.getenv('MATRIXEXPLORER_PASSWD')
+
+auth = dash_auth.BasicAuth(app, [[user, password]])
 
 app.layout = html.Div([
         dcc.Location(id='url', refresh=True),
