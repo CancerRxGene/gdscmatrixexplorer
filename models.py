@@ -59,22 +59,27 @@ class Drug(ToDictMixin, Base):
 @generic_repr
 class Combination(ToDictMixin, Base):
     __tablename__ = 'combinations'
-    drugset_id = sa.Column(sa.Integer, primary_key=True)
-    cmatrix = sa.Column(sa.Integer, primary_key=True)
 
-    lib1_id = sa.Column(sa.Integer, sa.ForeignKey(Drug.id), nullable=False,
-                        index=True)
-    lib2_id = sa.Column(sa.Integer, sa.ForeignKey(Drug.id), nullable=False,
-                        index=True)
-    matrix_size = sa.Column(sa.Integer)
+    # id = sa.Column(sa.Integer, primary_key=True)
 
-    lib1_tag = sa.Column(sa.String)
-    lib2_tag = sa.Column(sa.String)
+    project_id = sa.Column(sa.Integer, primary_key=True)
+
+    # drugset_id = sa.Column(sa.Integer, primary_key=True)
+    # cmatrix = sa.Column(sa.Integer, primary_key=True)
+
+    lib1_id = sa.Column(sa.Integer, sa.ForeignKey(Drug.id), primary_key=True,
+                        index=True)
+    lib2_id = sa.Column(sa.Integer, sa.ForeignKey(Drug.id), primary_key=True,
+                        index=True)
+    # matrix_size = sa.Column(sa.Integer)
+    #
+    # lib1_tag = sa.Column(sa.String)
+    # lib2_tag = sa.Column(sa.String)
 
     lib1 = relationship(Drug, foreign_keys=[lib1_id])
     lib2 = relationship(Drug, foreign_keys=[lib2_id])
 
-    matrices = relationship("MatrixResult", lazy='dynamic')
+    matrices = relationship("MatrixResult", lazy='dynamic', back_populates='combination')
 
     @property
     def replicates_query(self):
@@ -102,6 +107,9 @@ class MatrixResult(ToDictMixin, Base):
     barcode = sa.Column(sa.Integer, nullable=False, primary_key=True)
     drugset_id = sa.Column(sa.Integer, nullable=False, primary_key=True)
     cmatrix = sa.Column(sa.Integer, nullable=False, primary_key=True)
+
+    lib1_id = sa.Column(sa.Integer, sa.ForeignKey(Drug.id), nullable=False, index=True)
+    lib2_id = sa.Column(sa.Integer, sa.ForeignKey(Drug.id), nullable=False, index=True)
 
     model_id = sa.Column(sa.String, sa.ForeignKey(Model.id), nullable=False,
                          index=True)
@@ -132,11 +140,20 @@ class MatrixResult(ToDictMixin, Base):
     lib1_delta_max_effect = sa.Column(sa.Float)
     lib2_delta_max_effect = sa.Column(sa.Float)
 
-    combination = relationship("Combination", back_populates='matrices')
+    # project = relationship("Project", back_populates='matrices',
+    #                        primaryjoin="Project.id == foreign(MatrixResult.project_id)")
+    combination = relationship("Combination", back_populates='matrices',
+                               primaryjoin="and_(and_(Combination.project_id == MatrixResult.project_id, "
+                                           "Combination.lib1_id == MatrixResult.lib1_id),"
+                                           "Combination.lib2_id == MatrixResult.lib2_id)",
+                               viewonly=True)
+
+    project = relationship("Project", back_populates='matrices')
+    # combinations = relationship("Combination", back_populates='matrices')
+
     well_results = relationship("WellResult")
     combination_curves = relationship("DoseResponseCurve")
     model = relationship("Model")
-    project = relationship("Project", back_populates='matrices')
 
     @property
     def single_agent_curves(self):
@@ -160,9 +177,12 @@ class MatrixResult(ToDictMixin, Base):
     def project_replicates_query(self):
         return sa.orm.object_session(self).query(MatrixResult)\
             .filter(MatrixResult.model_id == self.model_id)\
-            .filter(MatrixResult.drugset_id == self.drugset_id)\
-            .filter(MatrixResult.cmatrix == self.cmatrix) \
-            .filter(MatrixResult.project_id == self.project_id)
+            .filter(MatrixResult.project_id == self.project_id)\
+            .filter(MatrixResult.lib1_id == self.lib1_id)\
+            .filter(MatrixResult.lib2_id == self.lib2_id)
+
+    # .filter(MatrixResult.drugset_id == self.drugset_id)\
+    # .filter(MatrixResult.cmatrix == self.cmatrix)\
 
     @property
     def project_replicates(self):
@@ -178,7 +198,8 @@ class MatrixResult(ToDictMixin, Base):
             .join(Combination) \
             .filter(
                 sa.and_(
-                    Combination.drugset_id == al_reps.drugset_id,
+                    Combination.project_id == al_reps.project_id,
+                    # Combination.drugset_id == al_reps.drugset_id,
                     Combination.cmatrix == al_reps.cmatrix
                 ))\
             .filter(MatrixResult.model_id == self.model_id)
@@ -188,9 +209,13 @@ class MatrixResult(ToDictMixin, Base):
         return self.all_replicates_query.all()
 
 
-    __table_args__ = (sa.ForeignKeyConstraint(
-        [drugset_id, cmatrix], [Combination.drugset_id, Combination.cmatrix]), {}
+    __table_args__ = (
+        sa.ForeignKeyConstraint(
+            [project_id, lib1_id, lib2_id], [Combination.project_id, Combination.lib1_id, Combination.lib2_id]), {}
     )
+        # [drugset_id, cmatrix], [Combination.drugset_id, Combination.cmatrix]), {}
+
+    # )
 
 
 @generic_repr
