@@ -33,29 +33,31 @@ def layout(project_slug, combination_drug_ids=None):
 
     # We need the single agent IC50s for the MM plot
     dr_curves_query = session.query(
-            DoseResponseCurve.dosed_tag,
-            DoseResponseCurve.ic50,
-            DoseResponseCurve.barcode) \
-        .filter(
-            DoseResponseCurve.treatment_type == 'S',
-            DoseResponseCurve.dosed_tag.in_([
-                combination.lib1_tag,
-                combination.lib2_tag]),
-            DoseResponseCurve.drugset_id == combination.drugset_id
-        )
+        DoseResponseCurve.lib1_id,
+        DoseResponseCurve.ic50,
+        DoseResponseCurve.barcode)\
+        .filter(DoseResponseCurve.treatment_type == 'S', DoseResponseCurve.project_id == combination.project_id)\
+        .filter(sa.or_(DoseResponseCurve.lib1_id == combination.lib1_id, DoseResponseCurve.lib1_id == combination.lib2_id)
+                )
 
-    all_dr_curves = pd.read_sql(dr_curves_query.statement, session.bind)
+    all_dr_curves = pd.read_sql(dr_curves_query.statement, session.bind).rename(columns={'lib1_id' : 'drug_id'})
 
-    all_matrices = pd.read_sql(combination.matrices.statement, session.bind)\
-        .assign(**{'lib1_tag': combination.lib1_tag,
-                   'lib2_tag': combination.lib2_tag,
-                   'lib1_name': combination.lib1.drug_name,
-                   'lib2_name': combination.lib2.drug_name})\
-        .merge(all_dr_curves, left_on=['barcode', 'lib1_tag'],
-               right_on=['barcode', 'dosed_tag'])\
-        .merge(all_dr_curves, left_on=['barcode', 'lib2_tag'],
-               right_on=['barcode', 'dosed_tag'], suffixes=['_lib1', '_lib2'])\
-        .merge(all_cell_models, left_on=['model_id'], right_on=['id'])
+    all_matrices = pd.read_sql(combination.matrices.statement, session.bind) \
+        .assign(**{'lib1_name': combination.lib1.drug_name,
+                   'lib2_name': combination.lib2.drug_name}) \
+        .merge(right=all_dr_curves, left_on=['barcode', 'lib1_id'], right_on=['barcode', 'drug_id']) \
+        .merge(right=all_dr_curves, how='left', left_on=['barcode', 'lib2_id'], right_on=['barcode', 'drug_id'], suffixes=['_lib1', '_lib2']) \
+        .merge(all_cell_models, left_on=['model_id'], right_on=['id'])\
+        .drop(columns=['drug_id_lib1', 'drug_id_lib2'])
+        # .assign(**{'lib1_tag': combination.lib1_tag,
+        #            'lib2_tag': combination.lib2_tag,
+        #            'lib1_name': combination.lib1.drug_name,
+        #            'lib2_name': combination.lib2.drug_name})\
+        # .merge(all_dr_curves, left_on=['barcode', 'lib1_tag'],
+        #        right_on=['barcode', 'dosed_tag'])\
+        # .merge(all_dr_curves, left_on=['barcode', 'lib2_tag'],
+        #        right_on=['barcode', 'dosed_tag'], suffixes=['_lib1', '_lib2'])\
+        # .merge(all_cell_models, left_on=['model_id'], right_on=['id'])
 
     return html.Div([
         crumbs([("Home", "/"), (project.name, f"/project/{project.slug}"),
