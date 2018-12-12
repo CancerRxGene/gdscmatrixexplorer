@@ -20,6 +20,7 @@ class Project(ToDictMixin, Base):
     name = sa.Column(sa.String, unique=True)
     slug = sa.Column(sa.String, unique=True)
     matrices = relationship("MatrixResult", back_populates='project')
+    dose_responses = relationship("DoseResponseCurve")
 
     @property
     def combinations(self):
@@ -162,15 +163,15 @@ class MatrixResult(ToDictMixin, Base):
                 DoseResponseCurve.barcode == self.barcode,
                 DoseResponseCurve.treatment_type == 'S',
                 DoseResponseCurve.dosed_tag.in_([
-                    self.combination.lib1_tag,
-                    self.combination.lib2_tag])
+                    self.combination.lib1_id,
+                    self.combination.lib2_id])
                 ).all()
 
     @property
     def drugs(self):
         return {
-            self.combination.lib1_tag: self.combination.lib1,
-            self.combination.lib2_tag: self.combination.lib2
+            self.combination.lib1_id: self.combination.lib1,
+            self.combination.lib2_id: self.combination.lib2
         }
 
     @property
@@ -271,6 +272,9 @@ class DoseResponseCurve(ToDictMixin, Base):
     barcode = sa.Column(sa.Integer, nullable=False)
     cmatrix = sa.Column(sa.Integer, nullable=True)
     drugset_id = sa.Column(sa.Integer, nullable=False)
+    project_id = sa.Column(sa.Integer, sa.ForeignKey(Project.id), nullable=False, index=True)
+    lib1_id = sa.Column(sa.Integer, nullable=False)
+    lib2_id = sa.Column(sa.Integer, nullable=True)
     fixed_tag = sa.Column(sa.String, nullable=True)
     fixed_dose = sa.Column(sa.String, nullable=True)
     dosed_tag = sa.Column(sa.String, nullable=False)

@@ -48,22 +48,22 @@ def upload_project(combo_matrix_stats_path: str,
     matrix_results = extract_matrix_results(combo_matrix_stats)
     matrix_results = add_model_id(matrix_results, models, 'cosmic_id')
     matrix_results = add_project_id(matrix_results, project)
-    # add_combo_id(matrix_results, ) ??
     matrix_results_to_db(matrix_results)
-    #
-    # valid_barcodes = set(matrix_results.barcode)
-    #
-    # well_results = extract_well_results(combo_well_stats)
-    # well_results = well_results[well_results.barcode.isin(valid_barcodes)]
-    # well_results_to_db(well_results)
-    #
-    # dr_curves = extract_dose_response_curves(nlme_stats)
-    # dr_curves = dr_curves[dr_curves.barcode.isin(valid_barcodes)]
-    # dr_curves_to_db(dr_curves)
-    #
-    # sa_wells = extract_single_agent_wells(nlme_stats)
-    # sa_wells = sa_wells[sa_wells.barcode.isin(valid_barcodes)]
-    # sa_wells_to_db(sa_wells)
+
+    valid_barcodes = set(matrix_results.barcode)
+
+    well_results = extract_well_results(combo_well_stats)
+    well_results = well_results[well_results.barcode.isin(valid_barcodes)]
+    well_results_to_db(well_results)
+
+    dr_curves = extract_dose_response_curves(nlme_stats)
+    dr_curves = dr_curves[dr_curves.barcode.isin(valid_barcodes)]
+    dr_curves = add_project_id(dr_curves, project)
+    dr_curves_to_db(dr_curves)
+
+    sa_wells = extract_single_agent_wells(nlme_stats)
+    sa_wells = sa_wells[sa_wells.barcode.isin(valid_barcodes)]
+    sa_wells_to_db(sa_wells)
 
 
 def get_project(project_name):
@@ -302,16 +302,20 @@ def well_results_to_db(well_results):
 def extract_dose_response_curves(nlme_stats):
     dr_curves = nlme_stats[
         ['fitted_treatment', 'treatment_type', 'BARCODE', 'cmatrix',
-         'DRUGSET_ID', 'xmid', 'scal', 'RMSE', 'IC50', 'auc', 'Emax', 'maxc', 'minc']
+         'DRUGSET_ID', 'DRUG_ID_lib',  'treatment', 'xmid', 'scal', 'RMSE', 'IC50', 'auc', 'Emax', 'maxc', 'minc']
     ]\
         .drop_duplicates()
-    dr_curves[['fixed_tag', 'fixed_dose', 'dosed_tag']] = \
-        dr_curves.fitted_treatment.str.extract(
-            '(?:(?P<fixed_tag>[A-Z][0-9]+)(?P<fixed_dose>D[0-9]+)-)?(?P<dosed_tag>[A-Z][0-9]+)$',
-            expand=True)
-    del dr_curves['fitted_treatment']
 
     dr_curves.columns = [c.lower() for c in dr_curves.columns]
+
+    dr_curves[['fixed_tag', 'fixed_dose', 'dosed_tag']] = \
+        dr_curves.fitted_treatment.str.extract(
+            '(?:(?P<fixed_tag>[A,L][0-9]+)(?P<fixed_dose>D[0-9]+)-)?(?P<dosed_tag>[A,L][0-9]+)$',
+            expand=True)
+    dr_curves[['lib1_id', 'lib2_id']] = dr_curves.drug_id_lib.str.split("|", n=2, expand=True)
+
+    del dr_curves['fitted_treatment']
+    del dr_curves['drug_id_lib']
 
     return dr_curves
 
