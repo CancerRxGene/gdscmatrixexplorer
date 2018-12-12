@@ -40,10 +40,11 @@ def layout(project_id):
 )
 def update_boxplot(boxplot_value, project_id):
 
-    all_matrices_query = session.query(getattr(MatrixResult, boxplot_value), MatrixResult.barcode, MatrixResult.cmatrix, MatrixResult.drugset_id, Combination.lib1_id, Combination.lib2_id)\
+    all_matrices_query = session.query(MatrixResult.project_id, getattr(MatrixResult, boxplot_value), MatrixResult.barcode, MatrixResult.cmatrix, Combination.lib1_id, Combination.lib2_id)\
         .join(Combination)\
-        .filter(and_(MatrixResult.drugset_id == Combination.drugset_id,
-                     MatrixResult.cmatrix == Combination.cmatrix))\
+        .filter(and_(MatrixResult.project_id == Combination.project_id,
+                     MatrixResult.lib1_id == Combination.lib1_id,
+                     MatrixResult.lib2_id == Combination.lib2_id))\
         .filter(MatrixResult.project_id == int(project_id))
 
     summary = pd.read_sql(all_matrices_query.statement, all_matrices_query.session.bind)
@@ -52,7 +53,7 @@ def update_boxplot(boxplot_value, project_id):
 
     summary = summary.merge(all_drugs, left_on='lib1_id', right_on='id')\
         .merge(all_drugs, left_on='lib2_id', right_on='id', suffixes=['_lib1', '_lib2'])
-    summary['combo_id'] = summary.cmatrix.astype(str) + "::" + summary.drugset_id.astype(str)
+    summary['combo_id'] = summary.project_id.astype(str) + "::" + summary.lib1_id.astype(str) + "::" + summary.lib2_id.astype(str)
 
     def get_drug_names(summary, combo_id):
         row = next(summary.drop_duplicates(subset=['combo_id']).query("combo_id == @combo_id").itertuples())
