@@ -13,9 +13,9 @@ from components.single_agent.info import infoblock
 
 def layout(matrix):
     curve1 = matrix.single_agent_curves[0]
-    drug1 = matrix.drugs[curve1.dosed_tag]
+    drug1 = matrix.drugs[matrix.lib1_id]
     curve2 = matrix.single_agent_curves[1]
-    drug2 = matrix.drugs[curve2.dosed_tag]
+    drug2 = matrix.drugs[matrix.lib2_id]
     model = matrix.model
 
     try:

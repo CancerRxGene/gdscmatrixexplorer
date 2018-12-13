@@ -221,6 +221,7 @@ def extract_matrix_results(combo_matrix_stats):
     matrix_results = combo_matrix_stats[
         ["COSMIC_ID", "DRUGSET_ID", "cmatrix", "BARCODE",
          'lib1_drug_id', 'lib2_drug_id',
+         'lib1', 'lib2',
          'combo_max_effect',
          'lib1_max_effect', 'lib2_max_effect'] + hsa_wells + bliss_wells]
 
@@ -231,6 +232,8 @@ def extract_matrix_results(combo_matrix_stats):
             "BARCODE": "barcode",
             "lib1_drug_id": "lib1_id",
             "lib2_drug_id": "lib2_id",
+            "lib1": "lib1_tag",
+            "lib2": "lib2_tag",
             "HSA_excess_matrix": "HSA_excess",
             "HSA_excess_matrix_synergy_only": "HSA_excess_syn",
             "HSA_excess_synergistic_wells": "HSA_excess_well_count",
