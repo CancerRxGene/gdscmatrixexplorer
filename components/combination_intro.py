@@ -58,20 +58,20 @@ def layout(combination):
                                 ], className="table-borderless")
                             ]),
                             html.Div(className="col-3", children=[
-                                html.Table(children=[
-                                    html.Tr([
-                                        html.Td(html.Strong("Drugset")),
-                                        html.Td(combination.drugset_id)
-                                    ]),
-                                    html.Tr([
-                                        html.Td([html.Strong("Matrix id")]),
-                                        html.Td(combination.cmatrix)
-                                    ]),
-                                    html.Tr([
-                                        html.Td([html.Strong("Matrix size")]),
-                                        html.Td(combination.matrix_size)
-                                    ])
-                                ], className="table-borderless")
+                                # html.Table(children=[
+                                #     html.Tr([
+                                #         html.Td(html.Strong("Drugset")),
+                                #         html.Td(combination.drugset_id)
+                                #     ]),
+                                #     html.Tr([
+                                #         html.Td([html.Strong("Matrix id")]),
+                                #         html.Td(combination.cmatrix)
+                                #     ]),
+                                #     html.Tr([
+                                #         html.Td([html.Strong("Matrix size")]),
+                                #         html.Td(combination.matrix_size)
+                                #     ])
+                                # ], className="table-borderless")
                             ])
                         ])
                     ])

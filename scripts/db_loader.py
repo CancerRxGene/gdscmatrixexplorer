@@ -42,8 +42,9 @@ def upload_project(combo_matrix_stats_path: str,
     add_new_drugs(combo_matrix_stats)
 
     drug_matrices = extract_drug_matrices(combo_matrix_stats)
+    drug_matrices = add_project_id(drug_matrices, project)
     drug_matrices_to_db(drug_matrices)
-
+    #
     matrix_results = extract_matrix_results(combo_matrix_stats)
     matrix_results = add_model_id(matrix_results, models, 'cosmic_id')
     matrix_results = add_project_id(matrix_results, project)
@@ -57,6 +58,7 @@ def upload_project(combo_matrix_stats_path: str,
 
     dr_curves = extract_dose_response_curves(nlme_stats)
     dr_curves = dr_curves[dr_curves.barcode.isin(valid_barcodes)]
+    dr_curves = add_project_id(dr_curves, project)
     dr_curves_to_db(dr_curves)
 
     sa_wells = extract_single_agent_wells(nlme_stats)
@@ -203,11 +205,8 @@ def drugs_to_db(drugs):
 
 
 def extract_drug_matrices(combo_matrix_stats):
-    drug_matrix = combo_matrix_stats[["DRUGSET_ID", "cmatrix", "lib1",
-                                      "lib1_drug_id", "lib2", "lib2_drug_id",
-                                      "matrix_size"]]
-    drug_matrix.columns = ["drugset_id", "cmatrix", "lib1_tag", "lib1_id",
-                           "lib2_tag", "lib2_id", "matrix_size"]
+    drug_matrix = combo_matrix_stats[["lib1", "lib1_drug_id", "lib2", "lib2_drug_id",                                "matrix_size"]]
+    drug_matrix.columns = ["lib1_tag", "lib1_id", "lib2_tag", "lib2_id", "matrix_size"]
     return drug_matrix.drop_duplicates()
 
 
@@ -220,7 +219,10 @@ def extract_matrix_results(combo_matrix_stats):
     bliss_wells = [c for c in combo_matrix_stats.columns if c.startswith("Bliss")]
 
     matrix_results = combo_matrix_stats[
-        ["COSMIC_ID", "DRUGSET_ID", "cmatrix", "BARCODE", 'combo_max_effect',
+        ["COSMIC_ID", "DRUGSET_ID", "cmatrix", "BARCODE",
+         'lib1_drug_id', 'lib2_drug_id',
+         'lib1', 'lib2',
+         'combo_max_effect',
          'lib1_max_effect', 'lib2_max_effect'] + hsa_wells + bliss_wells]
 
     matrix_results = matrix_results.rename(
@@ -228,6 +230,10 @@ def extract_matrix_results(combo_matrix_stats):
             "COSMIC_ID": "cosmic_id",
             "DRUGSET_ID": "drugset_id",
             "BARCODE": "barcode",
+            "lib1_drug_id": "lib1_id",
+            "lib2_drug_id": "lib2_id",
+            "lib1": "lib1_tag",
+            "lib2": "lib2_tag",
             "HSA_excess_matrix": "HSA_excess",
             "HSA_excess_matrix_synergy_only": "HSA_excess_syn",
             "HSA_excess_synergistic_wells": "HSA_excess_well_count",
@@ -299,16 +305,20 @@ def well_results_to_db(well_results):
 def extract_dose_response_curves(nlme_stats):
     dr_curves = nlme_stats[
         ['fitted_treatment', 'treatment_type', 'BARCODE', 'cmatrix',
-         'DRUGSET_ID', 'xmid', 'scal', 'RMSE', 'IC50', 'auc', 'Emax', 'maxc', 'minc']
+         'DRUGSET_ID', 'DRUG_ID_lib',  'treatment', 'xmid', 'scal', 'RMSE', 'IC50', 'auc', 'Emax', 'maxc', 'minc']
     ]\
         .drop_duplicates()
-    dr_curves[['fixed_tag', 'fixed_dose', 'dosed_tag']] = \
-        dr_curves.fitted_treatment.str.extract(
-            '(?:(?P<fixed_tag>[A-Z][0-9]+)(?P<fixed_dose>D[0-9]+)-)?(?P<dosed_tag>[A-Z][0-9]+)$',
-            expand=True)
-    del dr_curves['fitted_treatment']
 
     dr_curves.columns = [c.lower() for c in dr_curves.columns]
+
+    dr_curves[['fixed_tag', 'fixed_dose', 'dosed_tag']] = \
+        dr_curves.fitted_treatment.str.extract(
+            '(?:(?P<fixed_tag>[A,L][0-9]+)(?P<fixed_dose>D[0-9]+)-)?(?P<dosed_tag>[A,L][0-9]+)$',
+            expand=True)
+    dr_curves[['lib1_id', 'lib2_id']] = dr_curves.drug_id_lib.str.split("|", n=2, expand=True)
+
+    del dr_curves['fitted_treatment']
+    del dr_curves['drug_id_lib']
 
     return dr_curves
 

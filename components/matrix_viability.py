@@ -30,21 +30,21 @@ def layout(matrix: MatrixResult):
 
     dose_conc_map = pd.concat([dose_conc_cols, dose_conc_rows])
 
+    drug1 = matrix.combination.lib1.drug_name
+    drug2 = matrix.combination.lib2.drug_name
+
     sliced_plot_ids = pd.DataFrame([
         {'id': c.id,
-         'orient': 'column' if c.fixed_tag == matrix.combination.lib1_tag else 'row',
+         'orient': 'column' if c.fixed_tag == matrix.lib1_tag else 'row',
          'position': c.fixed_dose[1:],
-         'fixed_drug_name': matrix.drugs[c.fixed_tag].drug_name,
-         'dosed_drug_name': matrix.drugs[c.dosed_tag].drug_name
+         'fixed_drug_name': drug1 if matrix.lib1_tag == c.fixed_tag else drug2,
+         'dosed_drug_name': drug2 if matrix.lib1_tag == c.dosed_tag else drug1
          }
         for c in matrix.combination_curves])
 
     sliced_plot_ids = pd.merge(sliced_plot_ids, dose_conc_map, on=['position', 'orient'])
 
     available_viability_metrics = ['viability', 'inhibition']
-
-    drug1 = matrix.combination.lib1.drug_name
-    drug2 = matrix.combination.lib2.drug_name
 
     matrix_df = matrix_df.assign(inhibition=lambda df: 1 - df.viability)
 

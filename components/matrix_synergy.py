@@ -14,8 +14,8 @@ def layout(matrix):
     available_combo_metrics = ["HSA_excess", "Bliss_excess", "HSA",
                                "Bliss_additivity", "Bliss_index", "Loewe_index"]
 
-    drug1 = matrix.drugs[matrix.combination.lib1_tag].drug_name
-    drug2 = matrix.drugs[matrix.combination.lib2_tag].drug_name
+    drug1 = matrix.combination.lib1.drug_name
+    drug2 = matrix.combination.lib2.drug_name
 
     matrix_df = pd.DataFrame([w.to_dict() for w in matrix.well_results])
 

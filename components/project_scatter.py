@@ -73,7 +73,7 @@ def layout(project_id):
      dash.dependencies.Input('color-select', 'value'),
      dash.dependencies.Input('project-id', 'children')])
 def update_scatter(x_axis_field, y_axis_field, color_field, project_id):
-    all_matrices_query = session.query(
+    all_matrices_query = session.query(MatrixResult.project_id,
         getattr(MatrixResult, x_axis_field),
         getattr(MatrixResult, y_axis_field),
         MatrixResult.barcode, MatrixResult.cmatrix, MatrixResult.drugset_id,
@@ -82,8 +82,9 @@ def update_scatter(x_axis_field, y_axis_field, color_field, project_id):
     ) \
         .join(Combination) \
         .join(Model) \
-        .filter(and_(MatrixResult.drugset_id == Combination.drugset_id,
-                     MatrixResult.cmatrix == Combination.cmatrix)) \
+        .filter(and_(MatrixResult.project_id == Combination.project_id,
+                     MatrixResult.lib1_id == Combination.lib1_id,
+                     MatrixResult.lib2_id == Combination.lib2_id)) \
         .filter(MatrixResult.model_id == Model.id) \
         .filter(MatrixResult.project_id == int(project_id))
 
@@ -95,8 +96,8 @@ def update_scatter(x_axis_field, y_axis_field, color_field, project_id):
     summary = summary.merge(all_drugs, left_on='lib1_id', right_on='id') \
         .merge(all_drugs, left_on='lib2_id', right_on='id',
                suffixes=['_lib1', '_lib2'])
-    summary['combo_id'] = summary.cmatrix.astype(
-        str) + "::" + summary.drugset_id.astype(str)
+    summary['combo_id'] = summary.project_id.astype(str) + "::" + summary.lib1_id.astype(str) + "::" + summary.lib2_id.astype(str)
+
 
     color_values = {}
     if color_field != 'default':
