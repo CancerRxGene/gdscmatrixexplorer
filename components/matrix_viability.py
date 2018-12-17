@@ -17,12 +17,14 @@ def layout(matrix: MatrixResult):
     matrix_df['lib2_conc'] = [np.format_float_scientific(conc, 3) for conc in matrix_df['lib2_conc']]
 
     dose_conc_cols = matrix_df[['lib1_conc', 'lib1_dose']].drop_duplicates()
+
     dose_conc_cols = dose_conc_cols.assign(position=[dose[1:] for dose in dose_conc_cols['lib1_dose']])
     dose_conc_cols = dose_conc_cols.assign(orient='column')
     dose_conc_cols = dose_conc_cols.rename(index=str, columns={"lib1_conc": "conc"})
     dose_conc_cols = dose_conc_cols[['position', 'orient', 'conc']]
 
     dose_conc_rows = matrix_df[['lib2_conc', 'lib2_dose']].drop_duplicates()
+
     dose_conc_rows = dose_conc_rows.assign(position=[dose[1:] for dose in dose_conc_rows['lib2_dose']])
     dose_conc_rows = dose_conc_rows.assign(orient='row')
     dose_conc_rows = dose_conc_rows.rename(index=str, columns={"lib2_conc": "conc"})
@@ -170,9 +172,10 @@ def update_viability_heatmap(viability_heatmap_zvalue, matrix_json, drug_names):
     matrix_df = pd.read_json(matrix_json, orient='split')
     drug1, drug2 = drug_names.split(':_:')
 
+    # sort the data frame before the conc convert to scientific notation
+    matrix_df = matrix_df.sort_values(['lib1_conc', 'lib2_conc'])
     matrix_df['lib1_conc'] = [np.format_float_scientific(conc, 3) for conc in matrix_df['lib1_conc']]
     matrix_df['lib2_conc'] = [np.format_float_scientific(conc, 3) for conc in matrix_df['lib2_conc']]
-
     zvalue = matrix_df[viability_heatmap_zvalue]
 
     return {
@@ -183,7 +186,9 @@ def update_viability_heatmap(viability_heatmap_zvalue, matrix_json, drug_names):
                 z=zvalue,
                 zmax=1,
                 zmin=0,
-                colorscale='Viridis'
+                colorscale='Bluered',
+                reversescale=True
+
             )
         ],
         'layout': go.Layout(title=viability_heatmap_zvalue.capitalize(),
@@ -210,11 +215,13 @@ def update_viability_surface(viability_heatmap_zvalue, matrix_json, drug_names):
     drug1, drug2 = drug_names.split(':_:')
 
     zvalues_table = matrix_df.pivot(index='lib2_conc', columns='lib1_conc', values=viability_heatmap_zvalue)
-    zvalues_table = zvalues_table.sort_values(by=['lib2_conc'], ascending=0)
+
+    # change lib2_conc ascending to 1
+    zvalues_table = zvalues_table.sort_values(by=['lib2_conc'], ascending=1)
     lib1_conc_table = matrix_df.pivot(index='lib2_conc', columns='lib1_conc', values='lib1_conc')
-    lib1_conc_table = lib1_conc_table.sort_values(by=['lib2_conc'], ascending=0)
+    lib1_conc_table = lib1_conc_table.sort_values(by=['lib2_conc'], ascending=1)
     lib2_conc_table = matrix_df.pivot(index='lib2_conc', columns='lib1_conc', values='lib2_conc')
-    lib2_conc_table = lib2_conc_table.sort_values(by=['lib2_conc'], ascending=0)
+    lib2_conc_table = lib2_conc_table.sort_values(by=['lib2_conc'], ascending=1)
 
     return {
         'data': [
@@ -222,7 +229,8 @@ def update_viability_surface(viability_heatmap_zvalue, matrix_json, drug_names):
                 z=zvalues_table.values,
                 x=lib1_conc_table.values,
                 y=lib2_conc_table.values,
-                colorscale='Viridis',
+                colorscale='Bluered',
+                reversescale=True,
                 cmax=1,
                 cmin=0,
                 showscale=False
