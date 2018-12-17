@@ -10,14 +10,17 @@ from app import app
 def layout(plot_data=None):
     dropdown_options = [
         {'label': 'Bliss excess', 'value': 'Bliss_excess'},
-        {'label': 'Bliss_excess_syn', 'value': 'Bliss_excess_syn'},
-        {'label': 'Bliss_excess_window', 'value': 'Bliss_excess_window'},
-        {'label': 'Bliss_excess_window_syn', 'value': 'Bliss_excess_window_syn'},
+        {'label': 'Bliss excess synergy only', 'value': 'Bliss_excess_syn'},
+        {'label': 'Bliss excess 3x3', 'value': 'Bliss_excess_window'},
+        {'label': 'Bliss excess 3x3 synergy only', 'value': 'Bliss_excess_window_syn'},
         {'label': 'HSA excess', 'value': 'HSA_excess'},
-        {'label': 'HSA_excess_syn', 'value': 'HSA_excess_syn'},
-        {'label': 'HSA_excess_syn', 'value': 'HSA_excess_syn'},
-        {'label': 'HSA_excess_window', 'value': 'HSA_excess_window'},
-        {'label': 'HSA_excess_window_syn', 'value': 'HSA_excess_window_syn'}]
+        {'label': 'HSA excess synergy only', 'value': 'HSA_excess_syn'},
+        {'label': 'HSA excess 3x3', 'value': 'HSA_excess_window'},
+        {'label': 'HSA excess 3x3 synergy only', 'value': 'HSA_excess_window_syn'},
+        {'label': 'Combo max. effect', 'value': 'combo_max_effect'},
+        {'label': 'lib1 max. effect', 'value': 'lib1_max_effect'},
+        {'label': 'lib2 max. effect', 'value': 'lib2_max_effect'}
+    ]
 
     return html.Div(className='border bg-white p-2 my-2', children=[
         dcc.Location(id='combo-url', refresh=True),
