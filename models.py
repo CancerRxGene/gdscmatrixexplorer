@@ -131,8 +131,8 @@ class MatrixResult(ToDictMixin, Base):
     combo_max_effect = sa.Column(sa.Float)
     lib1_max_effect = sa.Column(sa.Float)
     lib2_max_effect = sa.Column(sa.Float)
-    lib1_delta_max_effect = sa.Column(sa.Float)
-    lib2_delta_max_effect = sa.Column(sa.Float)
+    # lib1_delta_max_effect = sa.Column(sa.Float)
+    # lib2_delta_max_effect = sa.Column(sa.Float)
 
     combination = relationship("Combination", back_populates='matrices',
                                primaryjoin="and_(and_(Combination.project_id == MatrixResult.project_id, "

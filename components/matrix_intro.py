@@ -18,6 +18,9 @@ def layout(matrix):
     drug2 = matrix.drugs[matrix.lib2_id]
     model = matrix.model
 
+    matrix_hsa = [w.HSA_excess for w in matrix.well_results]
+    max_hsa = max(matrix_hsa)
+
     try:
         model_information = requests.get(
             f"https://api.cellmodelpassports.sanger.ac.uk/models/{model.id}?include=sample.tissue,sample.cancer_type,sample.patient").json()
@@ -113,10 +116,26 @@ def layout(matrix):
             html.Div(className='col-3', children=[
                 html.Div(className='bg bg-light border pt-3 px-4 pb-3 mb-3', children=[
                     html.H3("Summary"),
+                    html.Strong("Max. observed inhibition %"),
                     html.Hr(),
-                    html.Span("Fact 1: "), html.Strong("Value"), html.Br(),
-                    html.Span("Thing 2: "), html.Strong("Good", className='text-success'), html.Br(),
-                    html.Span("Measurement 3: "), html.Strong("Low", className="text-primary"), html.Br(),
+                    html.Table([
+                        html.Tr([
+                            html.Td(["Combination"]),
+                            html.Td([html.Strong(round(matrix.combo_max_effect * 100, 1))])
+                            ]),
+                        html.Tr([
+                            html.Td([drug1.drug_name]),
+                            html.Td([html.Strong(round(matrix.lib1_max_effect * 100, 1))])
+                        ]),
+                        html.Tr([
+                            html.Td([drug2.drug_name]),
+                            html.Td([html.Strong(round(matrix.lib2_max_effect * 100, 1))])
+                        ]),
+                        html.Tr([
+                            html.Td(["Excess over HSA"]),
+                            html.Td([html.Strong(round(max_hsa * 100, 1))])
+                        ])
+                    ]),
                 ]),
                 html.Div(className='bg bg-light border pt-4 px-4 pb-1 d-print-none',
                          children=[

@@ -46,6 +46,7 @@ def upload_project(combo_matrix_stats_path: str,
     drug_matrices_to_db(drug_matrices)
     #
     matrix_results = extract_matrix_results(combo_matrix_stats)
+    # matrix_results = add_delta_max_effects(matrix_results)
     matrix_results = add_model_id(matrix_results, models, 'cosmic_id')
     matrix_results = add_project_id(matrix_results, project)
     matrix_results_to_db(matrix_results)
@@ -213,7 +214,6 @@ def extract_drug_matrices(combo_matrix_stats):
 def drug_matrices_to_db(drug_matrices):
     to_db(Combination, drug_matrices)
 
-
 def extract_matrix_results(combo_matrix_stats):
     hsa_wells = [c for c in combo_matrix_stats.columns if c.startswith("HSA")]
     bliss_wells = [c for c in combo_matrix_stats.columns if c.startswith("Bliss")]
@@ -262,6 +262,10 @@ def extract_matrix_results(combo_matrix_stats):
 
     return matrix_results
 
+# def add_delta_max_effects(matrix_results):
+#     matrix_results['lib1_delta_max_effect'] = matrix_results.combo_max_effect - matrix_results.lib1_max_effect
+#     matrix_results['lib2_delta_max_effect'] = matrix_results.combo_max_effect - matrix_results.lib2_max_effect
+#     return(matrix_results)
 
 def add_model_id(df, models, model_id_field='cosmic_id'):
     res = df.merge(models[['id', model_id_field]], on=model_id_field, how='inner')\
