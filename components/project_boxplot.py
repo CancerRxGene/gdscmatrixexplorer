@@ -75,7 +75,12 @@ def update_boxplot(boxplot_value, project_id):
                 customdata=[{"to": f"/matrix/{row.barcode}/{row.cmatrix}"}
                             for row in summary.query("combo_id == @combo_id").itertuples(index=False)],
                 hoveron='points'
-            ) for combo_id in reversed(sorted(summary.combo_id.unique(), key=lambda x: get_drug_names(summary, x)))
+            )
+            for combo_id in summary[['combo_id', boxplot_value]].\
+                groupby(by='combo_id', as_index=False).\
+                median().\
+                sort_values(by=boxplot_value).\
+                combo_id
         ],
         'layout': go.Layout(
             height=1000,
