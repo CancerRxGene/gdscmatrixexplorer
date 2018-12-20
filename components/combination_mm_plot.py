@@ -97,6 +97,7 @@ def update_tissue_plot(plot_data, colorscale_select):
 
     plot_data = pd.read_json(plot_data, orient='split')
 
+
     return {
         'data': [ go.Box(
             name=plot_data.query("tissue == @tissue").tissue.unique()[0],
@@ -108,7 +109,11 @@ def update_tissue_plot(plot_data, colorscale_select):
             marker={
                 'size': 8
             }
-        ) for tissue in plot_data.tissue.unique()
+        ) for tissue in plot_data[['tissue', colorscale_select]].
+            groupby(by='tissue', as_index=False)
+            .median()
+            .sort_values(by=colorscale_select, ascending=False)
+            .tissue
         ],
         'layout': {
             'title': 'Combination interaction effects by tissue type',
