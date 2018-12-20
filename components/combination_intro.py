@@ -2,7 +2,24 @@ import dash_html_components as html
 import dash_core_components as dcc
 
 
-def layout(combination):
+def layout(combination, conc_ranges):
+
+    lib1_minc = conc_ranges.query('drug_id == @combination.lib1_id').minc.item()
+    lib2_minc = conc_ranges.query('drug_id == @combination.lib2_id').minc.item()
+
+    lib1_maxc = conc_ranges.query('drug_id == @combination.lib1_id').maxc.item()
+    lib2_maxc = conc_ranges.query('drug_id == @combination.lib2_id').maxc.item()
+
+    lib1_minc = '{:.3e}'.format(lib1_minc)
+    lib2_minc = '{:.3e}'.format(lib2_minc)
+    lib1_maxc = '{:.3e}'.format(lib1_maxc)
+    lib2_maxc = '{:.3e}'.format(lib2_maxc)
+
+    print(lib1_minc)
+    print(lib2_minc)
+    print(lib1_maxc)
+    print(lib2_maxc)
+
     return html.Div(
         children=[
             html.Div(className="row mt-5 mb-3", children=[
@@ -33,6 +50,14 @@ def layout(combination):
                                     html.Tr(children=[
                                         html.Td(html.Strong("Owner")),
                                         html.Td(combination.lib1.owner)
+                                    ]),
+                                    html.Tr(children=[
+                                        html.Td(html.Strong("Min. conc.")),
+                                        html.Td(f"{lib1_minc} µM")
+                                    ]),
+                                    html.Tr(children=[
+                                        html.Td(html.Strong("Max. conc.")),
+                                        html.Td(f"{lib1_maxc} µM")
                                     ])
                                 ], className="table-borderless")
                             ]),
@@ -54,6 +79,14 @@ def layout(combination):
                                     html.Tr([
                                         html.Td([html.Strong("Owner")]),
                                         html.Td(combination.lib2.owner)
+                                    ]),
+                                    html.Tr(children=[
+                                        html.Td(html.Strong("Min. conc.")),
+                                        html.Td(f"{lib2_minc} µM")
+                                    ]),
+                                    html.Tr(children=[
+                                        html.Td(html.Strong("Max. conc.")),
+                                        html.Td(f"{lib2_maxc} µM")
                                     ])
                                 ], className="table-borderless")
                             ]),

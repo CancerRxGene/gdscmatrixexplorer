@@ -36,13 +36,18 @@ def layout(project_slug, combination_drug_ids=None):
         DoseResponseCurve.lib1_id,
         DoseResponseCurve.dosed_tag,
         DoseResponseCurve.ic50,
-        DoseResponseCurve.barcode)\
+        DoseResponseCurve.barcode,
+        DoseResponseCurve.minc,
+        DoseResponseCurve.maxc
+    )\
         .filter(DoseResponseCurve.treatment_type == 'S', DoseResponseCurve.project_id == combination.project_id)\
         .filter(sa.or_(DoseResponseCurve.lib1_id == combination.lib1_id,
                        DoseResponseCurve.lib1_id == combination.lib2_id)
                 )
 
     all_dr_curves = pd.read_sql(dr_curves_query.statement, session.bind).rename(columns={'lib1_id' : 'drug_id'})
+
+    lib_conc_ranges = all_dr_curves[['drug_id', 'minc', 'maxc']].drop_duplicates()
 
     combo_matrices = pd.read_sql(combination.matrices.statement, session.bind) \
         .assign(**{'lib1_name': combination.lib1.drug_name,
@@ -69,7 +74,7 @@ def layout(project_slug, combination_drug_ids=None):
     return html.Div([
         crumbs([("Home", "/"), (project.name, f"/project/{project.slug}"),
                 (f"{combination.lib1.drug_name} + {combination.lib2.drug_name}",)]),
-        intro(combination),
+        intro(combination, lib_conc_ranges),
         mm_plot(combo_matrices, project_matrix_metrics)
     ])
 
