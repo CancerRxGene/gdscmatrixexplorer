@@ -64,9 +64,10 @@ def layout(matrix):
                                         ], className="pl-0", style={"width": "50%"}),
                                         html.Td([
                                             html.Strong("Mutated Cancer Genes "), '  '.join(dg for dg in sorted(driver_genes)) if driver_genes else "No mutated cancer genes found", html.Br(),
-                                            html.Strong("MSI Status "), model_information['data']['attributes']['msi_status'], html.Br(),
-                                            html.Strong("Ploidy "), round(model_information['data']['attributes']['ploidy'], 3), html.Br(),
-                                            html.Strong("Mutational Burden "), round(model_information['data']['attributes']['mutations_per_mb'],2), " mutations per Mb", html.Br(),html.Br(),
+                                            html.Strong("MSI Status "), model_information['data']['attributes']['msi_status'] , html.Br(),
+                                            html.Strong("Ploidy "), round(model_information['data']['attributes']['ploidy'], 3) if model_information['data']['attributes']['ploidy'] else "Unknown", html.Br(),
+                                            html.Strong("Mutational Burden "),
+                                            f"{round(model_information['data']['attributes']['mutations_per_mb'], 2)} mutations per Mb" if model_information['data']['attributes']['mutations_per_mb'] else "Unknown", html.Br(),html.Br(),
                                             html.A(children=f"View {model.name} on Cell Model Passports", href=f"https://cellmodelpassports.sanger.ac.uk/passports/{model.id}")
                                         ])
 
