@@ -4,7 +4,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy_utils import generic_repr
 
 from components.dr_plot import DoseResponsePlot
-from db import Base
+from db import Base, session
 
 
 class ToDictMixin:
@@ -21,13 +21,7 @@ class Project(ToDictMixin, Base):
     slug = sa.Column(sa.String, unique=True)
     matrices = relationship("MatrixResult", back_populates='project')
     dose_responses = relationship("DoseResponseCurve")
-
-    @property
-    def combinations(self):
-        return sa.orm.object_session(self).query(Combination).join(MatrixResult) \
-            .filter(
-                MatrixResult.project_id == self.id,
-        ).distinct().all()
+    combinations = relationship("Combination", lazy='dynamic', back_populates='project')
 
     @property
     def models(self):
@@ -60,17 +54,15 @@ class Drug(ToDictMixin, Base):
 @generic_repr
 class Combination(ToDictMixin, Base):
     __tablename__ = 'combinations'
-    project_id = sa.Column(sa.Integer, primary_key=True, index=True)
-
-    lib1_id = sa.Column(sa.Integer, sa.ForeignKey(Drug.id), primary_key=True,
-                        index=True)
-    lib2_id = sa.Column(sa.Integer, sa.ForeignKey(Drug.id), primary_key=True,
-                        index=True)
+    project_id = sa.Column(sa.Integer, sa.ForeignKey(Project.id), primary_key=True, index=True)
+    lib1_id = sa.Column(sa.Integer, sa.ForeignKey(Drug.id), primary_key=True, index=True)
+    lib2_id = sa.Column(sa.Integer, sa.ForeignKey(Drug.id), primary_key=True, index=True)
 
     lib1 = relationship(Drug, foreign_keys=[lib1_id])
     lib2 = relationship(Drug, foreign_keys=[lib2_id])
 
     matrices = relationship("MatrixResult", lazy='dynamic', back_populates='combination')
+    project = relationship("Project", back_populates='combinations')
 
     @property
     def replicates_query(self):
@@ -90,6 +82,13 @@ class Combination(ToDictMixin, Base):
     @property
     def replicates(self):
         return self.replicates_query.all()
+
+    @classmethod
+    def get(cls, project_id, lib1_id, lib2_id):
+        return session.query(Combination) \
+            .filter_by(lib1_id=lib1_id, lib2_id=lib2_id,
+                       project_id=project_id) \
+            .one()
 
 
 @generic_repr
@@ -305,15 +304,6 @@ class DoseResponseCurve(ToDictMixin, Base):
                     SingleAgentWellResult.lib_drug == self.dosed_tag,
                     SingleAgentWellResult.barcode == self.barcode
                 ).all()
-
-    # @property
-    # def minc(self):
-    #     if self.treatment_type == 'S':
-    #         return min([w.conc for w in self.well_results])
-    #     else:
-    #         lib1_doses = {w.lib1_conc for w in self.well_results}
-    #         lib2_doses = {w.lib2_conc for w in self.well_results}
-    #         return min(lib1_doses) if len(lib1_doses) > 1 else min(lib2_doses)
 
     def x_to_conc(self, x):
         try:

@@ -11,7 +11,7 @@ def project_block(project):
                     className='card-title'
                 ),
                 html.P(f"{len(project.models)} Cell Lines"),
-                html.P(f"{len(project.combinations)} Combinations"),
+                html.P(f"{project.combinations.count()} Combinations"),
                 dcc.Link(f"View Project", className='btn btn-primary',
                          href=f"/project/{project.slug}")
             ])

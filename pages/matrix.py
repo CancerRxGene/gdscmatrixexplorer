@@ -8,11 +8,15 @@ from components.matrix_intro import layout as intro
 from components.matrix_viability import layout as viability
 from components.matrix_synergy import layout as synergy
 from components.breadcrumbs import breadcrumb_generator as crumbs
+from utils import get_matrix_from_url
 
 
-def layout(barcode=None, cmatrix=None):
-    my_matrix = session.query(MatrixResult) \
-        .filter_by(barcode=barcode, cmatrix=cmatrix).one()
+def layout(url):
+
+    my_matrix = get_matrix_from_url(url)
+    if not isinstance(my_matrix, MatrixResult):
+        return my_matrix
+
     p = my_matrix.project
     c = my_matrix.combination
 

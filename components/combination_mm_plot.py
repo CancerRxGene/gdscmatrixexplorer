@@ -2,38 +2,60 @@ import dash_html_components as html
 import dash_core_components as dcc
 import plotly.graph_objs as go
 import dash.dependencies
-import pandas as pd
 import plotly.figure_factory as ff
+import sqlalchemy as sa
 
 from app import app
+from models import Combination
+from utils import url_is_combination_page, metric_dropdown_options, \
+    get_project_metrics, get_project_from_url, get_combination_results_with_sa
 
 
-def layout(plot_data=None, project_metrics=None):
-    dropdown_options = [
-        {'label': 'Bliss excess', 'value': 'Bliss_excess'},
-        {'label': 'Bliss excess synergy only', 'value': 'Bliss_excess_syn'},
-        {'label': 'Bliss excess 3x3', 'value': 'Bliss_excess_window'},
-        {'label': 'Bliss excess 3x3 synergy only', 'value': 'Bliss_excess_window_syn'},
-        {'label': 'HSA excess', 'value': 'HSA_excess'},
-        {'label': 'HSA excess synergy only', 'value': 'HSA_excess_syn'},
-        {'label': 'HSA excess 3x3', 'value': 'HSA_excess_window'},
-        {'label': 'HSA excess 3x3 synergy only', 'value': 'HSA_excess_window_syn'},
-        {'label': 'Combo max. inhibition', 'value': 'combo_max_effect'},
-        {'label': 'lib1 max. inhibition', 'value': 'lib1_max_effect'},
-        {'label': 'lib2 max. inhibition', 'value': 'lib2_max_effect'}
-    ]
+def get_drug_ids_from_url(url):
+    segments = url.split("/")
+    if len(segments) < 5:
+        return None, None
+    drug_ids = segments[4]
+    drug1_id, drug2_id = drug_ids.split("+")
 
+    return int(drug1_id), int(drug2_id)
+
+
+def get_combination(project_id, lib1_id, lib2_id):
+    try:
+        combination = Combination.get(project_id, lib1_id, lib2_id)
+    except sa.orm.exc.NoResultFound:
+        return html.Div("Combination not found")
+    except sa.orm.exc.MultipleResultsFound:
+        return html.Div("Multiple results found for this combination - cannot display")
+
+    return combination
+
+
+def get_plot_data_from_url(url):
+    project = get_project_from_url(url)
+    drug1_id, drug2_id = get_drug_ids_from_url(url)
+    combination = get_combination(project.id, drug1_id, drug2_id)
+    plot_data = get_combination_results_with_sa(combination)
+    return plot_data
+
+
+def get_project_metrics_from_url(url, metric):
+    project = get_project_from_url(url)
+    return get_project_metrics(project.id, metric)
+
+
+def layout():
     return html.Div(className='border bg-white p-2 my-2', children=[
-        dcc.Location(id='combo-url', refresh=True),
         html.Div(className='row',
                  children=[
                      html.Div(className='col-5',
                               children=[
                                   html.Label('Combination interaction'),
                                   dcc.Dropdown(
-                                      options=dropdown_options,
+                                      options=metric_dropdown_options,
                                       value='HSA_excess',
-                                      id='color-scale-select',
+                                      id='combo-page-color-scale-select',
                                       clearable=False
                                   ),
                                   dcc.Graph(
@@ -48,7 +70,7 @@ def layout(plot_data=None, project_metrics=None):
                      html.Div(className='col-7',
                               children=[
                                   dcc.Graph(
-                                      id='mm-scatter'
+                                      id='combo-page-mm-scatter'
                                   )
                               ],
                               style={'width': '100%', 'float': 'left'}
@@ -58,27 +80,20 @@ def layout(plot_data=None, project_metrics=None):
             html.Div(className='col-12', children=[
                 dcc.Graph(id='combo-tissue')
             ])
-        ]),
-        html.Div(style={"display": "none"},
-                 children=plot_data.to_json(date_format='iso', orient='split'),
-                 id='plot-data'
-                 ),
-        html.Div(style={"display": "none"},
-                 children=project_metrics.to_json(date_format='iso', orient='split'),
-                 id='project-metrics'
-                 ),
+        ])
 
     ])
 
+
 @app.callback(
     dash.dependencies.Output('intxn-distn', 'figure'),
-    [dash.dependencies.Input('plot-data', 'children'),
-     dash.dependencies.Input('project-metrics', 'children'),
-     dash.dependencies.Input('color-scale-select', 'value')])
-def update_distn(plot_data, project_metrics, colorscale_select):
-
-    plot_data = pd.read_json(plot_data, orient='split')
-    project_metrics = pd.read_json(project_metrics, orient='split')
+    [dash.dependencies.Input('url', 'pathname'),
+     dash.dependencies.Input('combo-page-color-scale-select', 'value')])
+def update_distn(pathname, colorscale_select):
+    if not url_is_combination_page(pathname):
+        return None
+    plot_data = get_plot_data_from_url(pathname)
+    project_metrics = get_project_metrics_from_url(pathname, colorscale_select)
 
     drug1 = plot_data['lib1_name'].unique()
     drug2 = plot_data['lib2_name'].unique()
@@ -95,24 +110,24 @@ def update_distn(plot_data, project_metrics, colorscale_select):
     return figure
 
 @app.callback(
-    dash.dependencies.Output('mm-scatter', 'figure'),
-    [dash.dependencies.Input('plot-data', 'children'),
-     dash.dependencies.Input('project-metrics', 'children'),
-     dash.dependencies.Input('color-scale-select', 'value')])
-def update_scatter(plot_data, project_metrics, colorscale_select):
-
-    plot_data = pd.read_json(plot_data, orient='split')
-    project_metrics = pd.read_json(project_metrics, orient='split')
+    dash.dependencies.Output('combo-page-mm-scatter', 'figure'),
+    [dash.dependencies.Input('url', 'pathname'),
+     dash.dependencies.Input('combo-page-color-scale-select', 'value')])
+def update_scatter(pathname, colorscale_select):
+    if not url_is_combination_page(pathname):
+        return None
+    plot_data = get_plot_data_from_url(pathname)
+    project_metrics = get_project_metrics_from_url(pathname, colorscale_select)
 
     drug1 = plot_data['lib1_name'].unique()
     drug2 = plot_data['lib2_name'].unique()
 
     # Set colorscale using whole project dataset
-    color_zero = abs(0 - min(project_metrics[colorscale_select]) / (max(project_metrics[colorscale_select]) - min(project_metrics[colorscale_select])))
     color_min = project_metrics[colorscale_select].min()
     color_max = project_metrics[colorscale_select].max()
+    color_zero = abs(0 - color_min / (color_max - color_min))
 
-    return {
+    return go.Figure({
         'data': [go.Scatter(
             x=plot_data['ic50_lib1'],
             y=plot_data['ic50_lib2'],
@@ -138,19 +153,21 @@ def update_scatter(plot_data, project_metrics, colorscale_select):
             'xaxis': {'title': f"{drug1[0]} IC50 log µM"},
             'yaxis': {'title': f"{drug2[0]} IC50 log µM"}
         }
-    }
+    })
+
 
 @app.callback(
     dash.dependencies.Output('combo-tissue', 'figure'),
-    [dash.dependencies.Input('plot-data', 'children'),
-     dash.dependencies.Input('color-scale-select', 'value')])
-def update_tissue_plot(plot_data, colorscale_select):
+    [dash.dependencies.Input('url', 'pathname'),
+     dash.dependencies.Input('combo-page-color-scale-select', 'value')
+     ])
+def update_tissue_plot(url, colorscale_select):
+    if not url_is_combination_page(url):
+        return None
+    plot_data = get_plot_data_from_url(url)
 
-    plot_data = pd.read_json(plot_data, orient='split')
-
-
-    return {
-        'data': [ go.Box(
+    return go.Figure(
+        data=[ go.Box(
             name=plot_data.query("tissue == @tissue").tissue.unique()[0],
             y=plot_data.query("tissue == @tissue")[colorscale_select],
             boxpoints="all",
@@ -166,16 +183,16 @@ def update_tissue_plot(plot_data, colorscale_select):
             .sort_values(by=colorscale_select, ascending=False)
             .tissue
         ],
-        'layout': {
+        layout= {
             'title': 'Combination interaction effects by tissue type',
             'showlegend': False
         }
-    }
+    )
 
 
 @app.callback(
-    dash.dependencies.Output('combo-url', 'pathname'),
-    [dash.dependencies.Input('mm-scatter', 'clickData')])
+    dash.dependencies.Output('url', 'pathname'),
+    [dash.dependencies.Input('combo-page-mm-scatter', 'clickData')])
 def go_to_dot(clicked_points):
     print("Click!")
     if clicked_points:

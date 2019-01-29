@@ -5,7 +5,7 @@ from db import session
 from models import Project
 
 
-def layout():
+def layout(*args, **kwargs):
     projects = session.query(Project).all()
 
     return html.Div([

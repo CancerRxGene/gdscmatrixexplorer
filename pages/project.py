@@ -10,17 +10,15 @@ from models import Project
 from components.project_boxplot import layout as project_boxplot
 from components.project_scatter import layout as project_scatter
 from components.breadcrumbs import breadcrumb_generator as crumbs
+from utils import get_project_from_url
 
 
-def layout(project_slug):
-    try:
-        project = session.query(Project).filter_by(slug=project_slug).one()
-    except sa.orm.exc.NoResultFound:
-        return html.Div("Project not found")
+def layout(url):
+    project = get_project_from_url(url)
 
     def format_combo_links(combo):
         combo_string = (f"{combo.lib1.drug_name} + {combo.lib2.drug_name}")
-        combo_ref = f"/project/{project_slug}/combination/{combo.lib1_id}+{combo.lib2_id}"
+        combo_ref = f"/project/{project.slug}/combination/{combo.lib1_id}+{combo.lib2_id}"
         return dcc.Link(combo_string, href=combo_ref)
 
     combo_links = [format_combo_links(combo) for combo in
@@ -33,7 +31,7 @@ def layout(project_slug):
     return html.Div([
         crumbs([("Home", "/"), (project.name, "/" + project.slug)]),
         html.H2(f"{project.name}", className='display-4 mt-2'),
-        html.P(f"Cell Lines: {len(project.models)} - Combinations: {len(project.combinations)}", className='lead mb-4'),
+        html.P(f"Cell Lines: {len(project.models)} - Combinations: {project.combinations.count()}", className='lead mb-4'),
         html.Div(className='row', children=[
 
             html.Div(

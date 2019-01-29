@@ -2,23 +2,22 @@ import dash_html_components as html
 import dash_core_components as dcc
 
 
-def layout(combination, conc_ranges):
+def layout(combination):
 
-    lib1_minc = conc_ranges.query('drug_id == @combination.lib1_id').minc.item()
-    lib2_minc = conc_ranges.query('drug_id == @combination.lib2_id').minc.item()
+    single_agent_curves = combination.matrices[0].single_agent_curves
 
-    lib1_maxc = conc_ranges.query('drug_id == @combination.lib1_id').maxc.item()
-    lib2_maxc = conc_ranges.query('drug_id == @combination.lib2_id').maxc.item()
+    if single_agent_curves[0].lib1_id == combination.lib1_id:
+        lib1_minc, lib1_maxc = single_agent_curves[0].minc, single_agent_curves[0].maxc
+        lib2_minc, lib2_maxc = single_agent_curves[1].minc, single_agent_curves[1].maxc
+    else:
+        lib2_minc, lib2_maxc = single_agent_curves[0].minc, single_agent_curves[0].maxc
+        lib1_minc, lib1_maxc = single_agent_curves[1].minc, single_agent_curves[1].maxc
+
 
     lib1_minc = '{:.3e}'.format(lib1_minc)
     lib2_minc = '{:.3e}'.format(lib2_minc)
     lib1_maxc = '{:.3e}'.format(lib1_maxc)
     lib2_maxc = '{:.3e}'.format(lib2_maxc)
-
-    print(lib1_minc)
-    print(lib2_minc)
-    print(lib1_maxc)
-    print(lib2_maxc)
 
     return html.Div(
         children=[
@@ -90,22 +89,6 @@ def layout(combination, conc_ranges):
                                     ])
                                 ], className="table-borderless")
                             ]),
-                            html.Div(className="col-3", children=[
-                                # html.Table(children=[
-                                #     html.Tr([
-                                #         html.Td(html.Strong("Drugset")),
-                                #         html.Td(combination.drugset_id)
-                                #     ]),
-                                #     html.Tr([
-                                #         html.Td([html.Strong("Matrix id")]),
-                                #         html.Td(combination.cmatrix)
-                                #     ]),
-                                #     html.Tr([
-                                #         html.Td([html.Strong("Matrix size")]),
-                                #         html.Td(combination.matrix_size)
-                                #     ])
-                                # ], className="table-borderless")
-                            ])
                         ])
                     ])
                 ])

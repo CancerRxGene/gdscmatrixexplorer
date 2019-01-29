@@ -1,4 +1,3 @@
-import numpy as np
 import dash_html_components as html
 
 
