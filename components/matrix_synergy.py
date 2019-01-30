@@ -8,6 +8,7 @@ import plotly.graph_objs as go
 from components.synergy_info.syn_info import infoblock_matrix
 
 from app import app
+from utils import get_metric_axis_range
 
 
 def layout(matrix):
@@ -93,6 +94,7 @@ def update_combo_heatmap(combo_heatmap_zvalue, combo_json, drug_names):
     matrix_df['lib2_conc'] = [np.format_float_scientific(conc, 3) for conc in matrix_df['lib2_conc']]
 
     zvalue = matrix_df[combo_heatmap_zvalue]
+    zmin, zmax = get_metric_axis_range(combo_heatmap_zvalue)
 
     return {
         'data': [
@@ -100,10 +102,10 @@ def update_combo_heatmap(combo_heatmap_zvalue, combo_json, drug_names):
                 x=matrix_df.lib1_conc,
                 y=matrix_df.lib2_conc,
                 z=zvalue,
-                zmax=1,
-                zmin=0,
+                zmax=zmax,
+                zmin=zmin,
                 colorscale='Reds',
-                reversescale=True
+                reversescale=False
             )
         ],
         'layout': go.Layout(title=combo_heatmap_zvalue,
@@ -139,6 +141,7 @@ def update_combo_surface(combo_heatmap_zvalue, combo_json, drug_names):
     lib1_conc_table = lib1_conc_table.sort_values(by=['lib2_conc'], ascending=1)
     lib2_conc_table = matrix_df.pivot(index='lib2_conc', columns='lib1_conc', values='lib2_conc')
     lib2_conc_table = lib2_conc_table.sort_values(by=['lib2_conc'], ascending=1)
+    zmin, zmax = get_metric_axis_range(combo_heatmap_zvalue)
 
     return {
         'data': [
@@ -148,8 +151,8 @@ def update_combo_surface(combo_heatmap_zvalue, combo_json, drug_names):
                 y=lib2_conc_table.values,
                 colorscale='Reds',
                 reversescale=True,
-                cmax=1,
-                cmin=0,
+                cmax=zmax,
+                cmin=zmin,
                 showscale=False
             )
         ],
@@ -189,13 +192,20 @@ def update_combo_surface(combo_heatmap_zvalue, combo_json, drug_names):
                     }
                 },
                 'zaxis': {
-                    'range': (-0.2, 0.3),
+                    'range': (zmin, zmax),
                     'title': combo_heatmap_zvalue,
                     'titlefont': {
                         'size': 12
                     },
                     'tickfont': {
                         'size': 10
+                    }
+                },
+                'camera': {
+                    'eye': {
+                        'x': -1.25,
+                        'y': -1.25,
+                        'z': 1.25
                     }
                 }
             }
