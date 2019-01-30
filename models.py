@@ -80,6 +80,16 @@ class Combination(ToDictMixin, Base):
         ))
 
     @property
+    def models(self):
+        return sa.orm.object_session(self).query(Model) \
+            .join(MatrixResult, Combination)\
+            .filter(
+                Combination.project_id == self.project_id,
+                Combination.lib1_id == self.lib1_id,
+                Combination.lib2_id == self.lib2_id)\
+            .all()
+
+    @property
     def replicates(self):
         return self.replicates_query.all()
 
