@@ -128,10 +128,17 @@ class MatrixResult(ToDictMixin, Base):
     Bliss_excess_window_syn_dose_lib1 = sa.Column(sa.String)
     Bliss_excess_window_syn_dose_lib2 = sa.Column(sa.String)
     combo_max_effect = sa.Column(sa.Float)
+    combo_max2_effect = sa.Column(sa.Float)
+    combo_max3_effect = sa.Column(sa.Float)
     lib1_max_effect = sa.Column(sa.Float)
     lib2_max_effect = sa.Column(sa.Float)
     # lib1_delta_max_effect = sa.Column(sa.Float)
     # lib2_delta_max_effect = sa.Column(sa.Float)
+    day1_viability_mean = sa.Column(sa.Float)
+    growth_rate = sa.Column(sa.Float)
+    doubling_time = sa.Column(sa.Float)
+    combo_d1_xs = sa.Column(sa.Float)
+
 
     combination = relationship("Combination", back_populates='matrices',
                                primaryjoin="and_(and_(Combination.project_id == MatrixResult.project_id, "

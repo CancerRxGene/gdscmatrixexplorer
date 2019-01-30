@@ -215,15 +215,22 @@ def drug_matrices_to_db(drug_matrices):
     to_db(Combination, drug_matrices)
 
 def extract_matrix_results(combo_matrix_stats):
-    hsa_wells = [c for c in combo_matrix_stats.columns if c.startswith("HSA")]
-    bliss_wells = [c for c in combo_matrix_stats.columns if c.startswith("Bliss")]
+    hsa_cols = [c for c in combo_matrix_stats.columns if c.startswith("HSA")]
+    bliss_cols = [c for c in combo_matrix_stats.columns if c.startswith("Bliss")]
+    max_effect_cols = [c for c in combo_matrix_stats.columns if c.endswith("max_effect")]
 
     matrix_results = combo_matrix_stats[
         ["COSMIC_ID", "DRUGSET_ID", "cmatrix", "BARCODE",
          'lib1_drug_id', 'lib2_drug_id',
-         'lib1', 'lib2',
-         'combo_max_effect',
-         'lib1_max_effect', 'lib2_max_effect'] + hsa_wells + bliss_wells]
+         'lib1', 'lib2'] +
+        max_effect_cols +
+        ["combo_max2_effect", "combo_max3_effect"] +
+        hsa_cols +
+        bliss_cols +
+        ["day1_viability_mean", "growth_rate", "doubling_time", "combo_d1_xs"]
+    ]
+         # 'combo_max_effect',
+         # 'lib1_max_effect', 'lib2_max_effect', ]
 
     matrix_results = matrix_results.rename(
         columns={
