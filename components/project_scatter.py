@@ -11,7 +11,7 @@ from sqlalchemy import and_
 from app import app
 from db import session
 from models import MatrixResult, Project, Combination, Model
-from utils import metrics, plot_colors, matrix_metrics
+from utils import plot_colors, matrix_metrics
 
 
 def layout(project_id):

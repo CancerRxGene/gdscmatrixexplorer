@@ -35,13 +35,6 @@ class Colors:
     DARKGREY_ULTRATRANS = "rgba(51,46,44,0.05)"
 
 
-metrics = ["HSA_excess", "HSA_excess_syn", "HSA_excess_well_count",
-           "HSA_excess_window", "HSA_excess_window_syn", "Bliss_excess",
-           "Bliss_excess_syn", "Bliss_excess_well_count",
-           "Bliss_excess_window",
-           "Bliss_excess_window_syn"
-           ]
-
 matrix_metrics = {
     'Bliss_excess': {
         'label': 'Bliss Excess',
@@ -132,20 +125,6 @@ well_metrics = {
 }
 
 
-metric_dropdown_options = [
-        {'label': 'Bliss excess', 'value': 'Bliss_excess'},
-        {'label': 'Bliss excess synergy only', 'value': 'Bliss_excess_syn'},
-        {'label': 'Bliss excess 3x3', 'value': 'Bliss_excess_window'},
-        {'label': 'Bliss excess 3x3 synergy only', 'value': 'Bliss_excess_window_syn'},
-        {'label': 'HSA excess', 'value': 'HSA_excess'},
-        {'label': 'HSA excess synergy only', 'value': 'HSA_excess_syn'},
-        {'label': 'HSA excess 3x3', 'value': 'HSA_excess_window'},
-        {'label': 'HSA excess 3x3 synergy only', 'value': 'HSA_excess_window_syn'},
-        {'label': 'Combo max. inhibition', 'value': 'combo_max_effect'},
-        {'label': 'lib1 max. inhibition', 'value': 'lib1_max_effect'},
-        {'label': 'lib2 max. inhibition', 'value': 'lib2_max_effect'}
-    ]
-
 plot_colors = ["rgb(215,150,209)", "rgb(164,250,201)", "rgb(245,167,221)",
                "rgb(124,191,134)", "rgb(220,173,241)", "rgb(168,199,127)",
                "rgb(195,186,255)", "rgb(201,176,105)", "rgb(39,200,238)",
@@ -159,7 +138,7 @@ plot_colors = ["rgb(215,150,209)", "rgb(164,250,201)", "rgb(245,167,221)",
 
 
 def url_is_combination_page(url):
-    return re.fullmatch("/project/[a-zA-Z0-9\-]*/combination/[0-9]*\+[0-g]*", url)
+    return url_parser(url) == 'combination'
 
 
 def url_parser(url):
