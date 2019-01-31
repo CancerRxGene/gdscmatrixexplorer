@@ -139,12 +139,20 @@ class MatrixResult(ToDictMixin, Base):
     Bliss_excess_window_syn_dose_lib1 = sa.Column(sa.String)
     Bliss_excess_window_syn_dose_lib2 = sa.Column(sa.String)
     combo_max_effect = sa.Column(sa.Float)
+    combo_max2_effect = sa.Column(sa.Float)
+    combo_max3_effect = sa.Column(sa.Float)
     lib1_max_effect = sa.Column(sa.Float)
     lib2_max_effect = sa.Column(sa.Float)
+    day1_viability_mean = sa.Column(sa.Float)
+    growth_rate = sa.Column(sa.Float)
+    doubling_time = sa.Column(sa.Float)
+    combo_max_effect_excess_over_day1 = sa.Column(sa.Float)
+
     lib1_delta_max_effect = sa.orm.column_property(
         (combo_max_effect - lib1_max_effect).label('lib1_delta_max_effect'))
     lib2_delta_max_effect = sa.orm.column_property(
         (combo_max_effect - lib2_max_effect).label('lib2_delta_max_effect'))
+
 
 
     combination = relationship("Combination", back_populates='matrices',
@@ -170,10 +178,6 @@ class MatrixResult(ToDictMixin, Base):
                     self.lib1_tag,
                     self.lib2_tag
                 ])).all()
-                # DoseResponseCurve.lib1_id.in_([
-                #     self.combination.lib1_id,
-                #     self.combination.lib2_id])
-                # ).all()
 
     @property
     def drugs(self):
@@ -205,7 +209,6 @@ class MatrixResult(ToDictMixin, Base):
             .filter(
                 sa.and_(
                     Combination.project_id == al_reps.project_id,
-                    # Combination.drugset_id == al_reps.drugset_id,
                     Combination.lib1_id == al_reps.lib1_id,
                     Combination.lib2_id == al_reps.lib2_id
                 ))\
