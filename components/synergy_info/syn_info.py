@@ -6,23 +6,72 @@ from textwrap import dedent
 
 def infoblock_matrix(matrix_result):
 
-    return dcc.Markdown(dedent(
-        """
-        ## Matrix Summary Metrics  
-          
-        ### Bliss Excess  
-        **Average:** 0.184  
-        **Maximum:** 0.455 (10µM Drug1, 0.1µM Drug2)  
-        **Average for synergistic wells:** 0.329   
-        
-        ### HSA  
-        **Average:** 0.184  
-        **Maximum:** 0.455 (10µM Drug1, 0.1µM Drug2)  
-        **Average for synergistic wells:** 0.329  
-          
-        ### Loewe  
-        """))
-
+    return html.Div([
+        html.Div(className='card mb-3', children=[
+            html.Div(className='card-body', children=[
+                html.H5(className='card-title', children=[
+                    "Bliss Excess"
+                ]),
+                html.P(className='card-text', children=[
+                    "Average Bliss Excess scores over the matrix or 3x3 window."
+                ])
+            ]),
+            html.Ul(className='list-group list-group-flush', children=[
+                html.Li(className='list-group-item d-flex justify-content-between align-items-center', children=[
+                    html.Strong("Matrix average"),
+                    html.Span("0.291")
+                ]),
+                html.Li(className='list-group-item d-flex justify-content-between align-items-center', children=[
+                    html.Strong("Matrix average synergistic wells"),
+                    html.Span("0.382")
+                ]),
+                html.Li(className='list-group-item d-flex justify-content-between align-items-center', children=[
+                    html.Strong("Highest window"),
+                    html.Span("0.456")
+                ]),
+                html.Li(className='list-group-item d-flex justify-content-between align-items-center', children=[
+                    html.Strong("Highest window synergistic wells"),
+                    html.Span("0.456")
+                ])
+            ])
+        ]),
+        html.Div(className='card mb-3', children=[
+            html.Div(className='card-body', children=[
+                html.H4(className='card-title', children=[
+                    "HSA Excess"
+                ]),
+                html.P(className='card-text', children=[
+                    "Average excess over the highest single agent in the matrix or 3x3 window."
+                ])
+            ]),
+            html.Ul(className='list-group list-group-flush', children=[
+                html.Li(
+                    className='list-group-item d-flex justify-content-between align-items-center',
+                    children=[
+                        html.Strong("Average"),
+                        html.Span("0.291")
+                    ]),
+                html.Li(
+                    className='list-group-item d-flex justify-content-between align-items-center',
+                    children=[
+                        html.Strong("Average synergistic wells"),
+                        html.Span("0.382")
+                    ]),
+                html.Li(
+                    className='list-group-item d-flex justify-content-between align-items-center',
+                    children=[
+                        html.Strong("Highest window"),
+                        html.Span("0.456")
+                    ]),
+                html.Li(
+                    className='list-group-item d-flex justify-content-between align-items-center',
+                    children=[
+                        html.Strong("Highest window synergistic wells"),
+                        html.Span("0.456")
+                    ])
+            ])
+        ])
+    ])
     # return html.Div([
     #     html.Div([
     #         html.H5(["Maximum inhibitory effect"]),
