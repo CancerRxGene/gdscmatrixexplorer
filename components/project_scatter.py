@@ -11,7 +11,7 @@ from sqlalchemy import and_
 from app import app
 from db import session
 from models import MatrixResult, Project, Combination, Model
-from utils import metrics, plot_colors
+from utils import metrics, plot_colors, matrix_metrics
 
 
 def layout(project_id):
@@ -29,7 +29,7 @@ def layout(project_id):
                     html.Div(className='col-4', children=[
                         html.Label('X-Axis'),
                         dcc.Dropdown(
-                            options=[{'label': c, 'value': c} for c in metrics],
+                            options=list(matrix_metrics.values()),
                             value='HSA_excess',
                             id='x-axis-select'
                         ),
@@ -37,7 +37,7 @@ def layout(project_id):
                     html.Div(className='col-4', children=[
                         html.Label('Y-Axis'),
                         dcc.Dropdown(
-                            options=[{'label': c, 'value': c} for c in metrics],
+                            options=list(matrix_metrics.values()),
                             value='Bliss_excess',
                             id='y-axis-select'
                         )
@@ -133,9 +133,9 @@ def update_scatter(x_axis_field, y_axis_field, color_field, project_id):
             height=750,
             hovermode='closest',
             xaxis={'type': 'log' if 'index' in x_axis_field else 'linear',
-                   'title': x_axis_field.replace('_', ' ')},
+                   'title': matrix_metrics[x_axis_field]['label']},
             yaxis={'type': 'log' if 'index' in y_axis_field else 'linear',
-                   'title': y_axis_field.replace('_', ' ')}
+                   'title': matrix_metrics[y_axis_field]['label']}
         )
     }
 
