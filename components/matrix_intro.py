@@ -1,3 +1,4 @@
+import json
 from textwrap import dedent
 
 import dash
@@ -6,8 +7,9 @@ import dash_core_components as dcc
 import requests
 
 from app import app
-from components.matrix_navigation import replicate_links, links_to_other_models, \
-    links_to_other_combos
+from components.matrix_navigation import replicate_links_from_matrix
+from components.navigation.dropdowns import model_links_from_matrix, \
+    combo_links_from_matrix
 from components.single_agent.info import infoblock
 
 
@@ -24,7 +26,7 @@ def layout(matrix):
     try:
         model_information = requests.get(
             f"https://api.cellmodelpassports.sanger.ac.uk/models/{model.id}?include=sample.tissue,sample.cancer_type,sample.patient").json()
-    except requests.exceptions.ConnectionError:
+    except (requests.exceptions.ConnectionError, json.decoder.JSONDecodeError):
         model_information, model_drivers, driver_genes = None, None, None
 
     if model_information:
@@ -142,25 +144,12 @@ def layout(matrix):
                          children=[
                              html.H3("Quick Navigation"),
                              html.Hr(),
-                             replicate_links(matrix),
-                             links_to_other_models(matrix),
-                             links_to_other_combos(matrix)
+                             replicate_links_from_matrix(matrix),
+                             model_links_from_matrix(matrix),
+                             combo_links_from_matrix(matrix)
                          ])
             ])
         ]),
         html.Div(id='hidden-div', className='d-none')
     ]
     )
-
-
-
-
-@app.callback(dash.dependencies.Output('matrix-url', 'pathname'),
-              [dash.dependencies.Input('dropdown-models', 'value'),
-               dash.dependencies.Input('dropdown-combos', 'value')])
-def dropdown_handler(dropdown_models_value, dropdown_combos_value):
-
-    value = dropdown_models_value or dropdown_combos_value
-    barcode, cmatrix = value.split('__')
-    return f"/matrix/{barcode}/{cmatrix}"
-
