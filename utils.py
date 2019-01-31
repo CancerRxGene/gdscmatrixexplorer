@@ -38,26 +38,95 @@ class Colors:
     DARKGREY_ULTRATRANS = "rgba(51,46,44,0.05)"
 
 
-metrics = ["HSA_excess", "HSA_excess_syn", "HSA_excess_well_count",
-           "HSA_excess_window", "HSA_excess_window_syn", "Bliss_excess",
-           "Bliss_excess_syn", "Bliss_excess_well_count",
-           "Bliss_excess_window",
-           "Bliss_excess_window_syn"
-           ]
+matrix_metrics = {
+    'Bliss_excess': {
+        'label': 'Bliss Excess',
+        'description': 'Average Bliss excess',
+        'value': 'Bliss_excess'
+    },
+    'Bliss_excess_syn': {
+        'label': 'Bliss excess synergy',
+        'description': 'Average Bliss excess synergistic wells',
+        'value': 'Bliss_excess_syn'
+    },
+    'Bliss_excess_window': {
+        'label': 'Bliss excess 3x3 window',
+        'description': 'Average Bliss excess of the highest 3x3 window',
+        'value': 'Bliss_excess_window'
+    },
+    'Bliss_excess_window_syn': {
+        'label': 'Bliss excess 3x3 window synergy',
+        'description': 'Average Bliss excess of highest 3x3 window counting only synergistic wells',
+        'value': 'Bliss_excess_window_syn'
+    },
+    'HSA_excess': {
+        'label': 'HSA excess',
+        'description': 'Average HSA excess',
+        'value': 'HSA_excess'
+    },
+    'HSA_excess_syn': {
+        'label': 'HSA excess synergy',
+        'description': 'Average HSA excess eynergistic wells',
+        'value': 'HSA_excess_syn'
+    },
+    'HSA_excess_window': {
+        'label': 'HSA excess 3x3 window',
+        'description': 'Average HSA Excess of the highest 3x3 window',
+        'value': 'HSA_excess_window'
+    },
+    'HSA_excess_window_syn': {
+        'label': 'HSA excess 3x3 window synergy',
+        'description': 'Average HSA excess of highest 3x3 window counting only synergistic wells',
+        'value': 'HSA_excess_window_syn'
+    },
+    'combo_max_effect': {
+        'label': 'Max effect combination',
+        'description': 'Maximum inhibition observed in combination',
+        'value': 'combo_max_effect'
+    },
+    'lib1_max_effect': {
+        'label': 'Max effect drug 1',
+        'description': 'Maximum inhibition observed in drug 1',
+        'value': 'lib1_max_effect'
+    },
+    'lib2_max_effect': {
+        'label': 'Max effect drug 2',
+        'description': 'Maximum inhibition observed in drug 2',
+        'value': 'lib2_max_effect'
+    },
+    'lib1_delta_max_effect': {
+        'label': 'Delta max effect drug 1',
+        'description': 'Max effect combination minus max effect drug1',
+        'value': 'lib1_delta_max_effect'
+    },
+    'lib2_delta_max_effect': {
+        'label': 'Delta max effect drug 2',
+        'description': 'Max effect combination minus max effect drug2',
+        'value': 'lib2_delta_max_effect'
+    },
+}
 
-metric_dropdown_options = [
-        {'label': 'Bliss excess', 'value': 'Bliss_excess'},
-        {'label': 'Bliss excess synergy only', 'value': 'Bliss_excess_syn'},
-        {'label': 'Bliss excess 3x3', 'value': 'Bliss_excess_window'},
-        {'label': 'Bliss excess 3x3 synergy only', 'value': 'Bliss_excess_window_syn'},
-        {'label': 'HSA excess', 'value': 'HSA_excess'},
-        {'label': 'HSA excess synergy only', 'value': 'HSA_excess_syn'},
-        {'label': 'HSA excess 3x3', 'value': 'HSA_excess_window'},
-        {'label': 'HSA excess 3x3 synergy only', 'value': 'HSA_excess_window_syn'},
-        {'label': 'Combo max. inhibition', 'value': 'combo_max_effect'},
-        {'label': 'lib1 max. inhibition', 'value': 'lib1_max_effect'},
-        {'label': 'lib2 max. inhibition', 'value': 'lib2_max_effect'}
-    ]
+well_metrics = {
+    'HSA':
+        {'label': "HSA",
+         'value': "HSA"},
+    'HSA_excess':
+        {'label': "HSA excess",
+         'value': "HSA_excess"},
+    'Bliss_additivity':
+        {'label': "Bliss additivity",
+         'value': "Bliss_additivity"},
+    'Bliss_index':
+        {'label': "Bliss index",
+         'value': "Bliss_index"},
+    'Bliss_excess':
+        {'label': "Bliss excess",
+         'value': "Bliss_excess"},
+    'Loewe_index':
+        {'label': "Loewe index",
+         'value': "Loewe_index"}
+}
+
 
 plot_colors = ["rgb(215,150,209)", "rgb(164,250,201)", "rgb(245,167,221)",
                "rgb(124,191,134)", "rgb(220,173,241)", "rgb(168,199,127)",
@@ -89,7 +158,7 @@ def get_metric_axis_range(metric):
 
 
 def url_is_combination_page(url):
-    return re.fullmatch("/project/[a-zA-Z0-9\-]*/combination/[0-9]*\+[0-g]*", url)
+    return url_parser(url) == 'combination'
 
 
 def url_parser(url):

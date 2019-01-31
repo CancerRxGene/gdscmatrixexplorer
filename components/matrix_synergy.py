@@ -8,12 +8,10 @@ import plotly.graph_objs as go
 from components.synergy_info.syn_info import infoblock_matrix
 
 from app import app
-from utils import get_metric_axis_range
+from utils import get_metric_axis_range, well_metrics
 
 
 def layout(matrix):
-    available_combo_metrics = ["HSA_excess", "Bliss_excess", "HSA",
-                               "Bliss_additivity", "Bliss_index", "Loewe_index"]
 
     drug1 = matrix.combination.lib1.drug_name
     drug2 = matrix.combination.lib2.drug_name
@@ -21,7 +19,7 @@ def layout(matrix):
     matrix_df = pd.DataFrame([w.to_dict() for w in matrix.well_results])
 
     matrix_df = matrix_df.assign(inhibition=lambda df: 1 - df.viability)
-    matrix_df = matrix_df[['lib1_conc', 'lib2_conc'] + available_combo_metrics]
+    matrix_df = matrix_df[['lib1_conc', 'lib2_conc'] + list(well_metrics.keys())]
 
     return html.Div(className='row', children=[
         html.Div(className='col-12', children=[
@@ -34,8 +32,7 @@ def layout(matrix):
                         html.Div(className='col-3', children=[
                             dcc.Dropdown(
                                 id='combo-heatmap-zvalue',
-                                options=[{'label': i, 'value': i} for i in
-                                         available_combo_metrics],
+                                options=list(well_metrics.values()),
                                 value='HSA_excess',
                                 searchable=False,
                                 clearable=False
