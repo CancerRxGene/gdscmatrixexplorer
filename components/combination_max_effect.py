@@ -26,13 +26,24 @@ def layout(combination):
         )
 
     df_max_effects = pd.read_sql(max_effects_query.statement, session.get_bind())
-
-    print(df_max_effects.shape)
-    print(df_max_effects.head())
     labels = [f"Cell Line: {x}" for x in df_max_effects['Cell Line']]
     customdata = [{"to": f"/matrix/{row.barcode}/{row.cmatrix}"}
                   for row in df_max_effects.itertuples(index=False)]
 
+    def generate_box(name, y, text, customdata):
+        return go.Box(
+            name=name, y=y, text=text, customdata=customdata,
+            boxpoints='all',
+            jitter=0.3,
+            marker=dict(
+                size=4,
+                opacity=0.5
+            ),
+            hoveron='points',
+        )
+
+    def generate_standard_box(name, y):
+        return generate_box(name, y, text=labels, customdata=customdata)
 
     return html.Div(
         children=[
@@ -48,44 +59,17 @@ def layout(combination):
                                     id='combo-max-effect-boxplot',
                                     figure=go.Figure(
                                         data=[
-                                            go.Box(
+                                            generate_standard_box(
                                                 name=f"{combination.lib1.drug_name}",
-                                                y=df_max_effects.lib1_max_effect,
-                                                boxpoints='all',
-                                                jitter=0.3,
-                                                marker=dict(
-                                                    size=4,
-                                                    opacity=0.5
-                                                ),
-                                                text=labels,
-                                                hoveron='points',
-                                                customdata=customdata
+                                                y=df_max_effects.lib1_max_effect
                                             ),
-                                            go.Box(
+                                            generate_standard_box(
                                                 name=f"{combination.lib2.drug_name}",
-                                                y=df_max_effects.lib2_max_effect,
-                                                boxpoints='all',
-                                                jitter=0.3,
-                                                marker=dict(
-                                                    size=4,
-                                                    opacity=0.5
-                                                ),
-                                                text=labels,
-                                                hoveron='points',
-                                                customdata=customdata
+                                                y=df_max_effects.lib2_max_effect
                                             ),
-                                            go.Box(
+                                            generate_standard_box(
                                                 name=f"{combination.lib1.drug_name} + {combination.lib2.drug_name}",
-                                                y=df_max_effects.combo_max_effect,
-                                                boxpoints='all',
-                                                jitter=0.3,
-                                                marker=dict(
-                                                    size=4,
-                                                    opacity=0.5
-                                                ),
-                                                text=labels,
-                                                hoveron='points',
-                                                customdata=customdata
+                                                y=df_max_effects.combo_max_effect
                                             )
                                         ],
                                         layout=go.Layout(
@@ -105,31 +89,13 @@ def layout(combination):
                                     id='combo-delta-max-effect-boxplot',
                                     figure=go.Figure(
                                         data=[
-                                            go.Box(
+                                            generate_standard_box(
                                                 name=f"Δ {combination.lib1.drug_name}",
-                                                y=df_max_effects.lib1_delta_max_effect,
-                                                boxpoints='all',
-                                                jitter=0.3,
-                                                marker=dict(
-                                                    size=4,
-                                                    opacity=0.5
-                                                ),
-                                                text=labels,
-                                                hoveron='points',
-                                                customdata=customdata
+                                                y=df_max_effects.lib1_delta_max_effect
                                             ),
-                                            go.Box(
+                                            generate_standard_box(
                                                 name=f"Δ {combination.lib2.drug_name}",
-                                                y=df_max_effects.lib2_delta_max_effect,
-                                                boxpoints='all',
-                                                jitter=0.3,
-                                                marker=dict(
-                                                    size=4,
-                                                    opacity=0.5
-                                                ),
-                                                text=labels,
-                                                hoveron='points',
-                                                customdata=customdata
+                                                y=df_max_effects.lib2_delta_max_effect
                                             )
                                         ],
                                         layout=go.Layout(
@@ -149,19 +115,10 @@ def layout(combination):
                                     id='combo-bliss-boxplot',
                                     figure=go.Figure(
                                         data=[
-                                            go.Box(
-                                                name=f"Bliss excess",
-                                                y=df_max_effects.Bliss_excess,
-                                                boxpoints='all',
-                                                jitter=0.3,
-                                                marker=dict(
-                                                    size=4,
-                                                    opacity=0.5
-                                                ),
-                                                text=labels,
-                                                hoveron='points',
-                                                customdata=customdata
-                                            ),
+                                            generate_standard_box(
+                                                name="Bliss excess",
+                                                y=df_max_effects.Bliss_excess
+                                            )
                                         ],
                                         layout=go.Layout(
                                             showlegend=False,
