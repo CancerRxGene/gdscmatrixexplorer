@@ -37,13 +37,64 @@ def infoblock_matrix(matrix_result):
         html.Div(className='card mb-3', children=[
             html.Div(className='card-body', children=[
                 html.H4(className='card-title', children=[
+                    "Maximum Effect"
+                ]),
+                html.P(className='card-text', children=[
+                    "Color indicates percentile bracket for this combination",
+                    html.Br(),
+                    html.Strong("Top 33% ", className='badge badge-success'),
+                    html.Span(" "),
+                    html.Strong("Middle 33% ", className='badge badge-danger'),
+                    html.Span(" "),
+                    html.Strong("Bottom 33% ", className='badge badge-primary'),
+                    html.Span(" "),
+                ])
+            ]),
+            html.Ul(className='list-group list-group-flush', children=[
+                html.Li(
+                    className='list-group-item d-flex justify-content-between align-items-center',
+                    children=[
+                        html.Span("Combo max effect"),
+                        get_pill(matrix_result, 'combo_max_effect')
+                    ]),
+                html.Li(
+                    className='list-group-item d-flex justify-content-between align-items-center',
+                    children=[
+                        html.Span(f"{matrix_result.combination.lib1.drug_name} max effect"),
+                        get_pill(matrix_result, 'lib1_max_effect')
+                    ]),
+                html.Li(
+                    className='list-group-item d-flex justify-content-between align-items-center',
+                    children=[
+                        html.Span(
+                            f"∆ max effect {matrix_result.combination.lib1.drug_name}"),
+                        get_pill(matrix_result, 'lib1_delta_max_effect')
+                    ]),
+                html.Li(
+                    className='list-group-item d-flex justify-content-between align-items-center',
+                    children=[
+                        html.Span(f"{matrix_result.combination.lib2.drug_name} max effect"),
+                        get_pill(matrix_result, 'lib2_max_effect')
+                    ]),
+                html.Li(
+                    className='list-group-item d-flex justify-content-between align-items-center',
+                    children=[
+                        html.Span(
+                            f"∆ max effect {matrix_result.combination.lib2.drug_name}"),
+                        get_pill(matrix_result, 'lib2_delta_max_effect')
+                    ]),
+            ])
+        ]),
+        html.Div(className='card mb-3', children=[
+            html.Div(className='card-body', children=[
+                html.H4(className='card-title', children=[
                     "Bliss Excess"
                 ]),
                 html.P(className='card-text', children=[
-                    "Color indicates percentile bracket for this combination", html.Br(),
-                    html.Strong("Top 33% ", className='badge badge-success'), html.Span(" "),
-                    html.Strong("Middle 33% ", className='badge badge-danger'), html.Span(" "),
-                    html.Strong("Bottom 33% ", className='badge badge-primary'), html.Span(" "),
+                    "Average Bliss in the matrix or 3x3 window.", html.Br(),
+                    # html.Strong("Top 33% ", className='badge badge-success'), html.Span(" "),
+                    # html.Strong("Middle 33% ", className='badge badge-danger'), html.Span(" "),
+                    # html.Strong("Bottom 33% ", className='badge badge-primary'), html.Span(" "),
                 ])
             ]),
             html.Ul(className='list-group list-group-flush', children=[
@@ -71,7 +122,14 @@ def infoblock_matrix(matrix_result):
                     "HSA Excess"
                 ]),
                 html.P(className='card-text', children=[
-                    "Average excess over the highest single agent in the matrix or 3x3 window."
+                    "Average excess over the highest single agent in the matrix or 3x3 window.",
+                    html.Br(),
+                    # html.Strong("Top 33% ", className='badge badge-success'),
+                    # html.Span(" "),
+                    # html.Strong("Middle 33% ", className='badge badge-danger'),
+                    # html.Span(" "),
+                    # html.Strong("Bottom 33% ", className='badge badge-primary'),
+                    # html.Span(" "),
                 ])
             ]),
             html.Ul(className='list-group list-group-flush', children=[
