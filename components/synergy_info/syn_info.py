@@ -1,7 +1,34 @@
-import numpy as np
+from functools import lru_cache
+
 import dash_html_components as html
-import dash_core_components as dcc
-from textwrap import dedent
+import pandas as pd
+
+from db import session
+
+
+def get_badge_classname(value, context, metric):
+    if value < context.loc["33%", metric]:
+        return 'badge-primary'
+    elif value < context.loc["50%", metric]:
+        return 'badge-danger'
+    else:
+        return 'badge-success'
+
+
+# This is only cached for an individual request as the 'matrix'-object is different for each request.
+# A more elegant solution would cache the context for any combination
+@lru_cache()
+def get_context(matrix):
+    return pd.read_sql(matrix.combination.matrices.statement,
+                          session.get_bind()) \
+        .describe(percentiles=[0.33, 0.67])
+
+
+def get_pill(matrix, metric):
+    context = get_context(matrix)
+    value = round(getattr(matrix, metric), 3)
+    badge_cls = get_badge_classname(value, context, metric)
+    return html.Span(f"{value}", className="badge badge-pill " + badge_cls)
 
 
 def infoblock_matrix(matrix_result):
@@ -9,29 +36,32 @@ def infoblock_matrix(matrix_result):
     return html.Div([
         html.Div(className='card mb-3', children=[
             html.Div(className='card-body', children=[
-                html.H5(className='card-title', children=[
+                html.H4(className='card-title', children=[
                     "Bliss Excess"
                 ]),
                 html.P(className='card-text', children=[
-                    "Average Bliss Excess scores over the matrix or 3x3 window."
+                    "Color indicates percentile bracket for this combination", html.Br(),
+                    html.Strong("Top 33% ", className='badge badge-success'), html.Span(" "),
+                    html.Strong("Middle 33% ", className='badge badge-danger'), html.Span(" "),
+                    html.Strong("Bottom 33% ", className='badge badge-primary'), html.Span(" "),
                 ])
             ]),
             html.Ul(className='list-group list-group-flush', children=[
                 html.Li(className='list-group-item d-flex justify-content-between align-items-center', children=[
-                    html.Strong("Matrix average"),
-                    html.Span("0.291")
+                    html.Span("Matrix average"),
+                    get_pill(matrix_result, 'Bliss_excess')
                 ]),
                 html.Li(className='list-group-item d-flex justify-content-between align-items-center', children=[
-                    html.Strong("Matrix average synergistic wells"),
-                    html.Span("0.382")
+                    html.Span("Matrix average synergistic wells"),
+                    get_pill(matrix_result, 'Bliss_excess_syn')
                 ]),
                 html.Li(className='list-group-item d-flex justify-content-between align-items-center', children=[
-                    html.Strong("Highest window"),
-                    html.Span("0.456")
+                    html.Span("Highest window"),
+                    get_pill(matrix_result, 'Bliss_excess_window')
                 ]),
                 html.Li(className='list-group-item d-flex justify-content-between align-items-center', children=[
-                    html.Strong("Highest window synergistic wells"),
-                    html.Span("0.456")
+                    html.Span("Highest window synergistic wells"),
+                    get_pill(matrix_result, 'Bliss_excess_window_syn')
                 ])
             ])
         ]),
@@ -48,26 +78,26 @@ def infoblock_matrix(matrix_result):
                 html.Li(
                     className='list-group-item d-flex justify-content-between align-items-center',
                     children=[
-                        html.Strong("Average"),
-                        html.Span("0.291")
+                        html.Span("Matrix average"),
+                        get_pill(matrix_result, 'HSA_excess')
                     ]),
                 html.Li(
                     className='list-group-item d-flex justify-content-between align-items-center',
                     children=[
-                        html.Strong("Average synergistic wells"),
-                        html.Span("0.382")
+                        html.Span("Matrix average synergistic wells"),
+                        get_pill(matrix_result, 'HSA_excess_syn')
                     ]),
                 html.Li(
                     className='list-group-item d-flex justify-content-between align-items-center',
                     children=[
-                        html.Strong("Highest window"),
-                        html.Span("0.456")
+                        html.Span("Highest window"),
+                        get_pill(matrix_result, 'HSA_excess_window')
                     ]),
                 html.Li(
                     className='list-group-item d-flex justify-content-between align-items-center',
                     children=[
-                        html.Strong("Highest window synergistic wells"),
-                        html.Span("0.456")
+                        html.Span("Highest window synergistic wells"),
+                        get_pill(matrix_result, 'HSA_excess_window_syn')
                     ])
             ])
         ])
