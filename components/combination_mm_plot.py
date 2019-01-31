@@ -46,12 +46,13 @@ def get_project_metrics_from_url(url, metric):
 
 
 def layout():
-    return html.Div(className='border bg-white p-2 my-2', children=[
+    return html.Div(className='border bg-white pt-3 px-4 pb-3 mb-3', children=[
+        html.H3("Combination Interaction"),
+        html.Hr(),
         html.Div(className='row',
                  children=[
                      html.Div(className='col-5',
                               children=[
-                                  html.Label('Combination interaction'),
                                   dcc.Dropdown(
                                       options=metric_dropdown_options,
                                       value='HSA_excess',

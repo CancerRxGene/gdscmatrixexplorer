@@ -1,3 +1,4 @@
+import json
 from textwrap import dedent
 
 import dash
@@ -24,7 +25,7 @@ def layout(matrix):
     try:
         model_information = requests.get(
             f"https://api.cellmodelpassports.sanger.ac.uk/models/{model.id}?include=sample.tissue,sample.cancer_type,sample.patient").json()
-    except requests.exceptions.ConnectionError:
+    except (requests.exceptions.ConnectionError, json.decoder.JSONDecodeError):
         model_information, model_drivers, driver_genes = None, None, None
 
     if model_information:
