@@ -131,14 +131,10 @@ class MatrixResult(ToDictMixin, Base):
     combo_max_effect = sa.Column(sa.Float)
     lib1_max_effect = sa.Column(sa.Float)
     lib2_max_effect = sa.Column(sa.Float)
-
-    @hybrid_property
-    def lib1_delta_max_effect(self):
-        return self.combo_max_effect - self.lib1_max_effect
-
-    @hybrid_property
-    def lib2_delta_max_effect(self):
-        return self.combo_max_effect - self.lib2_max_effect
+    lib1_delta_max_effect = sa.orm.column_property(
+        (combo_max_effect - lib1_max_effect).label('lib1_delta_max_effect'))
+    lib2_delta_max_effect = sa.orm.column_property(
+        (combo_max_effect - lib2_max_effect).label('lib2_delta_max_effect'))
 
 
     combination = relationship("Combination", back_populates='matrices',

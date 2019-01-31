@@ -42,6 +42,96 @@ metrics = ["HSA_excess", "HSA_excess_syn", "HSA_excess_well_count",
            "Bliss_excess_window_syn"
            ]
 
+matrix_metrics = {
+    'Bliss_excess': {
+        'label': 'Bliss Excess',
+        'description': 'Average Bliss Excess',
+        'value': 'Bliss_excess'
+    },
+    'Bliss_excess_syn': {
+        'label': 'Bliss Excess Synergy',
+        'description': 'Average Bliss Excess Synergistic Wells',
+        'value': 'Bliss_excess_syn'
+    },
+    'Bliss_excess_window': {
+        'label': 'Bliss Excess 3x3 Window',
+        'description': 'Average Bliss Excess of the Highest 3x3 Window',
+        'value': 'Bliss_excess_window'
+    },
+    'Bliss_excess_window_syn': {
+        'label': 'Bliss Excess 3x3 Window Synergy',
+        'description': 'Average Bliss Excess of Highest 3x3 Window counting only Synergistic Well',
+        'value': 'Bliss_excess_window_syn'
+    },
+    'HSA_excess': {
+        'label': 'HSA Excess',
+        'description': 'Average HSA Excess',
+        'value': 'HSA_excess'
+    },
+    'HSA_excess_syn': {
+        'label': 'HSA Excess Synergy',
+        'description': 'Average HSA Excess Synergistic Wells',
+        'value': 'HSA_excess_syn'
+    },
+    'HSA_excess_window': {
+        'label': 'HSA Excess 3x3 Window',
+        'description': 'Average HSA Excess of the Highest 3x3 Window',
+        'value': 'HSA_excess_window'
+    },
+    'HSA_excess_window_syn': {
+        'label': 'HSA Excess 3x3 Window Synergy',
+        'description': 'Average HSA Excess of Highest 3x3 Window counting only Synergistic Well',
+        'value': 'HSA_excess_window_syn'
+    },
+    'combo_max_effect': {
+        'label': 'Max Effect Combination',
+        'description': 'Maximum inhibition observed in combination',
+        'value': 'combo_max_effect'
+    },
+    'lib1_max_effect': {
+        'label': 'Max Effect Drug 1',
+        'description': 'Maximum inhibition observed in drug 1',
+        'value': 'lib1_max_effect'
+    },
+    'lib2_max_effect': {
+        'label': 'Max Effect Drug 2',
+        'description': 'Maximum inhibition observed in drug 2',
+        'value': 'lib2_max_effect'
+    },
+    'lib1_delta_max_effect': {
+        'label': 'Delta Max Effect Drug 1',
+        'description': 'Max effect combination minus max effect drug1',
+        'value': 'lib1_delta_max_effect'
+    },
+    'lib2_delta_max_effect': {
+        'label': 'Delta Max Effect Drug 2',
+        'description': 'Max effect combination minus max effect drug2',
+        'value': 'lib2_delta_max_effect'
+    },
+}
+
+well_metrics = {
+    'HSA':
+        {'label': "HSA",
+         'value': "HSA"},
+    'HSA_excess':
+        {'label': "HSA Excess",
+         'value': "HSA_excess"},
+    'Bliss_additivity':
+        {'label': "Bliss Additivity",
+         'value': "Bliss_additivity"},
+    'Bliss_index':
+        {'label': "Bliss Index",
+         'value': "Bliss_index"},
+    'Bliss_excess':
+        {'label': "Bliss Excess",
+         'value': "Bliss_excess"},
+    'Loewe_index':
+        {'label': "Loewe Index",
+         'value': "Loewe_index"}
+}
+
+
 metric_dropdown_options = [
         {'label': 'Bliss excess', 'value': 'Bliss_excess'},
         {'label': 'Bliss excess synergy only', 'value': 'Bliss_excess_syn'},
