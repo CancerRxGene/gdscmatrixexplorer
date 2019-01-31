@@ -7,8 +7,8 @@ import sqlalchemy as sa
 
 from app import app
 from models import Combination
-from utils import url_is_combination_page, metric_dropdown_options, \
-    get_project_metrics, get_project_from_url, get_combination_results_with_sa
+from utils import url_is_combination_page, get_project_metrics, \
+    get_project_from_url, get_combination_results_with_sa, matrix_metrics
 
 
 def get_drug_ids_from_url(url):
@@ -54,7 +54,7 @@ def layout():
                      html.Div(className='col-5',
                               children=[
                                   dcc.Dropdown(
-                                      options=metric_dropdown_options,
+                                      options=list(matrix_metrics.values()),
                                       value='HSA_excess',
                                       id='combo-page-color-scale-select',
                                       clearable=False
@@ -150,7 +150,7 @@ def update_scatter(pathname, colorscale_select):
         )
         ],
         'layout': {
-            'title': colorscale_select,
+            'title': matrix_metrics[colorscale_select]['description'],
             'xaxis': {'title': f"{drug1[0]} IC50 log µM"},
             'yaxis': {'title': f"{drug2[0]} IC50 log µM"}
         }
