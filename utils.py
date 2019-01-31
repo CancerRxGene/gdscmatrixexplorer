@@ -1,9 +1,12 @@
+import math
 import re
 from functools import lru_cache
 
 import pandas as pd
 import sqlalchemy as sa
 import dash_html_components as html
+from sqlalchemy import func
+
 from db import session
 import models
 
@@ -135,6 +138,23 @@ plot_colors = ["rgb(215,150,209)", "rgb(164,250,201)", "rgb(245,167,221)",
                "rgb(222,206,255)", "rgb(122,185,149)", "rgb(255,209,192)",
                "rgb(172,168,198)", "rgb(255,250,203)", "rgb(196,166,142)",
                "rgb(197,237,225)", "rgb(170,175,138)", "rgb(255,235,208)"]
+
+
+@lru_cache(20)
+def get_metric_min_max(metric):
+    return session.query(
+        func.min(getattr(models.WellResult, metric)).label('min_val'),
+        func.max(getattr(models.WellResult, metric)).label('max_val'))\
+        .one()
+
+
+def get_metric_axis_range(metric):
+    min_val, max_val = get_metric_min_max(metric)
+    print(min_val, max_val)
+    try:
+        return math.floor(min_val * 10) / 10, math.ceil(max_val * 10) / 10
+    except OverflowError:
+        return -1 if 'Loewe' not in metric else 0, 1
 
 
 def url_is_combination_page(url):
