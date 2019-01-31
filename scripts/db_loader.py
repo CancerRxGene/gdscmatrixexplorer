@@ -206,10 +206,9 @@ def drugs_to_db(drugs):
 
 
 def extract_drug_matrices(combo_matrix_stats):
-    drug_matrix = combo_matrix_stats[["lib1", "lib1_drug_id", "lib2", "lib2_drug_id",                                "matrix_size"]]
+    drug_matrix = combo_matrix_stats[["lib1", "lib1_drug_id", "lib2", "lib2_drug_id", "matrix_size"]]
     drug_matrix.columns = ["lib1_tag", "lib1_id", "lib2_tag", "lib2_id", "matrix_size"]
     return drug_matrix.drop_duplicates()
-
 
 def drug_matrices_to_db(drug_matrices):
     to_db(Combination, drug_matrices)
@@ -229,8 +228,7 @@ def extract_matrix_results(combo_matrix_stats):
         bliss_cols +
         ["day1_viability_mean", "growth_rate", "doubling_time", "combo_d1_xs"]
     ]
-         # 'combo_max_effect',
-         # 'lib1_max_effect', 'lib2_max_effect', ]
+
 
     matrix_results = matrix_results.rename(
         columns={
@@ -259,7 +257,8 @@ def extract_matrix_results(combo_matrix_stats):
             "Bliss_so_window_excess": "Bliss_excess_window_syn",
             "Bliss_so_window_dose1": "Bliss_excess_window_syn_dose_lib1",
             "Bliss_so_window_dose2": "Bliss_excess_window_syn_dose_lib2",
-            "HSA_window_size": "window_size"
+            "HSA_window_size": "window_size",
+            "combo_d1_xs": "combo_max_effect_excess_over_day1"
         }
     )
 
@@ -268,11 +267,6 @@ def extract_matrix_results(combo_matrix_stats):
     del matrix_results['HSA_so_window_size']
 
     return matrix_results
-
-# def add_delta_max_effects(matrix_results):
-#     matrix_results['lib1_delta_max_effect'] = matrix_results.combo_max_effect - matrix_results.lib1_max_effect
-#     matrix_results['lib2_delta_max_effect'] = matrix_results.combo_max_effect - matrix_results.lib2_max_effect
-#     return(matrix_results)
 
 def add_model_id(df, models, model_id_field='cosmic_id'):
     res = df.merge(models[['id', model_id_field]], on=model_id_field, how='inner')\
