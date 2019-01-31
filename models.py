@@ -1,5 +1,6 @@
 import sqlalchemy as sa
 import numpy as np
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship
 from sqlalchemy_utils import generic_repr
 
@@ -80,6 +81,16 @@ class Combination(ToDictMixin, Base):
         ))
 
     @property
+    def models(self):
+        return sa.orm.object_session(self).query(Model) \
+            .join(MatrixResult, Combination)\
+            .filter(
+                Combination.project_id == self.project_id,
+                Combination.lib1_id == self.lib1_id,
+                Combination.lib2_id == self.lib2_id)\
+            .all()
+
+    @property
     def replicates(self):
         return self.replicates_query.all()
 
@@ -136,6 +147,12 @@ class MatrixResult(ToDictMixin, Base):
     growth_rate = sa.Column(sa.Float)
     doubling_time = sa.Column(sa.Float)
     combo_max_effect_excess_over_day1 = sa.Column(sa.Float)
+
+    lib1_delta_max_effect = sa.orm.column_property(
+        (combo_max_effect - lib1_max_effect).label('lib1_delta_max_effect'))
+    lib2_delta_max_effect = sa.orm.column_property(
+        (combo_max_effect - lib2_max_effect).label('lib2_delta_max_effect'))
+
 
 
     combination = relationship("Combination", back_populates='matrices',

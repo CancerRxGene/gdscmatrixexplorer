@@ -1,8 +1,6 @@
 import dash_html_components as html
 import dash_core_components as dcc
 
-from db import session
-
 from models import MatrixResult
 from components.matrix_intro import layout as intro
 from components.matrix_viability import layout as viability
