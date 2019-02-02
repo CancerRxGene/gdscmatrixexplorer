@@ -31,7 +31,7 @@ def layout(combination):
             ]),
             html.Div(className="row", children=[
                 html.Div(className="col-6", children=[
-                    html.Div(className="bg-white pt-3 px-4 pb-2 mb-3 border border-warning ", children=[
+                    html.Div(className="bg-white pt-3 px-4 pb-2 mb-3 border border-info shadow-sm", children=[
                         html.H3("Drug information"),
                         html.Hr(),
                         html.Div(className="row pb-4", children=[
@@ -96,9 +96,9 @@ def layout(combination):
                         ])
                     ])
                 ]),
-                html.Div(className="col-6", children=[
+                html.Div(className="col-6 d-print-none", children=[
                     html.Div(
-                        className="bg-white pt-3 px-4 pb-2 mb-3 border border-warning ",
+                        className="bg-white pt-3 px-4 pb-2 mb-3 border border-warning shadow-sm",
                         children=[
                             html.H3("View combination in cell line"),
                             html.Hr(),

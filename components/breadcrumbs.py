@@ -12,5 +12,5 @@ def breadcrumb_generator(paths):
 
     return html.Div(
         className='row pl-2 d-print-none',
-        children=html.Div(html.P(crumbs), className='col-12 pl-4 pt-1')
+        children=html.Div(html.P(crumbs), className='col-12 pl-4 pt-2')
     )

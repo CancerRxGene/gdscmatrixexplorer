@@ -29,4 +29,5 @@ header = dbc.NavbarSimple(
     ],
     brand="GDSC Matrix Explorer",
     brand_href='/',
+    className='shadow-sm'
 )

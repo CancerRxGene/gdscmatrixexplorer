@@ -50,7 +50,7 @@ def layout(combination):
             dcc.Location(id='combo-max-effect-url'),
             html.Div(className="row", children=[
                 html.Div(className="col-12", children=[
-                    html.Div(className="bg-white pt-3 px-4 pb-3 mb-3 border border-warning ", children=[
+                    html.Div(className="bg-white pt-3 px-4 pb-3 mb-3 border shadow-sm", children=[
                         html.H3("Max Effect - Monotherapies vs Combination"),
                         html.Hr(),
                         html.Div(className="row pb-4", children=[

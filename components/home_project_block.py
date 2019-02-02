@@ -10,9 +10,10 @@ def project_block(project):
                 dbc.CardTitle(dcc.Link(children=project.name, href=f"/project/{project.slug}")),
                 html.P(f"{len(project.models)} Cell Lines"),
                 html.P(f"{project.combinations.count()} Combinations"),
-                dcc.Link(f"View Project", className='btn btn-primary',
+                dcc.Link(f"View Project", className='btn btn-primary shadow-sm',
                          href=f"/project/{project.slug}")
-            ])
+            ]),
+            className='shadow-sm'
         ),
         width=3
     )

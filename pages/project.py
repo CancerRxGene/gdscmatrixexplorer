@@ -17,9 +17,9 @@ def layout(url):
         crumbs([("Home", "/"), (project.name, "/" + project.slug)]),
         dbc.Row(
             dbc.Col(width=12, children=[
-                dbc.Card([
+                dbc.Card(className='shadow-sm mb-5', children=[
                     dbc.CardBody([
-                        dbc.CardTitle([f"Project ", html.Strong(f"{project.name}")], tag='h2', className='mb-5'),
+                        dbc.CardTitle([f"Project ", html.Strong(f"{project.name}")], tag='h2', className='mt-2 mb-4 ml-3 pl-1 pb-1'),
                         dbc.Row([
                             dbc.Col(width=3, children=[
                                 dbc.ListGroup(className='combinations-list', children=
