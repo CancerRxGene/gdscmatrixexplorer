@@ -1,5 +1,7 @@
+import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
+
 from dash.dependencies import Input, Output
 import dash_auth
 import os
@@ -16,20 +18,13 @@ auth = dash_auth.BasicAuth(app, [[user, password]])
 
 app.layout = html.Div([
         dcc.Location(id='url', refresh=True),
-        html.Div(
+        dbc.Container(
             id='wrapper',
-            className="container",
             children=[
                 header,
-                html.Div(
-                    className='row',
-                    children=[
-                        html.Div(
-                            id='page-content',
-                            className="col-12"),
-                ])
-        ])
-
+                dbc.Row(dbc.Col(id='page-content', width=12))
+            ]
+        )
 ])
 
 server = app.server
