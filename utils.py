@@ -150,7 +150,6 @@ def get_metric_min_max(metric):
 
 def get_metric_axis_range(metric):
     min_val, max_val = get_metric_min_max(metric)
-    print(min_val, max_val)
     try:
         return math.floor(min_val * 10) / 10, math.ceil(max_val * 10) / 10
     except OverflowError:
