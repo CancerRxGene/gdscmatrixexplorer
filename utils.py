@@ -2,9 +2,10 @@ import math
 import re
 from functools import lru_cache
 
+import dash_core_components as dcc
+import dash_html_components as html
 import pandas as pd
 import sqlalchemy as sa
-import dash_html_components as html
 from sqlalchemy import func
 
 from db import session
@@ -239,6 +240,17 @@ def get_combination_from_url(url):
         return html.Div("Multiple results found for this combination - cannot display")
 
     return combination
+
+
+def get_combination_url(combination):
+    return (f"/project/{combination.project.slug}/combination/"
+            f"{combination.lib1_id}+{combination.lib2_id}")
+
+
+def get_combination_link(combination):
+    url = get_combination_url(combination)
+    text = f"{combination.lib1.drug_name} + {combination.lib2.drug_name}"
+    return dcc.Link(text, href=url)
 
 
 @lru_cache()

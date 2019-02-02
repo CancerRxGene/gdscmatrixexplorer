@@ -1,68 +1,57 @@
-import dash
-import dash_core_components as dcc
+import dash_bootstrap_components as dbc
 import dash_html_components as html
 
-import sqlalchemy as sa
-
-from app import app
-from db import session
-from models import Project
 from components.project_boxplot import layout as project_boxplot
 from components.project_scatter import layout as project_scatter
 from components.breadcrumbs import breadcrumb_generator as crumbs
-from utils import get_project_from_url
+from utils import get_project_from_url, get_combination_link, \
+    get_combination_url
 
 
 def layout(url):
     project = get_project_from_url(url)
 
-    def format_combo_links(combo):
-        combo_string = (f"{combo.lib1.drug_name} + {combo.lib2.drug_name}")
-        combo_ref = f"/project/{project.slug}/combination/{combo.lib1_id}+{combo.lib2_id}"
-        return dcc.Link(combo_string, href=combo_ref)
+    combo_links = [get_combination_link(combo) for combo in project.combinations]
 
-    combo_links = [format_combo_links(combo) for combo in
-                   project.combinations]
-
-    tab_selected_style = {
-        'borderTop': '2px solid #D9230F',
-    }
-
-    return html.Div([
+    return [
         crumbs([("Home", "/"), (project.name, "/" + project.slug)]),
-        html.H2(f"{project.name}", className='display-4 mt-2'),
-        html.P(f"Cell Lines: {len(project.models)} - Combinations: {project.combinations.count()}", className='lead mb-4'),
-        html.Div(className='row', children=[
-
-            html.Div(
-                className='col-10',
-                children=[
-                    dcc.Tabs(id="tabs", value='overview', children=[
-                        dcc.Tab(label='Overview', value='overview', selected_style=tab_selected_style),
-                        dcc.Tab(label='FlexiScatter', value='scatter', selected_style=tab_selected_style),
-                    ]),
-                    html.Div(id='tabs-content'),
-                ]),
-            html.Div(
-                children=[html.H3("Combinations")] +
-                         [html.Div([combo_link, html.Br()]) for combo_link in
-                          sorted(combo_links, key=lambda x: x.children)],
-                className='col-2'
-            )
-        ]),
-        html.Div(style={"display": "none"}, children=str(project.id),
-                 id='project-id')
-    ],
-    style={'width':'100%'})
-
-
-
-@app.callback(
-    dash.dependencies.Output('tabs-content', 'children'),
-    [dash.dependencies.Input('tabs', 'value'),
-     dash.dependencies.Input('project-id', 'children')])
-def render_content(tab, project_id):
-    if tab == 'overview':
-        return project_boxplot(project_id)
-    elif tab == 'scatter':
-        return project_scatter(project_id)
+        dbc.Row(
+            dbc.Col(width=12, children=[
+                dbc.Card([
+                    dbc.CardBody([
+                        dbc.CardTitle([f"Project ", html.Strong(f"{project.name}")], tag='h2', className='mb-5'),
+                        dbc.Row([
+                            dbc.Col(width=3, children=[
+                                dbc.ListGroup(className='combinations-list', children=
+                                    [dbc.ListGroupItem([
+                                        html.H5([
+                                            html.Strong(f"Combinations "),
+                                            dbc.Badge(f" {project.combinations.count()} ", color='info')
+                                        ], className="d-flex justify-content-between"),
+                                        html.P("Sorted by target", className='small')
+                                    ])] +
+                                    [dbc.ListGroupItem(
+                                        href=get_combination_url(c),
+                                        action=True,
+                                        children=[
+                                            dbc.ListGroupItemHeading(
+                                                f"{c.lib1.drug_name} + {c.lib2.drug_name}"),
+                                            dbc.ListGroupItemText(
+                                                f"{c.lib1.target} + {c.lib2.target}")
+                                        ]
+                                    ) for c in project.combinations]
+                                )]),
+                            dbc.Col(width=9, children=[
+                                dbc.Tabs([
+                                    dbc.Tab(project_boxplot(), label='Overview'),
+                                    dbc.Tab(project_scatter(project.id),
+                                            label='FlexiScatter')
+                                ]),
+                            ])
+                        ])
+                    ])
+                ])
+            ])
+        ),
+        html.Div(className="d-none", id='project-id', children=project.id)
+    ]

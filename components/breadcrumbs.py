@@ -10,8 +10,7 @@ def breadcrumb_generator(paths):
 
     crumbs.append(html.Strong(paths[-1][0]))
 
-    return html.Div(className='row pl-2 d-print-none', children=[
-        html.Div(className='col-12 pl-4 pt-1', children=[
-            html.P(crumbs)
-        ])
-    ])
+    return html.Div(
+        className='row pl-2 d-print-none',
+        children=html.Div(html.P(crumbs), className='col-12 pl-4 pt-1')
+    )
