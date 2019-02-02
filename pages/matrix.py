@@ -26,5 +26,4 @@ def layout(url):
         intro(my_matrix),
         viability(my_matrix),
         synergy(my_matrix),
-        # table(my_matrix)
     ])
