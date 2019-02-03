@@ -18,7 +18,7 @@ def layout():
     return dbc.Row([
         dcc.Location('project-boxplot-url'),
         dbc.Col(
-            width=6,
+            width={"size": 6, "offset": 3},
             className="mt-2 mb-4",
             children=dbc.Form(inline=True, children=dbc.FormGroup([
                 dbc.Label('Metric', html_for='boxplot-value', className='mr-2'),
