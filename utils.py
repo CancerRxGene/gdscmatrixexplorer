@@ -242,15 +242,9 @@ def get_combination_from_url(url):
     return combination
 
 
-def get_combination_url(combination):
-    return (f"/project/{combination.project.slug}/combination/"
-            f"{combination.lib1_id}+{combination.lib2_id}")
-
-
 def get_combination_link(combination):
-    url = get_combination_url(combination)
     text = f"{combination.lib1.drug_name} + {combination.lib2.drug_name}"
-    return dcc.Link(text, href=url)
+    return dcc.Link(text, href=combination.url)
 
 
 @lru_cache()
