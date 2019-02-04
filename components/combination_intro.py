@@ -1,6 +1,8 @@
 import dash_html_components as html
 import dash_core_components as dcc
 
+from components.navigation.dropdowns import model_links_from_combo
+
 
 def layout(combination):
 
@@ -28,10 +30,12 @@ def layout(combination):
                 ])
             ]),
             html.Div(className="row", children=[
-                html.Div(className="col-12", children=[
-                    html.Div(className="bg-white p-2 my-2 border border-warning ", children=[
+                html.Div(className="col-6", children=[
+                    html.Div(className="bg-white pt-3 px-4 pb-2 mb-3 border border-warning ", children=[
+                        html.H3("Drug information"),
+                        html.Hr(),
                         html.Div(className="row pb-4", children=[
-                            html.Div(className="col-3", children=[
+                            html.Div(className="col-6", children=[
                                 # html.H2(f"{drug1.drug_name}"),
                                 html.Table(children=[
                                     html.Tr(children=[
@@ -60,7 +64,7 @@ def layout(combination):
                                     ])
                                 ], className="table-borderless")
                             ]),
-                            html.Div(className="col-3", children=[
+                            html.Div(className="col-6", children=[
                                 # html.H2(drug2.drug_name),
                                 html.Table(children=[
                                     html.Tr([
@@ -91,6 +95,19 @@ def layout(combination):
                             ]),
                         ])
                     ])
+                ]),
+                html.Div(className="col-6", children=[
+                    html.Div(
+                        className="bg-white pt-3 px-4 pb-2 mb-3 border border-warning ",
+                        children=[
+                            html.H3("View combination in cell line"),
+                            html.Hr(),
+                            html.Div(className="row pb-4", children=[
+                                html.Div(className="col-12", children=[
+                                    model_links_from_combo(combination)
+                                ])
+                            ])
+                        ])
                 ])
             ])
         ]
