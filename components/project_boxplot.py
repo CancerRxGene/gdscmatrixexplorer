@@ -16,12 +16,13 @@ def tissues():
     tissues.insert(0,'Pan-cancer')
     return tissues
 
+
 def layout():
 
     return dbc.Row([
         dcc.Location('project-boxplot-url'),
         dbc.Col(
-            width={"size": 6, "offset": 3},
+            width=6,
             className="mt-2 mb-4",
             children=dbc.Form(inline=True, children=dbc.FormGroup([
                 dbc.Label('Metric', html_for='boxplot-value', className='mr-2'),
@@ -33,7 +34,7 @@ def layout():
                 )
             ]))
         ),
-        dbc.Col(width={"size": 6, "offset": 3},
+        dbc.Col(width=6,
                 className="mt-2 mb-4",
             children=dbc.Form(inline=True, children=dbc.FormGroup([
                 dbc.Label('Tissue', html_for='tissue', className='mr-2'),
