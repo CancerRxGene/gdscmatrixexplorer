@@ -218,6 +218,7 @@ def get_project_from_url(url):
         return html.Div("Project not found")
     return project
 
+
 @lru_cache()
 def get_combination_from_url(url):
     if not url.startswith("/project"):
@@ -279,3 +280,14 @@ def get_combination_results_with_sa(combination):
         .drop(columns=['dosed_tag_lib1', 'dosed_tag_lib2'])
 
     return combo_matrices
+
+
+@lru_cache()
+def get_combination_matrices_summary(project_id, lib1_id, lib2_id, percentiles):
+    percentiles = list(percentiles)
+    query = session.query(models.MatrixResult) \
+        .filter(models.MatrixResult.project_id == project_id) \
+        .filter(models.MatrixResult.lib1_id == lib1_id) \
+        .filter(models.MatrixResult.lib2_id == lib2_id)
+    return pd.read_sql(query.statement, session.get_bind())\
+        .describe(percentiles=percentiles)

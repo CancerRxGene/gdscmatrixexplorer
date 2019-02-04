@@ -93,7 +93,7 @@ def update_combo_heatmap(combo_heatmap_zvalue, combo_json, drug_names):
                 reversescale=False
             )
         ],
-        'layout': go.Layout(title=combo_heatmap_zvalue,
+        'layout': go.Layout(title=well_metrics[combo_heatmap_zvalue]['label'],
                             xaxis={'type': 'category',
                                    'title': drug1 + " µM"
                                    },

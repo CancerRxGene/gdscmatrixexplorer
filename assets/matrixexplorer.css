@@ -1,0 +1,10 @@
+.badge{
+    font-size: 100%!important;
+}
+
+.matrix-metric .card-body {
+    padding-bottom: 0 !important;
+}
+.matrix-metric .card-body p{
+    padding-bottom: 1.25em;
+}
