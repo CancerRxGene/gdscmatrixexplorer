@@ -1,13 +1,13 @@
+import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
+
 from dash.dependencies import Input, Output
-import dash_table_experiments as dt
 import dash_auth
 import os
 
 from app import app
 from pages import project, home, matrix, combinations
-from components import project_scatter
 from page_components import header
 from utils import url_parser
 
@@ -18,23 +18,13 @@ auth = dash_auth.BasicAuth(app, [[user, password]])
 
 app.layout = html.Div([
         dcc.Location(id='url', refresh=True),
-        html.Div(
+        dbc.Container(
             id='wrapper',
-            className="container",
             children=[
                 header,
-                html.Div(
-                    className='row',
-                    children=[
-                        html.Div(
-                            id='page-content',
-                            className="col-12",
-                            children=[
-                                html.Div(className="d-none", children=dt.DataTable(rows=[{}], id='dummy_table'))
-                        ]),
-                ])
-        ])
-
+                dbc.Row(dbc.Col(id='page-content', width=12))
+            ]
+        )
 ])
 
 server = app.server
@@ -56,17 +46,6 @@ def display_page(pathname):
     elif page_type == 'matrix':
         return matrix.layout(pathname)
 
-    # elif pathname.startswith('/project'):
-    #     segments = pathname.split("/")
-    #     if len(segments) == 3:
-    #         return project.layout(segments[2])
-    #     elif len(segments) == 4 and segments[-1] == "scatter":
-    #         return project_scatter.layout(segments[-2])
-    #     elif len(segments) == 5 and segments[3] == "combination":
-    #         return combinations.layout(segments[2], segments[4])
-    # elif isinstance(pathname, str) and pathname.startswith('/matrix'):
-    #     segments = pathname.split("/")
-    #     return matrix.layout(*segments[2:])
     else:
         return '404'
 

@@ -1,4 +1,5 @@
 import dash
+import dash_bootstrap_components as dbc
 import dash_html_components as html
 import dash_core_components as dcc
 import plotly.graph_objs as go
@@ -48,13 +49,13 @@ def layout(combination):
     return html.Div(
         children=[
             dcc.Location(id='combo-max-effect-url'),
-            html.Div(className="row", children=[
-                html.Div(className="col-12", children=[
-                    html.Div(className="bg-white pt-3 px-4 pb-3 mb-3 border border-warning ", children=[
+            dbc.Row(
+                dbc.Col(width=12, children=[
+                    html.Div(className="bg-white pt-3 px-4 pb-3 mb-3 border shadow-sm", children=[
                         html.H3("Max Effect - Monotherapies vs Combination"),
                         html.Hr(),
-                        html.Div(className="row pb-4", children=[
-                            html.Div(className="col-5", children=[
+                        dbc.Row(className="pb-4", children=[
+                            dbc.Col(width=5, children=
                                 dcc.Graph(
                                     id='combo-max-effect-boxplot',
                                     figure=go.Figure(
@@ -83,8 +84,8 @@ def layout(combination):
                                     ),
                                     config={"displayModeBar": False}
                                 )
-                            ]),
-                            html.Div(className="col-4", children=[
+                            ),
+                            dbc.Col(width=4, children=
                                 dcc.Graph(
                                     id='combo-delta-max-effect-boxplot',
                                     figure=go.Figure(
@@ -109,8 +110,8 @@ def layout(combination):
                                     ),
                                     config={"displayModeBar": False}
                                 )
-                            ]),
-                            html.Div(className="col-3", children=[
+                            ),
+                            dbc.Col(width=3, children=
                                 dcc.Graph(
                                     id='combo-bliss-boxplot',
                                     figure=go.Figure(
@@ -131,11 +132,11 @@ def layout(combination):
                                     ),
                                     config={"displayModeBar": False}
                                 )
-                            ]),
+                            )
                         ])
                     ])
                 ])
-            ])
+            )
         ]
     )
 

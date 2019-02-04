@@ -101,6 +101,11 @@ class Combination(ToDictMixin, Base):
                        project_id=project_id) \
             .one()
 
+    @property
+    def url(self):
+        return (f"/project/{self.project.slug}/combination/"
+                f"{self.lib1_id}+{self.lib2_id}")
+
 
 @generic_repr
 class MatrixResult(ToDictMixin, Base):

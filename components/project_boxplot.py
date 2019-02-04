@@ -1,51 +1,84 @@
+from functools import lru_cache
+
 import dash
+import dash_bootstrap_components as dbc
 import dash_core_components as dcc
-import dash_html_components as html
 import pandas as pd
 import plotly.graph_objs as go
-from sqlalchemy import and_
 
 from app import app
 from db import session
-from models import MatrixResult, Combination, Model
+from models import MatrixResult, Model
 from utils import matrix_metrics
-
 
 def tissues():
     tissues = [s[0] for s in session.query(Model.tissue).distinct().all()]
     tissues.insert(0,'Pan-cancer')
     return tissues
 
-def layout(project_id):
-    return html.Div(className='row', children=[
+
+def layout():
+
+    return dbc.Row([
         dcc.Location('project-boxplot-url'),
-        html.Div(
-                className="col-12 mt-2 mb-4",
-                children=[
-                    html.Label('X-Axis', htmlFor='boxplot-value'),
-                    dcc.Dropdown(
-                        options=list(matrix_metrics.values()),
-                        value='Bliss_excess',
-                        id='boxplot-value'
-                    )
-                ]
-            ),
-        html.Div(
-            className="col-12 mt-2 mb-4",
-            children=[
-                html.Label('Tissue', htmlFor='tissue'),
+        dbc.Col(
+            width=6,
+            className="mt-2 mb-4",
+            children=dbc.Form(inline=True, children=dbc.FormGroup([
+                dbc.Label('Metric', html_for='boxplot-value', className='mr-2'),
+                dcc.Dropdown(
+                    options=list(matrix_metrics.values()),
+                    value='Bliss_excess',
+                    id='boxplot-value',
+                    className='flex-grow-1',
+                )
+            ]))
+        ),
+        dbc.Col(width=6,
+                className="mt-2 mb-4",
+            children=dbc.Form(inline=True, children=dbc.FormGroup([
+                dbc.Label('Tissue', html_for='tissue', className='mr-2'),
                 dcc.Dropdown(
                     options=[{'label': c, 'value': c} for c in tissues()],
                     value='Pan-cancer',
-                    id='tissue'
+                    id='tissue',
+                    className='flex-grow-1',
                 )
-            ]
+            ]))
         ),
-            html.Div(
-                className="col-12",
-                children=dcc.Graph(id='project-boxplot')
-            )
+        dbc.Col(
+            width=12,
+            children=dcc.Graph(id='project-boxplot')
+        )
     ])
+
+
+@lru_cache()
+def get_boxplot_summary_data(boxplot_value, project_id, tissue):
+    all_matrices_query = session.query(getattr(MatrixResult, boxplot_value),
+                                       MatrixResult.barcode,
+                                       MatrixResult.cmatrix,
+                                       MatrixResult.lib1_id,
+                                       MatrixResult.lib2_id) \
+        .filter(MatrixResult.project_id == int(project_id))
+
+    if tissue != 'Pan-cancer':
+        all_matrices_query = all_matrices_query.join(Model) \
+            .filter(Model.tissue == tissue)
+
+    summary = pd.read_sql(all_matrices_query.statement,
+                          all_matrices_query.session.bind)
+
+    all_drugs = pd.read_sql_table('drugs', session.bind)
+
+    summary = summary.merge(all_drugs, left_on='lib1_id', right_on='id') \
+        .merge(all_drugs, left_on='lib2_id', right_on='id',
+               suffixes=['_lib1', '_lib2'])
+    summary['combo_id'] = str(project_id) + "::" + \
+                          summary.lib1_id.astype(str) + "::" + \
+                          summary.lib2_id.astype(str)
+
+    return summary
 
 
 @app.callback(
@@ -54,25 +87,9 @@ def layout(project_id):
      dash.dependencies.Input('project-id', 'children'),
      dash.dependencies.Input('tissue', 'value')]
 )
-def update_boxplot(boxplot_value, project_id,tissue):
+def update_boxplot(boxplot_value, project_id, tissue):
 
-    all_matrices_query = session.query(MatrixResult.project_id, getattr(MatrixResult, boxplot_value), MatrixResult.barcode, MatrixResult.cmatrix, Combination.lib1_id, Combination.lib2_id)\
-        .join(Combination)\
-        .filter(and_(MatrixResult.project_id == Combination.project_id,
-                     MatrixResult.lib1_id == Combination.lib1_id,
-                     MatrixResult.lib2_id == Combination.lib2_id))\
-        .filter(MatrixResult.project_id == int(project_id))
-
-    if tissue != 'Pan-cancer':
-        all_matrices_query =  all_matrices_query.join(Model).filter(Model.tissue == tissue)
-
-    summary = pd.read_sql(all_matrices_query.statement, all_matrices_query.session.bind)
-
-    all_drugs = pd.read_sql_table('drugs', session.bind)
-
-    summary = summary.merge(all_drugs, left_on='lib1_id', right_on='id')\
-        .merge(all_drugs, left_on='lib2_id', right_on='id', suffixes=['_lib1', '_lib2'])
-    summary['combo_id'] = summary.project_id.astype(str) + "::" + summary.lib1_id.astype(str) + "::" + summary.lib2_id.astype(str)
+    summary = get_boxplot_summary_data(boxplot_value, project_id, tissue)
 
     def get_drug_names(summary, combo_id):
         row = next(summary.drop_duplicates(subset=['combo_id']).query("combo_id == @combo_id").itertuples())
@@ -81,7 +98,6 @@ def update_boxplot(boxplot_value, project_id,tissue):
     return {
         'data': [
             go.Box(
-                # name=str(cm),
                 name=get_drug_names(summary, combo_id),
                 x=summary.query("combo_id == @combo_id")[boxplot_value],
                 opacity=0.7,

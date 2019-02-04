@@ -1,4 +1,5 @@
 import dash
+import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
 import pandas as pd
@@ -21,15 +22,15 @@ def layout(matrix):
     matrix_df = matrix_df.assign(inhibition=lambda df: 1 - df.viability)
     matrix_df = matrix_df[['lib1_conc', 'lib2_conc'] + list(well_metrics.keys())]
 
-    return html.Div(className='row', children=[
-        html.Div(className='col-12', children=[
-            html.Div(className='border p-3 bg-white', children=[
-                html.Div(className='row pb-3', children=[
-                    html.Div(className='col-12 d-flex flex-row', children=[
-                        html.Div(className='col-auto', children=[
+    return dbc.Row(
+        dbc.Col(width=12, children=[
+            html.Div(className='border p-3 bg-white shadow-sm', children=[
+                dbc.Row([
+                    dbc.Col(width=12, className='d-flex flex-row', children=[
+                        dbc.Col(width='auto', children=
                             html.H3(["Drug combination interaction"], className='pt-1'),
-                        ]),
-                        html.Div(className='col-3', children=[
+                        ),
+                        dbc.Col(width=3, children=
                             dcc.Dropdown(
                                 id='combo-heatmap-zvalue',
                                 options=list(well_metrics.values()),
@@ -37,29 +38,17 @@ def layout(matrix):
                                 searchable=False,
                                 clearable=False
                             )
-                        ]),
-                    ]),
-                    html.Div(html.Hr(), className='col-12'),
-                ]),
-                html.Div(className='row', children=[
-                    html.Div(className='col-7', children=[
-                        html.Div(className='row ', children=[
-                            html.Div(className='col-12', children=[
-                                dcc.Graph(id='combo-heatmap')
-                            ])
-                        ]),
-                        html.Div(className='row', children=[
-                            html.Div(className='col-12', children=[
-                                dcc.Graph(id='combo-surface')
-                            ])
-                        ])
-                    ]),
-                    html.Div(className="col-4 offset-1", children=[
-                        html.Div(
-                            children=[
-                                infoblock_matrix(matrix)
-                            ]
                         ),
+                    ]),
+                    dbc.Col(html.Hr(), width=12)
+                ]),
+                dbc.Row([
+                    dbc.Col(width=7, children=[
+                        dcc.Graph(id='combo-heatmap'),
+                        dcc.Graph(id='combo-surface')
+                    ]),
+                    dbc.Col(width={"size": 4, "offset": 1}, children=[
+                        infoblock_matrix(matrix)
                     ])
                 ])
             ]),
@@ -68,8 +57,7 @@ def layout(matrix):
             html.Div(id='drug_names', style={'display': 'none'},
                      children=f"{drug1}:_:{drug2}")
         ])
-    ])
-
+    )
 
 
 @app.callback(

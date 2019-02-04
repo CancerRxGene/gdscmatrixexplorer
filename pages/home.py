@@ -1,3 +1,4 @@
+import dash_bootstrap_components as dbc
 import dash_html_components as html
 
 from components.home_project_block import project_block
@@ -11,9 +12,6 @@ def layout(*args, **kwargs):
     return html.Div([
         html.H1("GDSC Matrix Explorer", className='display-4 text-center mt-5 mb-3'),
         html.P("Projects", className='lead text-center'),
-        html.Div(
-            [project_block(p) for p in projects],
-            className='row'
-        )
+        dbc.Row([project_block(p) for p in projects])
     ])
 
