@@ -7,12 +7,15 @@ from sqlalchemy import and_
 
 from app import app
 from db import session
-from models import MatrixResult, Combination
+from models import MatrixResult, Combination, Model
 from utils import metrics
 
+def tissues():
+    tissues = [s[0] for s in session.query(Model.tissue).distinct().all()]
+    tissues.insert(0,'Pan-cancer')
+    return tissues
 
 def layout(project_id):
-
     return html.Div(className='row', children=[
         dcc.Location('project-boxplot-url'),
         html.Div(
@@ -26,6 +29,17 @@ def layout(project_id):
                     )
                 ]
             ),
+        html.Div(
+            className="col-12 mt-2 mb-4",
+            children=[
+                html.Label('Tissue', htmlFor='tissue'),
+                dcc.Dropdown(
+                    options=[{'label': c, 'value': c} for c in tissues()],
+                    value='Pan-cancer',
+                    id='tissue'
+                )
+            ]
+        ),
             html.Div(
                 className="col-12",
                 children=dcc.Graph(id='project-boxplot')
@@ -36,16 +50,30 @@ def layout(project_id):
 @app.callback(
     dash.dependencies.Output('project-boxplot', 'figure'),
     [dash.dependencies.Input('boxplot-value', 'value'),
-     dash.dependencies.Input('project-id', 'children')]
+     dash.dependencies.Input('project-id', 'children'),
+     dash.dependencies.Input('tissue', 'value')]
 )
-def update_boxplot(boxplot_value, project_id):
+def update_boxplot(boxplot_value, project_id,tissue):
+    if tissue == 'Pan-cancer':
+        all_matrices_query = session.query(MatrixResult.project_id, getattr(MatrixResult, boxplot_value), MatrixResult.barcode, MatrixResult.cmatrix, Combination.lib1_id, Combination.lib2_id)\
+            .join(Combination)\
+            .filter(and_(MatrixResult.project_id == Combination.project_id,
+                         MatrixResult.lib1_id == Combination.lib1_id,
+                         MatrixResult.lib2_id == Combination.lib2_id))\
+            .filter(MatrixResult.project_id == int(project_id))
 
-    all_matrices_query = session.query(MatrixResult.project_id, getattr(MatrixResult, boxplot_value), MatrixResult.barcode, MatrixResult.cmatrix, Combination.lib1_id, Combination.lib2_id)\
-        .join(Combination)\
-        .filter(and_(MatrixResult.project_id == Combination.project_id,
-                     MatrixResult.lib1_id == Combination.lib1_id,
-                     MatrixResult.lib2_id == Combination.lib2_id))\
-        .filter(MatrixResult.project_id == int(project_id))
+    else:
+        all_matrices_query = session.query(MatrixResult.project_id, getattr(MatrixResult, boxplot_value),
+                                           MatrixResult.barcode, MatrixResult.cmatrix, Combination.lib1_id,
+                                           Combination.lib2_id) \
+            .join(Combination) \
+            .join(Model) \
+            .filter(and_(MatrixResult.project_id == Combination.project_id,
+                         MatrixResult.lib1_id == Combination.lib1_id,
+                         MatrixResult.lib2_id == Combination.lib2_id)) \
+            .filter(MatrixResult.project_id == int(project_id)) \
+            .filter(Model.id == MatrixResult.model_id)\
+            .filter(Model.tissue == tissue)
 
     summary = pd.read_sql(all_matrices_query.statement, all_matrices_query.session.bind)
 
