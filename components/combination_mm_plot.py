@@ -1,41 +1,18 @@
-import dash_html_components as html
+import dash_bootstrap_components as dbc
 import dash_core_components as dcc
+import dash_html_components as html
 import plotly.graph_objs as go
 import dash.dependencies
 import plotly.figure_factory as ff
-import sqlalchemy as sa
 
 from app import app
-from models import Combination
 from utils import url_is_combination_page, get_project_metrics, \
-    get_project_from_url, get_combination_results_with_sa, matrix_metrics
-
-
-def get_drug_ids_from_url(url):
-    segments = url.split("/")
-    if len(segments) < 5:
-        return None, None
-    drug_ids = segments[4]
-    drug1_id, drug2_id = drug_ids.split("+")
-
-    return int(drug1_id), int(drug2_id)
-
-
-def get_combination(project_id, lib1_id, lib2_id):
-    try:
-        combination = Combination.get(project_id, lib1_id, lib2_id)
-    except sa.orm.exc.NoResultFound:
-        return html.Div("Combination not found")
-    except sa.orm.exc.MultipleResultsFound:
-        return html.Div("Multiple results found for this combination - cannot display")
-
-    return combination
+    get_project_from_url, get_combination_results_with_sa, matrix_metrics, \
+    get_combination_from_url
 
 
 def get_plot_data_from_url(url):
-    project = get_project_from_url(url)
-    drug1_id, drug2_id = get_drug_ids_from_url(url)
-    combination = get_combination(project.id, drug1_id, drug2_id)
+    combination = get_combination_from_url(url)
     plot_data = get_combination_results_with_sa(combination)
     return plot_data
 
