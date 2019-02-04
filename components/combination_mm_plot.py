@@ -26,40 +26,26 @@ def layout():
     return html.Div(className='border bg-white pt-3 px-4 pb-3 mb-3 shadow-sm', children=[
         html.H3("Combination Interaction"),
         html.Hr(),
-        html.Div(className='row',
-                 children=[
-                     html.Div(className='col-5',
-                              children=[
-                                  dcc.Dropdown(
-                                      options=list(matrix_metrics.values()),
-                                      value='HSA_excess',
-                                      id='combo-page-color-scale-select',
-                                      clearable=False
-                                  ),
-                                  dcc.Graph(
-                                      id='intxn-distn',
-                                      config={
-                                          'displayModeBar': False
-                                      }
-                                  )
-                              ],
-                              style={'width': '20%', 'float': 'left'}
-                              ),
-                     html.Div(className='col-7',
-                              children=[
-                                  dcc.Graph(
-                                      id='combo-page-mm-scatter'
-                                  )
-                              ],
-                              style={'width': '100%', 'float': 'left'}
-                              )
-                 ]),
-        html.Div(className='row pt-5 pb-5', children=[
-            html.Div(className='col-12', children=[
-                dcc.Graph(id='combo-tissue')
-            ])
-        ])
-
+        dbc.Row([
+            dbc.Col(width=5, children=[
+                dcc.Dropdown(
+                  options=list(matrix_metrics.values()),
+                  value='HSA_excess',
+                  id='combo-page-color-scale-select',
+                  clearable=False
+                ),
+                dcc.Graph(
+                  id='intxn-distn',
+                  config={
+                      'displayModeBar': False
+                  }
+                )
+            ]),
+            dbc.Col(dcc.Graph(id='combo-page-mm-scatter'), width=7)
+         ]),
+        dbc.Row(
+            dbc.Col(dcc.Graph(id='combo-tissue'), width=12, className='py-5')
+        )
     ])
 
 
