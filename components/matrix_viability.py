@@ -1,4 +1,5 @@
 import dash
+import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
 import pandas as pd
@@ -52,15 +53,15 @@ def layout(matrix: MatrixResult):
 
     matrix_df = matrix_df[['lib1_conc', 'lib2_conc'] + available_viability_metrics]
 
-    return html.Div(className='row pb-5', children=[
-        html.Div(className='col-12', children=[
-            html.Div(className='border bg-white p-4', children=[
-                html.Div(className='row', children=[
-                    html.Div(className='col-12 d-flex flex-row', children=[
-                        html.Div(className='col-auto', children=[
+    return dbc.Row(className='pb-5', children=[
+        dbc.Col(width=12, children=[
+            html.Div(className='border bg-white p-4 shadow-sm', children=[
+                dbc.Row([
+                    dbc.Col(width=12, className='d-flex flex-row', children=[
+                        dbc.Col(width='auto', children=[
                             html.H3(["Measured activity"], className='pt-1'),
                         ]),
-                        html.Div(className='col-3', children=[
+                        dbc.Col(width=3, children=
                             dcc.Dropdown(
                                 id='viability-heatmap-zvalue',
                                 options=[{'label': i, 'value': i} for i in
@@ -68,26 +69,26 @@ def layout(matrix: MatrixResult):
                                 value='viability',
                                 searchable=False,
                                 clearable=False
-                            ),
-                        ]),
+                            )
+                        )
                     ]),
-                    html.Div(html.Hr(), className='col-12')
+                    dbc.Col(html.Hr(), width=12)
                 ]),
-                html.Div(className='row', children=[
-                    html.Div(className='col-8', children=[
+                dbc.Row([
+                    dbc.Col(width=8, children=[
                         dcc.Graph(id='viability-heatmap'),
                         html.Div(className='col-8 offset-2', children=[
                         ])
                     ]),
-                    html.Div(className='col-4', children=[
+                    dbc.Col(width=4, children=[
                         dcc.Graph(id='viability-surface'),
                     ]),
                 ]),
-                html.Div(className='row', children=[
-                    html.Div(className='col-4 offset-1', children=[
+                dbc.Row([
+                    dbc.Col(width={"size":4, "offset":1}, children=[
                         html.Div(id='dr_row'),
                     ]),
-                    html.Div(className='col-4', children=[
+                    dbc.Col(width=4, children=[
                         html.Div(id='dr_column')
                     ])
                 ])

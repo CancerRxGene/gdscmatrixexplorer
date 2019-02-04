@@ -1,7 +1,7 @@
 import json
-from textwrap import dedent
 
 import dash
+import dash_bootstrap_components as dbc
 import dash_html_components as html
 import dash_core_components as dcc
 import requests
@@ -16,80 +16,72 @@ from models import Model
 
 
 def layout(matrix):
-    curve1 = matrix.single_agent_curves[0]
-    drug1 = matrix.drugs[matrix.lib1_id]
-    curve2 = matrix.single_agent_curves[1]
-    drug2 = matrix.drugs[matrix.lib2_id]
+    curve1, curve2 = matrix.single_agent_curves
+    drug1 = matrix.combination.lib1
+    drug2 = matrix.combination.lib2
     model = matrix.model
 
     matrix_hsa = [w.HSA_excess for w in matrix.well_results]
     max_hsa = max(matrix_hsa)
 
 
-
     return html.Div([
-
-        html.Div(className="row mt-3 mb-2 pl-3 d-flex flex-row", children=[
-            html.Div(className="col-12", children=[
+        dbc.Row(className="mt-3 mb-2 pl-3", children=
+            dbc.Col(width=12, children=[
                 dcc.Markdown(f"# **{drug1.drug_name}** + **{drug2.drug_name}** in cell model **{model.name}**"),
                 html.P("Combination Matrix Report", className='lead')
             ])
-        ]),
-        html.Div(className="row mt-2 mb-5", children=[
-            html.Div(className="col-9 d-flex flex-column", children=[
-                html.Div(className="row mb-3", children=[
-                    html.Div(className='col-12', children=[
-                        html.Div(
-                            id=f"cell-info-{model.id}",
-                            className="bg-white pt-4 px-4 pb-1 border border-warning",
-                            children=[html.Div([
-                                html.H3(["Cell Line ", html.Strong(model.name)]),
-                                html.Table(
-                                    id='model-information',
-                                    className='table',
-                                    children=[
-                                        html.Tr([
-                                            html.Td([
-                                                html.Strong("Tissue "), model.tissue, html.Br(),
-                                                html.Strong("Cancer Type "), model.cancer_type,
-                                                html.Br(), html.Br(), html.Em("Loading more information from Cell Model Passports...")],
-                                                className="pl-0", style={"width": "30%"})
-                                        ])
-                                    ]
-                                ),
-                            ])]
+        ),
+        dbc.Row(className="mt-2 mb-5", children=[
+            dbc.Col(width=9, children=[
+                html.Div(
+                    id=f"cell-info-{model.id}",
+                    className="bg-white pt-4 px-4 pb-1 mb-3 border border-warning shadow-sm",
+                    children=html.Div([
+                        html.H3(["Cell Line ", html.Strong(model.name)]),
+                        html.Table(
+                            id='model-information',
+                            className='table',
+                            children=[
+                                html.Tr([
+                                    html.Td([
+                                        html.Strong("Tissue "), model.tissue, html.Br(),
+                                        html.Strong("Cancer Type "), model.cancer_type,
+                                        html.Br(), html.Br(),
+                                        html.Em("Loading more information from Cell Model Passports...")],
+                                        className="pl-0")
+                                ])
+                            ]
                         )
                     ])
-                ]),
+                ),
 
-                html.Div(className="row", children=[
-                    html.Div(className="col-6 d-flex flex-column", children=[
+                dbc.Row([
+                    dbc.Col(width=6, children=
                         html.Div(
                             id=f"drug-info-{drug1.id}",
-                            className="bg-white pt-4 px-4 pb-1 border border-info h-100",
+                            className="bg-white pt-4 px-4 pb-1 border border-info h-100 shadow-sm",
                             children=[
                                 infoblock(drug1),
                                 curve1.plot(style={'maxHeight': '250px'})
                             ]
                         ),
-                    ]),
-                    html.Div(className="col-6 d-flex flex-column", children=[
+                    ),
+                    dbc.Col(width=6, children=
                         html.Div(
                             id=f"drug-info-{drug1.id}",
-                            className="bg-white pt-4 px-4 pb-1 border border-info h-100",
+                            className="bg-white pt-4 px-4 pb-1 border border-info h-100 shadow-sm",
                             children=[
                                 infoblock(drug2),
                                 curve2.plot(style={'maxHeight': '250px'})
                             ]
-                        ),
-                    ])
+                        )
+                    )
                 ]),
-
-
             ]),
 
-            html.Div(className='col-3', children=[
-                html.Div(className='bg bg-light border pt-3 px-4 pb-3 mb-3', children=[
+            dbc.Col(width=3, children=[
+                html.Div(className='bg bg-light border pt-3 px-4 pb-3 mb-3 shadow-sm', children=[
                     html.H3("Summary"),
                     html.Strong("Max. observed inhibition %"),
                     html.Hr(),
@@ -112,7 +104,7 @@ def layout(matrix):
                         ])
                     ]),
                 ]),
-                html.Div(className='bg bg-light border pt-4 px-4 pb-1 d-print-none',
+                html.Div(className='bg bg-light border pt-4 px-4 pb-1 d-print-none shadow-sm',
                          children=[
                              html.H3("Quick Navigation"),
                              html.Hr(),
@@ -122,7 +114,7 @@ def layout(matrix):
                          ])
             ])
         ]),
-        html.Div(id='hidden-div', className='d-none'),
+        # html.Div(id='hidden-div', className='d-none'),
         html.Div(id='model-id', className='d-none', children=matrix.model_id),
         html.Div(id='passport-data', className='d-none')
     ]

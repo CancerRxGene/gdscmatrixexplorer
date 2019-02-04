@@ -1,3 +1,4 @@
+import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
 
@@ -10,7 +11,7 @@ def breadcrumb_generator(paths):
 
     crumbs.append(html.Strong(paths[-1][0]))
 
-    return html.Div(
-        className='row pl-2 d-print-none',
-        children=html.Div(html.P(crumbs), className='col-12 pl-4 pt-2')
+    return dbc.Row(
+        dbc.Col(html.P(crumbs), width=12, className='pl-4 pt-2'),
+        className='pl-2 d-print-none'
     )
