@@ -3,15 +3,18 @@ from functools import lru_cache
 import dash
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
-import dash_html_components as html
 import pandas as pd
 import plotly.graph_objs as go
 
 from app import app
 from db import session
-from models import MatrixResult
+from models import MatrixResult, Model
 from utils import matrix_metrics
 
+def tissues():
+    tissues = [s[0] for s in session.query(Model.tissue).distinct().all()]
+    tissues.insert(0,'Pan-cancer')
+    return tissues
 
 def layout():
 
@@ -30,6 +33,18 @@ def layout():
                 )
             ]))
         ),
+        dbc.Col(width={"size": 6, "offset": 3},
+                className="mt-2 mb-4",
+            children=dbc.Form(inline=True, children=dbc.FormGroup([
+                dbc.Label('Tissue', html_for='tissue', className='mr-2'),
+                dcc.Dropdown(
+                    options=[{'label': c, 'value': c} for c in tissues()],
+                    value='Pan-cancer',
+                    id='tissue',
+                    className='flex-grow-1',
+                )
+            ]))
+        ),
         dbc.Col(
             width=12,
             children=dcc.Graph(id='project-boxplot')
@@ -38,13 +53,17 @@ def layout():
 
 
 @lru_cache()
-def get_boxplot_summary_data(boxplot_value, project_id):
+def get_boxplot_summary_data(boxplot_value, project_id, tissue):
     all_matrices_query = session.query(getattr(MatrixResult, boxplot_value),
                                        MatrixResult.barcode,
                                        MatrixResult.cmatrix,
                                        MatrixResult.lib1_id,
-                                       MatrixResult.lib2_id)\
+                                       MatrixResult.lib2_id) \
         .filter(MatrixResult.project_id == int(project_id))
+
+    if tissue != 'Pan-cancer':
+        all_matrices_query = all_matrices_query.join(Model) \
+            .filter(Model.tissue == tissue)
 
     summary = pd.read_sql(all_matrices_query.statement,
                           all_matrices_query.session.bind)
@@ -64,11 +83,12 @@ def get_boxplot_summary_data(boxplot_value, project_id):
 @app.callback(
     dash.dependencies.Output('project-boxplot', 'figure'),
     [dash.dependencies.Input('boxplot-value', 'value'),
-     dash.dependencies.Input('project-id', 'children')]
+     dash.dependencies.Input('project-id', 'children'),
+     dash.dependencies.Input('tissue', 'value')]
 )
-def update_boxplot(boxplot_value, project_id):
+def update_boxplot(boxplot_value, project_id, tissue):
 
-    summary = get_boxplot_summary_data(boxplot_value, project_id)
+    summary = get_boxplot_summary_data(boxplot_value, project_id, tissue)
 
     def get_drug_names(summary, combo_id):
         row = next(summary.drop_duplicates(subset=['combo_id']).query("combo_id == @combo_id").itertuples())
@@ -77,7 +97,6 @@ def update_boxplot(boxplot_value, project_id):
     return {
         'data': [
             go.Box(
-                # name=str(cm),
                 name=get_drug_names(summary, combo_id),
                 x=summary.query("combo_id == @combo_id")[boxplot_value],
                 opacity=0.7,
