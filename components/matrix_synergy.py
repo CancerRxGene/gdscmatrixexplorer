@@ -8,11 +8,10 @@ import plotly.graph_objs as go
 from components.synergy_info.syn_info import infoblock_matrix
 
 from app import app
+from utils import get_metric_axis_range, well_metrics
 
 
 def layout(matrix):
-    available_combo_metrics = ["HSA_excess", "Bliss_excess", "HSA",
-                               "Bliss_additivity", "Bliss_index", "Loewe_index"]
 
     drug1 = matrix.combination.lib1.drug_name
     drug2 = matrix.combination.lib2.drug_name
@@ -20,7 +19,7 @@ def layout(matrix):
     matrix_df = pd.DataFrame([w.to_dict() for w in matrix.well_results])
 
     matrix_df = matrix_df.assign(inhibition=lambda df: 1 - df.viability)
-    matrix_df = matrix_df[['lib1_conc', 'lib2_conc'] + available_combo_metrics]
+    matrix_df = matrix_df[['lib1_conc', 'lib2_conc'] + list(well_metrics.keys())]
 
     return html.Div(className='row', children=[
         html.Div(className='col-12', children=[
@@ -33,8 +32,7 @@ def layout(matrix):
                         html.Div(className='col-3', children=[
                             dcc.Dropdown(
                                 id='combo-heatmap-zvalue',
-                                options=[{'label': i, 'value': i} for i in
-                                         available_combo_metrics],
+                                options=list(well_metrics.values()),
                                 value='HSA_excess',
                                 searchable=False,
                                 clearable=False
@@ -93,6 +91,7 @@ def update_combo_heatmap(combo_heatmap_zvalue, combo_json, drug_names):
     matrix_df['lib2_conc'] = [np.format_float_scientific(conc, 3) for conc in matrix_df['lib2_conc']]
 
     zvalue = matrix_df[combo_heatmap_zvalue]
+    zmin, zmax = get_metric_axis_range(combo_heatmap_zvalue)
 
     return {
         'data': [
@@ -100,10 +99,10 @@ def update_combo_heatmap(combo_heatmap_zvalue, combo_json, drug_names):
                 x=matrix_df.lib1_conc,
                 y=matrix_df.lib2_conc,
                 z=zvalue,
-                zmax=1,
-                zmin=0,
+                zmax=zmax,
+                zmin=zmin,
                 colorscale='Reds',
-                reversescale=True
+                reversescale=False
             )
         ],
         'layout': go.Layout(title=combo_heatmap_zvalue,
@@ -139,6 +138,7 @@ def update_combo_surface(combo_heatmap_zvalue, combo_json, drug_names):
     lib1_conc_table = lib1_conc_table.sort_values(by=['lib2_conc'], ascending=1)
     lib2_conc_table = matrix_df.pivot(index='lib2_conc', columns='lib1_conc', values='lib2_conc')
     lib2_conc_table = lib2_conc_table.sort_values(by=['lib2_conc'], ascending=1)
+    zmin, zmax = get_metric_axis_range(combo_heatmap_zvalue)
 
     return {
         'data': [
@@ -148,8 +148,8 @@ def update_combo_surface(combo_heatmap_zvalue, combo_json, drug_names):
                 y=lib2_conc_table.values,
                 colorscale='Reds',
                 reversescale=True,
-                cmax=1,
-                cmin=0,
+                cmax=zmax,
+                cmin=zmin,
                 showscale=False
             )
         ],
@@ -189,13 +189,20 @@ def update_combo_surface(combo_heatmap_zvalue, combo_json, drug_names):
                     }
                 },
                 'zaxis': {
-                    'range': (-0.2, 0.3),
+                    'range': (zmin, zmax),
                     'title': combo_heatmap_zvalue,
                     'titlefont': {
                         'size': 12
                     },
                     'tickfont': {
                         'size': 10
+                    }
+                },
+                'camera': {
+                    'eye': {
+                        'x': -1.25,
+                        'y': -1.25,
+                        'z': 1.25
                     }
                 }
             }

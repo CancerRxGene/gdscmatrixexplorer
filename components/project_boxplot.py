@@ -8,7 +8,8 @@ from sqlalchemy import and_
 from app import app
 from db import session
 from models import MatrixResult, Combination, Model
-from utils import metrics
+from utils import matrix_metrics
+
 
 def tissues():
     tissues = [s[0] for s in session.query(Model.tissue).distinct().all()]
@@ -23,7 +24,7 @@ def layout(project_id):
                 children=[
                     html.Label('X-Axis', htmlFor='boxplot-value'),
                     dcc.Dropdown(
-                        options=[{'label': c, 'value': c} for c in metrics],
+                        options=list(matrix_metrics.values()),
                         value='Bliss_excess',
                         id='boxplot-value'
                     )
@@ -105,7 +106,7 @@ def update_boxplot(boxplot_value, project_id,tissue):
             margin=dict(l=150, r=70, b=80, t=20),
             showlegend=False,
             xaxis={'type': 'log' if 'index' in boxplot_value else 'linear',
-                   'title': boxplot_value.replace('_', ' ')}
+                   'title': matrix_metrics[boxplot_value]['label']}
         )
     }
 

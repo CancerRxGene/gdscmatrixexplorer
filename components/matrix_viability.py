@@ -233,7 +233,7 @@ def update_viability_surface(viability_heatmap_zvalue, matrix_json, drug_names):
                 reversescale=True,
                 cmax=1,
                 cmin=0,
-                showscale=False
+                showscale=False,
             )
         ],
         'layout': go.Layout(
