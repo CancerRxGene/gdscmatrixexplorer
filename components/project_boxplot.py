@@ -54,26 +54,16 @@ def layout(project_id):
      dash.dependencies.Input('tissue', 'value')]
 )
 def update_boxplot(boxplot_value, project_id,tissue):
-    if tissue == 'Pan-cancer':
-        all_matrices_query = session.query(MatrixResult.project_id, getattr(MatrixResult, boxplot_value), MatrixResult.barcode, MatrixResult.cmatrix, Combination.lib1_id, Combination.lib2_id)\
-            .join(Combination)\
-            .filter(and_(MatrixResult.project_id == Combination.project_id,
-                         MatrixResult.lib1_id == Combination.lib1_id,
-                         MatrixResult.lib2_id == Combination.lib2_id))\
-            .filter(MatrixResult.project_id == int(project_id))
 
-    else:
-        all_matrices_query = session.query(MatrixResult.project_id, getattr(MatrixResult, boxplot_value),
-                                           MatrixResult.barcode, MatrixResult.cmatrix, Combination.lib1_id,
-                                           Combination.lib2_id) \
-            .join(Combination) \
-            .join(Model) \
-            .filter(and_(MatrixResult.project_id == Combination.project_id,
-                         MatrixResult.lib1_id == Combination.lib1_id,
-                         MatrixResult.lib2_id == Combination.lib2_id)) \
-            .filter(MatrixResult.project_id == int(project_id)) \
-            .filter(Model.id == MatrixResult.model_id)\
-            .filter(Model.tissue == tissue)
+    all_matrices_query = session.query(MatrixResult.project_id, getattr(MatrixResult, boxplot_value), MatrixResult.barcode, MatrixResult.cmatrix, Combination.lib1_id, Combination.lib2_id)\
+        .join(Combination)\
+        .filter(and_(MatrixResult.project_id == Combination.project_id,
+                     MatrixResult.lib1_id == Combination.lib1_id,
+                     MatrixResult.lib2_id == Combination.lib2_id))\
+        .filter(MatrixResult.project_id == int(project_id))
+
+    if tissue != 'Pan-cancer':
+        all_matrices_query =  all_matrices_query.join(Model).filter(Model.tissue == tissue)
 
     summary = pd.read_sql(all_matrices_query.statement, all_matrices_query.session.bind)
 
