@@ -41,7 +41,7 @@ class DoseResponsePlot:
         self.mark_emax = mark_emax
         self.label_emax = label_emax
         self.label_rmse = label_rmse
-        self._style = style
+        self.style = style
         self.width = width
         self.height = height
 
@@ -287,10 +287,3 @@ class DoseResponsePlot:
             borderpad=2,
             font={"size": 12, 'color': C.DARKGREY if self.curve.rmse < 0.3 else 'white'}
         )
-
-    @property
-    def style(self):
-        # print(self._style)
-        # self._style.update({'border': "5px solid red"})
-        # print(self._style)
-        return self._style
