@@ -254,17 +254,16 @@ def get_combination_results_with_sa(combination):
 
     # We need the single agent IC50s for the MM plot
     dr_curves_query = session.query(
-        models.DoseResponseCurve.lib1_id,
-        models.DoseResponseCurve.dosed_tag,
+        models.DoseResponseCurve.drug_id_lib,
+        models.DoseResponseCurve.tag,
         models.DoseResponseCurve.ic50,
         models.DoseResponseCurve.barcode,
         models.DoseResponseCurve.minc,
         models.DoseResponseCurve.maxc
     ) \
-        .filter(models.DoseResponseCurve.treatment_type == 'S',
-                models.DoseResponseCurve.project_id == combination.project_id) \
-        .filter(sa.or_(models.DoseResponseCurve.lib1_id == combination.lib1_id,
-                       models.DoseResponseCurve.lib1_id == combination.lib2_id)
+        .filter(models.DoseResponseCurve.project_id == combination.project_id) \
+        .filter(sa.or_(models.DoseResponseCurve.drug_id_lib == combination.lib1_id,
+                       models.DoseResponseCurve.drug_id_lib == combination.lib2_id)
                 )
     all_dr_curves = pd.read_sql(dr_curves_query.statement, session.bind).rename(
         columns={'lib1_id': 'drug_id'})
@@ -273,11 +272,11 @@ def get_combination_results_with_sa(combination):
         .assign(**{'lib1_name': combination.lib1.drug_name,
                    'lib2_name': combination.lib2.drug_name}) \
         .merge(right=all_dr_curves, left_on=['barcode', 'lib1_tag'],
-               right_on=['barcode', 'dosed_tag']) \
+               right_on=['barcode', 'tag']) \
         .merge(right=all_dr_curves, how='left', left_on=['barcode', 'lib2_tag'],
-               right_on=['barcode', 'dosed_tag'], suffixes=['_lib1', '_lib2']) \
+               right_on=['barcode', 'tag'], suffixes=['_lib1', '_lib2']) \
         .merge(all_cell_models, left_on=['model_id'], right_on=['id']) \
-        .drop(columns=['dosed_tag_lib1', 'dosed_tag_lib2'])
+        .drop(columns=['tag_lib1', 'tag_lib2'])
 
     return combo_matrices
 

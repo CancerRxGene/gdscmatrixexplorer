@@ -309,21 +309,17 @@ def well_results_to_db(well_results):
 
 def extract_dose_response_curves(nlme_stats):
     dr_curves = nlme_stats[
-        ['fitted_treatment', 'treatment_type', 'BARCODE', 'cmatrix',
-         'DRUGSET_ID', 'DRUG_ID_lib',  'treatment', 'xmid', 'scal', 'RMSE', 'IC50', 'auc', 'Emax', 'maxc', 'minc']
+        ['fitted_treatment', 'treatment_type', 'BARCODE', 'DRUGSET_ID',
+         'DRUG_ID_lib', 'xmid', 'scal', 'RMSE', 'IC50', 'auc', 'Emax', 'maxc',
+         'minc']
     ]\
-        .drop_duplicates()
+        .query("treatment_type == 'S'")\
+        .drop_duplicates()\
+        .rename(columns={'fitted_treatment': 'tag'})
 
     dr_curves.columns = [c.lower() for c in dr_curves.columns]
 
-    dr_curves[['fixed_tag', 'fixed_dose', 'dosed_tag']] = \
-        dr_curves.fitted_treatment.str.extract(
-            '(?:(?P<fixed_tag>[A,L][0-9]+)(?P<fixed_dose>D[0-9]+)-)?(?P<dosed_tag>[A,L][0-9]+)$',
-            expand=True)
-    dr_curves[['lib1_id', 'lib2_id']] = dr_curves.drug_id_lib.str.split("|", n=2, expand=True)
-
-    del dr_curves['fitted_treatment']
-    del dr_curves['drug_id_lib']
+    del dr_curves['treatment_type']
 
     return dr_curves
 
