@@ -250,21 +250,24 @@ def get_combination_link(combination):
 
 @lru_cache()
 def get_combination_results_with_sa(combination):
-    all_cell_models = pd.read_sql_table('models', session.bind)
+    all_cell_models = pd.read_sql_table('models', session.bind)\
+        .rename(columns={'name': 'model_name'})
 
     # We need the single agent IC50s for the MM plot
     dr_curves_query = session.query(
-        models.DoseResponseCurve.lib1_id,
-        models.DoseResponseCurve.dosed_tag,
+        models.DoseResponseCurve.drug_id_lib,
+        models.DoseResponseCurve.tag,
         models.DoseResponseCurve.ic50,
         models.DoseResponseCurve.barcode,
         models.DoseResponseCurve.minc,
-        models.DoseResponseCurve.maxc
+        models.DoseResponseCurve.maxc,
+        models.Drug.drug_name,
+        models.Drug.target
     ) \
-        .filter(models.DoseResponseCurve.treatment_type == 'S',
-                models.DoseResponseCurve.project_id == combination.project_id) \
-        .filter(sa.or_(models.DoseResponseCurve.lib1_id == combination.lib1_id,
-                       models.DoseResponseCurve.lib1_id == combination.lib2_id)
+        .filter(models.Drug.id == models.DoseResponseCurve.lib1_id) \
+        .filter(models.DoseResponseCurve.project_id == combination.project_id) \
+        .filter(sa.or_(models.DoseResponseCurve.drug_id_lib == combination.lib1_id,
+                       models.DoseResponseCurve.drug_id_lib == combination.lib2_id)
                 )
     all_dr_curves = pd.read_sql(dr_curves_query.statement, session.bind).rename(
         columns={'lib1_id': 'drug_id'})
@@ -273,11 +276,11 @@ def get_combination_results_with_sa(combination):
         .assign(**{'lib1_name': combination.lib1.drug_name,
                    'lib2_name': combination.lib2.drug_name}) \
         .merge(right=all_dr_curves, left_on=['barcode', 'lib1_tag'],
-               right_on=['barcode', 'dosed_tag']) \
+               right_on=['barcode', 'tag']) \
         .merge(right=all_dr_curves, how='left', left_on=['barcode', 'lib2_tag'],
-               right_on=['barcode', 'dosed_tag'], suffixes=['_lib1', '_lib2']) \
+               right_on=['barcode', 'tag'], suffixes=['_lib1', '_lib2']) \
         .merge(all_cell_models, left_on=['model_id'], right_on=['id']) \
-        .drop(columns=['dosed_tag_lib1', 'dosed_tag_lib2'])
+        .drop(columns=['tag_lib1', 'tag_lib2'])
 
     return combo_matrices
 
@@ -291,3 +294,39 @@ def get_combination_matrices_summary(project_id, lib1_id, lib2_id, percentiles):
         .filter(models.MatrixResult.lib2_id == lib2_id)
     return pd.read_sql(query.statement, session.get_bind())\
         .describe(percentiles=percentiles)
+
+
+def matrix_hover_label_from_obj(m):
+    return f"{m.combination.lib1.drug_name} ({m.combination.lib1.target}) + {m.combination.lib2.drug_name} ({m.combination.lib2.target})<br />" \
+        f"Cell line: {m.model.name}<br />"\
+        f"Tissue: {m.model.tissue}"
+
+
+def matrix_hover_label_from_tuple(s):
+    return f"{s.drug_name_lib1} ({s.target_lib1}) - {s.drug_name_lib2} ({s.target_lib2})<br />"\
+    f"Cell line: {s.model_name}<br />"\
+    f"Tissue: {s.tissue}"
+
+
+def matrix_hover_label(matrix):
+    if isinstance(matrix, models.MatrixResult):
+        return matrix_hover_label_from_obj(matrix)
+    elif isinstance(matrix, tuple):
+        return matrix_hover_label_from_tuple(matrix)
+    elif isinstance(matrix, list):
+        return [matrix_hover_label(m) for m in matrix]
+    elif isinstance(matrix, pd.DataFrame):
+        return [matrix_hover_label(m) for m in matrix.itertuples()]
+
+
+def add_label_vars(plot_data):
+    all_drugs = pd.read_sql_table('drugs', session.bind)
+    all_models = pd.read_sql_table('models', session.bind)\
+        .rename(columns={'name': 'model_name'})
+
+    plot_data = plot_data.merge(all_drugs, left_on='lib1_id', right_on='id') \
+        .merge(all_drugs, left_on='lib2_id', right_on='id',
+               suffixes=['_lib1', '_lib2']) \
+        .merge(all_models, left_on='model_id', right_on='id')
+
+    return plot_data
