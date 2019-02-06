@@ -8,7 +8,7 @@ import plotly.figure_factory as ff
 from app import app
 from utils import url_is_combination_page, get_project_metrics, \
     get_project_from_url, get_combination_results_with_sa, matrix_metrics, \
-    get_combination_from_url
+    get_combination_from_url, matrix_hover_label
 
 
 def get_plot_data_from_url(url):
@@ -24,6 +24,7 @@ def get_project_metrics_from_url(url, metric):
 
 def layout():
     return html.Div(className='border bg-white pt-3 px-4 pb-3 mb-3 shadow-sm', children=[
+        dcc.Location(id='mm-plot-url', refresh=True),
         html.H3("Combination Interaction"),
         html.Hr(),
         dbc.Row([
@@ -109,6 +110,8 @@ def update_scatter(pathname, colorscale_select):
                 'cauto': False,
                 'showscale': True
             },
+            text=matrix_hover_label(plot_data),
+            hoverinfo='text',
             customdata=[(row.barcode, row.cmatrix) for row in plot_data.itertuples(index=False)]
         )
         ],
@@ -135,12 +138,15 @@ def update_tissue_plot(url, colorscale_select):
             name=plot_data.query("tissue == @tissue").tissue.unique()[0],
             y=plot_data.query("tissue == @tissue")[colorscale_select],
             boxpoints="all",
-            hoverinfo="all",
+            hoverinfo="y+text",
             hoveron="points",
             jitter=0.3,
             marker={
                 'size': 8
-            }
+            },
+            text=matrix_hover_label(plot_data),
+            customdata=[(row.barcode, row.cmatrix) for row in
+                        plot_data.itertuples(index=False)]
         ) for tissue in plot_data[['tissue', colorscale_select]].
             groupby(by='tissue', as_index=False)
             .median()
@@ -155,11 +161,11 @@ def update_tissue_plot(url, colorscale_select):
 
 
 @app.callback(
-    dash.dependencies.Output('url', 'pathname'),
-    [dash.dependencies.Input('combo-page-mm-scatter', 'clickData')])
-def go_to_dot(clicked_points):
-    print("Click!")
+    dash.dependencies.Output('mm-plot-url', 'pathname'),
+    [dash.dependencies.Input('combo-page-mm-scatter', 'clickData'),
+     dash.dependencies.Input('combo-tissue', 'clickData')])
+def go_to_dot(p1, p2):
+    clicked_points = p1 or p2
     if clicked_points:
         p = clicked_points['points'][0]['customdata']
-        print(p)
         return f"/matrix/{p[0]}/{p[1]}"

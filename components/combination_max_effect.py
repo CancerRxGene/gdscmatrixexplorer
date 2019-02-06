@@ -7,13 +7,13 @@ import pandas as pd
 
 from app import app
 from db import session
-from models import MatrixResult, Model
+from models import MatrixResult, Model, Drug
+from utils import matrix_hover_label, add_label_vars
 
 
 def layout(combination):
 
     max_effects_query = combination.matrices\
-        .join(Model)\
         .with_entities(
             MatrixResult.barcode,
             MatrixResult.cmatrix,
@@ -23,11 +23,15 @@ def layout(combination):
             MatrixResult.lib1_delta_max_effect,
             MatrixResult.lib2_delta_max_effect,
             MatrixResult.Bliss_excess,
-            Model.name.label('Cell Line')
+            MatrixResult.lib1_id,
+            MatrixResult.lib2_id,
+            MatrixResult.model_id
         )
 
     df_max_effects = pd.read_sql(max_effects_query.statement, session.get_bind())
-    labels = [f"Cell Line: {x}" for x in df_max_effects['Cell Line']]
+
+    df_max_effects = add_label_vars(df_max_effects)
+    labels = matrix_hover_label(df_max_effects)
     customdata = [{"to": f"/matrix/{row.barcode}/{row.cmatrix}"}
                   for row in df_max_effects.itertuples(index=False)]
 
@@ -41,6 +45,7 @@ def layout(combination):
                 opacity=0.5
             ),
             hoveron='points',
+            hoverinfo='y+text'
         )
 
     def generate_standard_box(name, y):
