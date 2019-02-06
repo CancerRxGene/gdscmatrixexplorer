@@ -29,7 +29,7 @@ def layout(matrix):
         dbc.Row(className="mt-3 mb-2 pl-3", children=
             dbc.Col(width=12, children=[
                 dcc.Markdown(f"# **{drug1.drug_name}** + **{drug2.drug_name}** in cell model **{model.name}**"),
-                html.P("Combination Matrix Report", className='lead')
+                html.P(f"Combination Matrix Report for barcode {matrix.barcode}", className='lead')
             ])
         ),
         dbc.Row(className="mt-2 mb-5", children=[
