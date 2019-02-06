@@ -159,7 +159,6 @@ class MatrixResult(ToDictMixin, Base):
         (combo_max_effect - lib2_max_effect).label('lib2_delta_max_effect'))
 
 
-
     combination = relationship("Combination", back_populates='matrices',
                                primaryjoin="and_(and_(Combination.project_id == MatrixResult.project_id, "
                                            "Combination.lib1_id == MatrixResult.lib1_id),"
@@ -177,9 +176,8 @@ class MatrixResult(ToDictMixin, Base):
         return sa.orm.object_session(self).query(DoseResponseCurve)\
             .filter(
                 DoseResponseCurve.barcode == self.barcode,
-                DoseResponseCurve.treatment_type == 'S',
                 # Must match on tag in case multiple tags in ds for the same drug id,
-                DoseResponseCurve.dosed_tag.in_([
+                DoseResponseCurve.tag.in_([
                     self.lib1_tag,
                     self.lib2_tag
                 ])).all()
@@ -281,15 +279,10 @@ class DoseResponseCurve(ToDictMixin, Base):
     __tablename__ = 'dose_response_curves'
     id = sa.Column(sa.Integer, primary_key=True)
     barcode = sa.Column(sa.Integer, nullable=False)
-    cmatrix = sa.Column(sa.Integer, nullable=True)
     drugset_id = sa.Column(sa.Integer, nullable=False)
     project_id = sa.Column(sa.Integer, sa.ForeignKey(Project.id), nullable=False, index=True)
-    lib1_id = sa.Column(sa.Integer, nullable=False, index=True)
-    lib2_id = sa.Column(sa.Integer, nullable=True, index=True)
-    fixed_tag = sa.Column(sa.String, nullable=True)
-    fixed_dose = sa.Column(sa.String, nullable=True)
-    dosed_tag = sa.Column(sa.String, nullable=False)
-    treatment_type = sa.Column(sa.String(1), nullable=False)
+    drug_id_lib = sa.Column(sa.Integer, nullable=False, index=True)
+    tag = sa.Column(sa.String, nullable=False)
     maxc = sa.Column(sa.Float, nullable=False)
     minc = sa.Column(sa.Float, nullable=False)
     rmse = sa.Column(sa.Float)
@@ -302,30 +295,18 @@ class DoseResponseCurve(ToDictMixin, Base):
     matrix_result = relationship("MatrixResult", back_populates='combination_curves')
 
     __table_args__ = (sa.ForeignKeyConstraint(
-        [drugset_id, cmatrix, barcode],
-        [MatrixResult.drugset_id, MatrixResult.cmatrix, MatrixResult.barcode]), {}
+        [drugset_id, barcode],
+        [MatrixResult.drugset_id, MatrixResult.barcode]), {}
     )
 
     @property
     def well_results(self):
-        if self.treatment_type != 'S':
-            return sa.orm.object_session(self).query(WellResult)\
-                .filter(
-                    WellResult.barcode == self.barcode,
-                    WellResult.cmatrix == self.cmatrix,
-                    WellResult.barcode == self.barcode,
-                    sa.or_(
-                        sa.and_(WellResult.lib1_tag == self.fixed_tag, WellResult.lib1_dose == self.fixed_dose),
-                        sa.and_(WellResult.lib2_tag == self.fixed_tag, WellResult.lib2_dose == self.fixed_dose)
-                    )
+        return sa.orm.object_session(self).query(SingleAgentWellResult) \
+            .filter(
+                SingleAgentWellResult.drugset_id == self.drugset_id,
+                SingleAgentWellResult.lib_drug == self.tag,
+                SingleAgentWellResult.barcode == self.barcode
             ).all()
-        else:
-            return sa.orm.object_session(self).query(SingleAgentWellResult) \
-                .filter(
-                    SingleAgentWellResult.drugset_id == self.drugset_id,
-                    SingleAgentWellResult.lib_drug == self.dosed_tag,
-                    SingleAgentWellResult.barcode == self.barcode
-                ).all()
 
     def x_to_conc(self, x):
         try:

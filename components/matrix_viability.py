@@ -17,35 +17,8 @@ def layout(matrix: MatrixResult):
     matrix_df['lib1_conc'] = [np.format_float_scientific(conc, 3) for conc in matrix_df['lib1_conc']]
     matrix_df['lib2_conc'] = [np.format_float_scientific(conc, 3) for conc in matrix_df['lib2_conc']]
 
-    dose_conc_cols = matrix_df[['lib1_conc', 'lib1_dose']].drop_duplicates()
-
-    dose_conc_cols = dose_conc_cols.assign(position=[dose[1:] for dose in dose_conc_cols['lib1_dose']])
-    dose_conc_cols = dose_conc_cols.assign(orient='column')
-    dose_conc_cols = dose_conc_cols.rename(index=str, columns={"lib1_conc": "conc"})
-    dose_conc_cols = dose_conc_cols[['position', 'orient', 'conc']]
-
-    dose_conc_rows = matrix_df[['lib2_conc', 'lib2_dose']].drop_duplicates()
-
-    dose_conc_rows = dose_conc_rows.assign(position=[dose[1:] for dose in dose_conc_rows['lib2_dose']])
-    dose_conc_rows = dose_conc_rows.assign(orient='row')
-    dose_conc_rows = dose_conc_rows.rename(index=str, columns={"lib2_conc": "conc"})
-    dose_conc_rows = dose_conc_rows[['position', 'orient', 'conc']]
-
-    dose_conc_map = pd.concat([dose_conc_cols, dose_conc_rows])
-
     drug1 = matrix.combination.lib1.drug_name
     drug2 = matrix.combination.lib2.drug_name
-
-    sliced_plot_ids = pd.DataFrame([
-        {'id': c.id,
-         'orient': 'column' if c.fixed_tag == matrix.lib1_tag else 'row',
-         'position': c.fixed_dose[1:],
-         'fixed_drug_name': drug1 if matrix.lib1_tag == c.fixed_tag else drug2,
-         'dosed_drug_name': drug2 if matrix.lib1_tag == c.dosed_tag else drug1
-         }
-        for c in matrix.combination_curves])
-
-    sliced_plot_ids = pd.merge(sliced_plot_ids, dose_conc_map, on=['position', 'orient'])
 
     available_viability_metrics = ['viability', 'inhibition']
 
@@ -64,7 +37,7 @@ def layout(matrix: MatrixResult):
                         dbc.Col(width=3, children=
                             dcc.Dropdown(
                                 id='viability-heatmap-zvalue',
-                                options=[{'label': i, 'value': i} for i in
+                                options=[{'label': i.capitalize(), 'value': i} for i in
                                          available_viability_metrics],
                                 value='viability',
                                 searchable=False,
@@ -82,20 +55,9 @@ def layout(matrix: MatrixResult):
                     ]),
                     dbc.Col(width=4, children=[
                         dcc.Graph(id='viability-surface'),
-                    ]),
-                ]),
-                dbc.Row([
-                    dbc.Col(width={"size":4, "offset":1}, children=[
-                        html.Div(id='dr_row'),
-                    ]),
-                    dbc.Col(width=4, children=[
-                        html.Div(id='dr_column')
                     ])
                 ])
             ]),
-            html.Div(id='curve-ids', style={'display': 'none'},
-                     children=sliced_plot_ids.to_json(date_format='iso',
-                                                      orient='split')),
             html.Div(id='viability-values', style={'display': 'none'},
                      children=matrix_df.to_json(date_format='iso', orient='split')),
             html.Div(id='drug_names', style={'display': 'none'},
@@ -103,65 +65,6 @@ def layout(matrix: MatrixResult):
 
         ])
     ])
-
-
-@app.callback(
-    dash.dependencies.Output('dr_row', 'children'),
-    [dash.dependencies.Input('viability-heatmap', 'hoverData'),
-     dash.dependencies.Input('curve-ids', 'children')])
-def display_combo_row(hoverdata, curve_ids):
-    curve_ids = pd.read_json(curve_ids, orient='split')
-    if not hoverdata:
-        return "Hover over the heatmap to view row-wise and column-wise plots"
-    row = hoverdata['points'][0]['y']
-    curve_row = next(curve_ids.query('orient == "row" and conc == @row').itertuples())
-    curve = session.query(DoseResponseCurve).get(int(curve_row.id))
-    return html.Div(className="mb-2 mt-2", children=[
-        html.H5("Row"),
-        html.P(
-            [
-                html.Span("Fixed: "),
-                html.Strong(f"{curve_row.fixed_drug_name} @ {row} µM"),
-                html.Br(),
-                html.Span("Titrated: "),
-                html.Strong(f"{curve_row.dosed_drug_name}"),
-            ]),
-        curve.plot(display_datapoints=True, mark_auc=True,
-                   label_auc=False, mark_ic50=True, label_ic50=True,
-                   mark_emax=False, label_emax=False, label_rmse=True,
-                   style={'height': '250px'}
-    )
-    ])
-
-
-@app.callback(
-    dash.dependencies.Output('dr_column', 'children'),
-    [dash.dependencies.Input('viability-heatmap', 'hoverData'),
-     dash.dependencies.Input('curve-ids', 'children')])
-def display_combo_column(hoverdata, curve_ids):
-    curve_ids = pd.read_json(curve_ids, orient='split')
-    if not hoverdata:
-        return ""
-    column = hoverdata['points'][0]['x']
-    curve_col = next(
-        curve_ids.query('orient == "column" and conc == @column').itertuples())
-    curve = session.query(DoseResponseCurve).get(int(curve_col.id))
-    return html.Div(className="mb-2 mt-2", children=[
-        html.H5("Column"),
-        html.P(
-            [
-             html.Span("Fixed: "), html.Strong(f"{curve_col.fixed_drug_name} @ {column} µM"),
-             html.Br(),
-             html.Span("Titrated: "), html.Strong(f"{curve_col.dosed_drug_name}"),
-             ]),
-
-        curve.plot(display_datapoints=True, mark_auc=True,
-                   label_auc=False, mark_ic50=True, label_ic50=True,
-                   mark_emax=False, label_emax=False, label_rmse=True,
-                   style={'height': '250px'}
-                   )
-    ])
-
 
 @app.callback(
     dash.dependencies.Output('viability-heatmap', 'figure'),
