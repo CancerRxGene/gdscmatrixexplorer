@@ -11,6 +11,7 @@ class DoseResponsePlot:
     def __init__(self, curve,
                  display_datapoints=True,
                  display_screening_range=True,
+                 display_day1_viab=True,
                  mark_auc=True,
                  label_auc=True,
                  mark_ic50=True,
@@ -18,6 +19,7 @@ class DoseResponsePlot:
                  mark_emax=True,
                  label_emax=True,
                  label_rmse=True,
+                 label_day1=True,
                  style=None):
         self.curve = curve
 
@@ -31,6 +33,7 @@ class DoseResponsePlot:
         self.id = f'dose-response-{curve.id}'
         self.display_datapoints = display_datapoints
         self.display_screening_range = display_screening_range
+        self.display_day1_viab = display_day1_viab
         self.mark_auc = mark_auc
         self.label_auc = label_auc
         self.mark_ic50 = mark_ic50
@@ -142,6 +145,7 @@ class DoseResponsePlot:
         shapes.extend([self.emax_line] if self.mark_emax else [])
         shapes.extend([self.ic50_line] if self.mark_ic50 else [])
         shapes.extend([self.screening_range] if self.display_screening_range else [])
+        shapes.extend([self.day1_line] if self.display_day1_viab else [])
         return shapes
 
 
@@ -187,6 +191,21 @@ class DoseResponsePlot:
                 'color': C.RED,
                 'width': 2,
                 'dash': "dashdot"
+            },
+        }
+
+    @property
+    def day1_line(self):
+        return {
+            'type': 'line',
+            'x0': self.curve.maxc / 1000000000,
+            'y0': self.curve.matrix_result.day1_viability_mean,
+            'x1': self.curve.maxc / 1000000,
+            'y1': self.curve.matrix_result.day1_viability_mean,
+            'line': {
+                'color': C.PINKPURPLE,
+                'width': 2,
+                'dash': "dot"
             },
         }
 
