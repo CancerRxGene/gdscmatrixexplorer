@@ -62,18 +62,18 @@ def layout(matrix):
                             id=f"drug-info-{drug1.id}",
                             className="bg-white pt-4 px-4 pb-1 border border-info h-100 shadow-sm",
                             children=[
-                                infoblock(drug1),
-                                curve1.plot(style={'maxHeight': '250px'})
+                                infoblock(drug1, rmse=curve1.rmse),
+                                curve1.plot(height=250)
                             ]
                         ),
                     ),
                     dbc.Col(width=6, children=
                         html.Div(
-                            id=f"drug-info-{drug1.id}",
+                            id=f"drug-info-{drug2.id}",
                             className="bg-white pt-4 px-4 pb-1 border border-info h-100 shadow-sm",
                             children=[
-                                infoblock(drug2),
-                                curve2.plot(style={'maxHeight': '250px'})
+                                infoblock(drug2, rmse=curve2.rmse),
+                                curve2.plot(height=250)
                             ]
                         )
                     )
