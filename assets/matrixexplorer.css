@@ -1,3 +1,37 @@
+.list-group-item h5,
+.list-group-item p{
+    margin-bottom: 0;
+}
+p.list-group-item-text{
+    margin-bottom: 0;
+}
+
+.combinations-list .list-group-item{
+    padding: 0.5rem 1.25rem;
+}
+.combinations-list .list-group-item-heading{
+    font-size: 0.85rem;
+    color: #D9230F;
+}
+.combinations-list .list-group-item-text{
+    font-size: 80%;
+    color: #212529;
+}
+
+.form-inline .form-group{
+    width: 100%
+}
+.form-inline .form-group label + div{
+    flex-grow: 1
+}
+
+a.nav-link{
+    cursor: pointer;
+}
+a.nav-link.active{
+    cursor: default;
+}
+
 .badge{
     font-size: 100%!important;
 }
