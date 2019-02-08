@@ -9,6 +9,8 @@ from utils import get_project_from_url
 
 def layout(url):
     project = get_project_from_url(url)
+    print ('project page')
+    print (project)
 
     return [
         crumbs([("Home", "/"), (project.name, "/" + project.slug)]),

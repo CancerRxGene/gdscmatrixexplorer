@@ -1,5 +1,6 @@
 import dash
 import dash_core_components as dcc
+import dash_bootstrap_components as dbc
 import dash_html_components as html
 import numpy as np
 import pandas as pd
@@ -11,68 +12,107 @@ from sqlalchemy import and_
 from app import app
 from db import session
 from models import MatrixResult, Project, Combination, Model
-from utils import plot_colors, matrix_metrics
+from utils import plot_colors,  matrix_metrics, tissues
 
 
 def layout(project_id):
     try:
         project = session.query(Project).get(project_id)
+        print('comb:')
+        print (project.combinations)
+        print(project)
     except sa.orm.exc.NoResultFound:
         return html.Div("Project not found")
 
-    return html.Div([
+    return dbc.Row([
         dcc.Location('project-scatter-url'),
-        html.Div(
-            children=[
+        dbc.Col(width=12,children=[
+            dbc.Row([
+                dbc.Col(
+                    width=4,
+                    className='mt-2 mb-4',
+                    children=[
+                        dbc.Form(inline=True, children=dbc.FormGroup([
+                            html.Label('X-Axis'),
+                            dcc.Dropdown(
+                                options=list(matrix_metrics.values()),
+                                value='HSA_excess',
+                                id='x-axis-select'
+                            ),
+                        ]))]),
+                dbc.Col(
+                    width=4,
+                    className='mt-2 mb-4',
+                    children=[
+                        dbc.Form(inline=True, children=dbc.FormGroup([
+                            html.Label('Y-Axis'),
+                            dcc.Dropdown(
+                                options=list(matrix_metrics.values()),
+                                value='Bliss_excess',
+                                id='y-axis-select'
+                            )
+                        ]))]),
+                dbc.Col(
+                    width=4,
+                    className='mt-2 mb-4',
+                    children=[
+                        dbc.Form(inline=True, children=dbc.FormGroup([
+                            html.Label('Color'),
+                            dcc.Dropdown(
+                                options=[{'label': l, 'value': v} for l, v in
+                                         [('Default', 'default'),
+                                          ("Cell Line", 'model_name'),
+                                          ("Tissue", 'tissue'),
+                                          ("Combination", 'combo_id')]],
+                                value='default',
+                                id='color-select'
+                            )
+                        ]))]),
+             ]),
+            dbc.Row([
+                dbc.Col(
+                    width=6,
+                    className='mt-2 mb-4',
+                    children=[
+                        dbc.Form(inline=True, children=dbc.FormGroup([
+                            html.Label('Tissue'),
+                            dcc.Dropdown(
+                                options=[{'label': c, 'value': c} for c in tissues()],
+                                id='tissue-select',
+                                multi=True
+                            ),
+                        ]))]),
+                dbc.Col(
+                    width=6,
+                    className='mt-2 mb-4',
+                    children=[
+                        dbc.Form(inline=True, children=dbc.FormGroup([
+                            html.Label('Combination'),
+                            dcc.Dropdown(
+                                options=
+                                 [{'label': f"{c.lib1.drug_name} + {c.lib2.drug_name}", 'value': f"{c.lib1.drug_name} + {c.lib2.drug_name}" } for c in project.combinations],
 
-                html.Div(className='row mt-2 mb-4', children=[
-                    html.Div(className='col-4', children=[
-                        html.Label('X-Axis'),
-                        dcc.Dropdown(
-                            options=list(matrix_metrics.values()),
-                            value='HSA_excess',
-                            id='x-axis-select'
-                        ),
-                    ]),
-                    html.Div(className='col-4', children=[
-                        html.Label('Y-Axis'),
-                        dcc.Dropdown(
-                            options=list(matrix_metrics.values()),
-                            value='Bliss_excess',
-                            id='y-axis-select'
-                        )
-                    ]),
-                    html.Div(className='col-4', children=[
-                        html.Label('Color'),
-                        dcc.Dropdown(
-                            options=[{'label': l, 'value': v} for l, v in
-                                     [('Default', 'default'),
-                                      ("Cell Line", 'model_name'),
-                                      ("Tissue", 'tissue'),
-                                      ("Combination", 'combo_id')]],
-                            value='default',
-                            id='color-select'
-                        )
-                    ]),
-                    html.Div(id='correlation', className='ml-3 mt-2')
-                ])
-            ]
-        ),
-        html.Div(
-            className='row',
-            children=html.Div(dcc.Graph(id='project-scatter'),
-                              className='col-12')
-        )]
-    )
-
+                                value='all',
+                                id='combination-select',
+                               # multi=True,
+                                #clearable=False
+                            ),
+                        ]))]),
+            ]),
+            dbc.Row(id='correlation', className='ml-3 mt-2'),
+            dbc.Row(dcc.Graph(id='project-scatter'))
+        ])
+    ])
 
 @app.callback(
     dash.dependencies.Output('project-scatter', 'figure'),
     [dash.dependencies.Input('x-axis-select', 'value'),
      dash.dependencies.Input('y-axis-select', 'value'),
      dash.dependencies.Input('color-select', 'value'),
+     dash.dependencies.Input('tissue-select', 'value'),
+    # dash.dependencies.Input('combination_select', 'value'),
      dash.dependencies.Input('project-id', 'children')])
-def update_scatter(x_axis_field, y_axis_field, color_field, project_id):
+def update_scatter(x_axis_field, y_axis_field, color_field, tissues,  project_id):
     all_matrices_query = session.query(MatrixResult.project_id,
         getattr(MatrixResult, x_axis_field),
         getattr(MatrixResult, y_axis_field),
@@ -88,6 +128,10 @@ def update_scatter(x_axis_field, y_axis_field, color_field, project_id):
         .filter(MatrixResult.model_id == Model.id) \
         .filter(MatrixResult.project_id == int(project_id))
 
+    if (tissues):
+        all_matrices_query = all_matrices_query.filter(Model.tissue.in_(tissues))
+
+    #print (combinations)
     summary = pd.read_sql(all_matrices_query.statement,
                           all_matrices_query.session.bind)
 

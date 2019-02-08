@@ -9,7 +9,7 @@ import os
 from app import app
 from pages import project, home, matrix, combinations
 from page_components import header
-from utils import url_parser
+from utils import url_parser, tissues
 
 user = os.getenv('MATRIXEXPLORER_USER')
 password = os.getenv('MATRIXEXPLORER_PASSWD')

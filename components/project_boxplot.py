@@ -9,13 +9,7 @@ import plotly.graph_objs as go
 from app import app
 from db import session
 from models import MatrixResult, Model
-from utils import matrix_metrics
-
-def tissues():
-    tissues = [s[0] for s in session.query(Model.tissue).distinct().all()]
-    tissues.insert(0,'Pan-cancer')
-    return tissues
-
+from utils import matrix_metrics, tissues
 
 def layout():
 
@@ -40,7 +34,6 @@ def layout():
                 dbc.Label('Tissue', html_for='tissue', className='mr-2'),
                 dcc.Dropdown(
                     options=[{'label': c, 'value': c} for c in tissues()],
-                    value='Pan-cancer',
                     id='tissue',
                     className='flex-grow-1',
                 )
@@ -62,7 +55,7 @@ def get_boxplot_summary_data(boxplot_value, project_id, tissue):
                                        MatrixResult.lib2_id) \
         .filter(MatrixResult.project_id == int(project_id))
 
-    if tissue != 'Pan-cancer':
+    if tissue:
         all_matrices_query = all_matrices_query.join(Model) \
             .filter(Model.tissue == tissue)
 
