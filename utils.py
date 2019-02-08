@@ -264,7 +264,7 @@ def get_combination_results_with_sa(combination):
         models.Drug.drug_name,
         models.Drug.target
     ) \
-        .filter(models.Drug.id == models.DoseResponseCurve.lib1_id) \
+        .filter(models.Drug.id == models.DoseResponseCurve.drug_id_lib) \
         .filter(models.DoseResponseCurve.project_id == combination.project_id) \
         .filter(sa.or_(models.DoseResponseCurve.drug_id_lib == combination.lib1_id,
                        models.DoseResponseCurve.drug_id_lib == combination.lib2_id)
