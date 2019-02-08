@@ -168,7 +168,6 @@ class MatrixResult(ToDictMixin, Base):
     project = relationship("Project", back_populates='matrices')
 
     well_results = relationship("WellResult")
-    combination_curves = relationship("DoseResponseCurve")
     model = relationship("Model")
 
     @property
@@ -292,12 +291,13 @@ class DoseResponseCurve(ToDictMixin, Base):
     xmid = sa.Column(sa.Float)
     scal = sa.Column(sa.Float)
 
-    matrix_result = relationship("MatrixResult", back_populates='combination_curves')
-
-    __table_args__ = (sa.ForeignKeyConstraint(
-        [drugset_id, barcode],
-        [MatrixResult.drugset_id, MatrixResult.barcode]), {}
-    )
+    @property
+    def matrix_results(self):
+        return sa.orm.object_session(self).query(MatrixResult) \
+            .filter(MatrixResult.barcode == self.barcode)\
+            .filter(sa.or_(MatrixResult.lib1_tag == self.tag,
+                           MatrixResult.lib2_tag == self.tag))\
+            .all()
 
     @property
     def well_results(self):

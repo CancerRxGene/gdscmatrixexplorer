@@ -12,12 +12,12 @@ class DoseResponsePlot:
     def __init__(self, curve,
                  display_datapoints=True,
                  display_screening_range=True,
-                 display_day1_viab=True,
+                 mark_day1=True,
                  mark_auc=True,
                  label_auc=True,
                  mark_ic50=True,
                  label_ic50=True,
-                 mark_emax=True,
+                 mark_emax=False,
                  label_emax=True,
                  label_rmse=True,
                  label_day1=True,
@@ -36,15 +36,15 @@ class DoseResponsePlot:
         self.id = f'dose-response-{curve.id}'
         self.display_datapoints = display_datapoints
         self.display_screening_range = display_screening_range
-        self.display_day1_viab = display_day1_viab
         self.mark_auc = mark_auc
         self.label_auc = label_auc
         self.mark_ic50 = mark_ic50
         self.label_ic50 = label_ic50
         self.mark_emax = mark_emax
         self.label_emax = label_emax
-        self.label_rmse = label_rmse
+        self.mark_day1 = mark_day1
         self.label_day1 = label_day1
+        self.label_rmse = label_rmse
         self.style = style
         self.width = width
         self.height = height
@@ -162,7 +162,7 @@ class DoseResponsePlot:
         shapes.extend([self.emax_line] if self.mark_emax else [])
         shapes.extend([self.ic50_line] if self.mark_ic50 else [])
         shapes.extend([self.screening_range] if self.display_screening_range else [])
-        shapes.extend([self.day1_line] if self.display_day1_viab else [])
+        shapes.extend([self.day1_line] if self.mark_day1 else [])
         return shapes
 
 
@@ -215,14 +215,14 @@ class DoseResponsePlot:
     def day1_line(self):
         return {
             'type': 'line',
-            'x0': self.curve.maxc / 1000000000,
-            'y0': self.curve.matrix_result.day1_viability_mean,
-            'x1': self.curve.maxc / 1000000,
-            'y1': self.curve.matrix_result.day1_viability_mean,
+            'xref': 'paper',
+            'x0': 0,
+            'y0': self.curve.matrix_results[0].day1_viability_mean,
+            'x1': 1,
+            'y1': self.curve.matrix_results[0].day1_viability_mean,
             'line': {
-                'color': C.PINKPURPLE,
-                'width': 2,
-                'dash': "dot"
+                'color': C.DARKPINK,
+                'width': 1,
             },
         }
 
@@ -233,6 +233,7 @@ class DoseResponsePlot:
         annotations.extend([self.ic50_label] if self.label_ic50 else [])
         annotations.extend([self.emax_label] if self.label_emax else [])
         annotations.extend([self.rmse_label] if self.label_rmse else [])
+        annotations.extend([self.day1_label] if self.label_day1 else [])
         return annotations
 
     @property
@@ -306,4 +307,22 @@ class DoseResponsePlot:
             bordercolor=C.DARKGREY_LIGHT,
             borderpad=2,
             font={"size": 12, 'color': C.DARKGREY if self.curve.rmse < 0.3 else 'white'}
+        )
+
+    @property
+    def day1_label(self):
+        return dict(
+            x=1,
+            y=self.curve.matrix_results[0].day1_viability_mean,
+            xref='paper',
+            yref='y',
+            text=f'<b>Day 1 </b> {round(self.curve.matrix_results[0].day1_viability_mean, 3)}',
+            showarrow=False,
+            xanchor="right",
+            yanchor="top",
+            bgcolor=C.DARKGREY_ULTRALIGHT,
+            bordercolor=C.DARKPINK,
+            borderpad=2,
+            font={"size": 12,
+                  'color': C.DARKGREY}
         )
