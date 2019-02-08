@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import plotly.graph_objs as go
 import dash_core_components as dcc
+import dash_html_components as html
 
 from utils import Colors as C
 
@@ -20,7 +21,9 @@ class DoseResponsePlot:
                  label_emax=True,
                  label_rmse=True,
                  label_day1=True,
-                 style=None):
+                 style={},
+                 width=None,
+                 height=None):
         self.curve = curve
 
         self.plot_data = pd.DataFrame({'xfit': np.linspace(-10, 30, 25)})
@@ -41,10 +44,22 @@ class DoseResponsePlot:
         self.mark_emax = mark_emax
         self.label_emax = label_emax
         self.label_rmse = label_rmse
+        self.label_day1 = label_day1
         self.style = style
+        self.width = width
+        self.height = height
 
     def plot(self):
-        return dcc.Graph(id=self.id, figure=self.figure, style=self.style)
+
+        graph = dcc.Graph(id=self.id,
+                         figure=self.figure,
+                         style=self.style,
+                         config={'displayModeBar': False}
+                         )
+        if self.curve.rmse > 0.3:
+            return html.Div(graph, style={'borderTop': '5px solid red'})
+        else:
+            return graph
 
     def __call__(self, *args, **kwargs):
         return self.plot()
@@ -129,6 +144,8 @@ class DoseResponsePlot:
 
         return go.Layout(
                 # title=f'Single Agent Response for {drug.drug_name}',
+                width=self.width,
+                height=self.height,
                 xaxis={'type': 'log', 'title': 'Concentration (M)',
                        'range': np.log10([self.curve.x_to_conc(-10),
                                           self.curve.x_to_conc(20)])},
@@ -285,8 +302,8 @@ class DoseResponsePlot:
             showarrow=False,
             xanchor="right",
             yanchor="top",
-            bgcolor=C.DARKGREY_ULTRALIGHT,
+            bgcolor=C.DARKGREY_ULTRALIGHT if self.curve.rmse < 0.3 else C.RED,
             bordercolor=C.DARKGREY_LIGHT,
             borderpad=2,
-            font={"size": 12}
+            font={"size": 12, 'color': C.DARKGREY if self.curve.rmse < 0.3 else 'white'}
         )

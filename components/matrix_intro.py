@@ -29,7 +29,7 @@ def layout(matrix):
         dbc.Row(className="mt-3 mb-2 pl-3", children=
             dbc.Col(width=12, children=[
                 dcc.Markdown(f"# **{drug1.drug_name}** + **{drug2.drug_name}** in cell model **{model.name}**"),
-                html.P("Combination Matrix Report", className='lead')
+                html.P(f"Combination Matrix Report for barcode {matrix.barcode}", className='lead')
             ])
         ),
         dbc.Row(className="mt-2 mb-5", children=[
@@ -62,18 +62,18 @@ def layout(matrix):
                             id=f"drug-info-{drug1.id}",
                             className="bg-white pt-4 px-4 pb-1 border border-info h-100 shadow-sm",
                             children=[
-                                infoblock(drug1),
-                                curve1.plot(style={'maxHeight': '250px'})
+                                infoblock(drug1, rmse=curve1.rmse),
+                                curve1.plot(height=250)
                             ]
                         ),
                     ),
                     dbc.Col(width=6, children=
                         html.Div(
-                            id=f"drug-info-{drug1.id}",
+                            id=f"drug-info-{drug2.id}",
                             className="bg-white pt-4 px-4 pb-1 border border-info h-100 shadow-sm",
                             children=[
-                                infoblock(drug2),
-                                curve2.plot(style={'maxHeight': '250px'})
+                                infoblock(drug2, rmse=curve2.rmse),
+                                curve2.plot(height=250)
                             ]
                         )
                     )

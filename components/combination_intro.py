@@ -8,7 +8,7 @@ def layout(combination):
 
     single_agent_curves = combination.matrices[0].single_agent_curves
 
-    if single_agent_curves[0].lib1_id == combination.lib1_id:
+    if single_agent_curves[0].drug_id_lib == combination.lib1_id:
         lib1_minc, lib1_maxc = single_agent_curves[0].minc, single_agent_curves[0].maxc
         lib2_minc, lib2_maxc = single_agent_curves[1].minc, single_agent_curves[1].maxc
     else:
