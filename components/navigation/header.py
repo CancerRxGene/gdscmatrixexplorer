@@ -1,15 +1,45 @@
+import dash
 import dash_bootstrap_components as dbc
 from db import session
 from models import Project
+from utils import url_parser
+from app import app
 
 
 def generate_header():
+    return dbc.NavbarSimple(
+        id='main-navbar',
+        brand="GDSC Matrix Explorer",
+        brand_href='/',
+        className='shadow-sm')
 
+
+def generate_navitem(link_text, link_href, link_page_type, current_page_type):
+    return dbc.NavItem(
+        dbc.NavLink(
+            link_text,
+            href=link_href,
+            className='active' if link_page_type == current_page_type else ''
+        )
+    )
+
+
+def generate_default_navitem(link_text, current_page_type):
+    link_href = "/" + link_text.lower()
+    link_page_type = link_text.lower()
+    return generate_navitem(link_text, link_href, link_page_type, current_page_type)
+
+
+@app.callback(dash.dependencies.Output('main-navbar', 'children'),
+              [dash.dependencies.Input('url', 'pathname')])
+def dropdown_handler(pathname):
+    if pathname is None:
+        return ''
+    page_type = url_parser(pathname)
     all_projects = session.query(Project).all()
 
-    return dbc.NavbarSimple(
-        children=[
-            dbc.NavItem(dbc.NavLink("Home", href="/")),
+    return [
+            generate_navitem("Home", "/", "home", page_type),
             dbc.DropdownMenu(
                 children=
                 [dbc.DropdownMenuItem(f"{p.name}", href=f"/project/{p.slug}")
@@ -29,10 +59,6 @@ def generate_header():
                 in_navbar=True,
                 label="Combinations",
             ),
-            dbc.NavItem(dbc.NavLink("Documentation", href="/documentation")),
-            dbc.NavItem(dbc.NavLink("Downloads", href="/downloads")),
-        ],
-        brand="GDSC Matrix Explorer",
-        brand_href='/',
-        className='shadow-sm'
-    )
+            generate_default_navitem("Documentation", page_type),
+            generate_default_navitem("Downloads", page_type)
+        ]
