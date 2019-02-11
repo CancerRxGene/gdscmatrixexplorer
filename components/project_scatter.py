@@ -5,9 +5,10 @@ import dash_html_components as html
 import numpy as np
 import pandas as pd
 import plotly.graph_objs as go
+import re
 from scipy.stats import pearsonr
 import sqlalchemy as sa
-from sqlalchemy import and_
+from sqlalchemy import and_, or_
 
 from app import app
 from db import session
@@ -89,13 +90,9 @@ def layout(project_id):
                         dbc.Form(inline=True, children=dbc.FormGroup([
                             html.Label('Combination'),
                             dcc.Dropdown(
-                                options=
-                                 [{'label': f"{c.lib1.drug_name} + {c.lib2.drug_name}", 'value': f"{c.lib1.drug_name} + {c.lib2.drug_name}" } for c in project.combinations],
-
-                                value='all',
+                                options=[{'label': f"{c.lib1.drug_name} + {c.lib2.drug_name}", 'value': f"{c.lib1_id}+{c.lib2_id}" } for c in project.combinations],
                                 id='combination-select',
-                               # multi=True,
-                                #clearable=False
+                                multi=True,
                             ),
                         ]))]),
             ]),
@@ -110,9 +107,9 @@ def layout(project_id):
      dash.dependencies.Input('y-axis-select', 'value'),
      dash.dependencies.Input('color-select', 'value'),
      dash.dependencies.Input('tissue-select', 'value'),
-    # dash.dependencies.Input('combination_select', 'value'),
+     dash.dependencies.Input('combination-select', 'value'),
      dash.dependencies.Input('project-id', 'children')])
-def update_scatter(x_axis_field, y_axis_field, color_field, tissues,  project_id):
+def update_scatter(x_axis_field, y_axis_field, color_field, tissues, combinations, project_id):
     all_matrices_query = session.query(MatrixResult.project_id,
         getattr(MatrixResult, x_axis_field),
         getattr(MatrixResult, y_axis_field),
@@ -131,10 +128,18 @@ def update_scatter(x_axis_field, y_axis_field, color_field, tissues,  project_id
     if (tissues):
         all_matrices_query = all_matrices_query.filter(Model.tissue.in_(tissues))
 
-    #print (combinations)
+    if (combinations):
+        rules = []
+        for c in combinations:
+            lib1,lib2 = c.split('+')
+            rule = and_(Combination.lib1_id==lib1, Combination.lib2_id==lib2)
+            print (rule)
+            rules.append(rule)
+            print (rules)
+        all_matrices_query = all_matrices_query .filter(or_(*rules))
+
     summary = pd.read_sql(all_matrices_query.statement,
                           all_matrices_query.session.bind)
-
     all_drugs = pd.read_sql_table('drugs', session.bind)
 
     summary = summary.merge(all_drugs, left_on='lib1_id', right_on='id') \
