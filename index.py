@@ -7,7 +7,7 @@ import dash_auth
 import os
 
 from app import app
-from pages import project, home, matrix, combinations
+from pages import project, home, matrix, combinations, documentation, downloads
 from page_components import header
 from utils import url_parser
 
@@ -45,6 +45,10 @@ def display_page(pathname):
         return combinations.layout(pathname)
     elif page_type == 'matrix':
         return matrix.layout(pathname)
+    elif page_type == 'documentation':
+        return documentation.layout(pathname)
+    elif page_type == 'downloads':
+        return downloads.layout(pathname)
 
     else:
         return '404'

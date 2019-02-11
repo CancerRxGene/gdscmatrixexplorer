@@ -168,6 +168,10 @@ def url_parser(url):
         return 'project'
     elif re.fullmatch("/matrix/\d*/\d*", url):
         return 'matrix'
+    elif re.fullmatch("/documentation", url):
+        return 'documentation'
+    elif re.fullmatch('/downloads', url):
+        return 'downloads'
     elif re.fullmatch("/", url):
         return 'home'
 
