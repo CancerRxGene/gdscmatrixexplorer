@@ -5,7 +5,6 @@ import dash_html_components as html
 import numpy as np
 import pandas as pd
 import plotly.graph_objs as go
-import re
 from scipy.stats import pearsonr
 import sqlalchemy as sa
 from sqlalchemy import and_, or_
@@ -19,9 +18,7 @@ from utils import plot_colors,  matrix_metrics, tissues
 def layout(project_id):
     try:
         project = session.query(Project).get(project_id)
-        print('comb:')
-        print (project.combinations)
-        print(project)
+
     except sa.orm.exc.NoResultFound:
         return html.Div("Project not found")
 
@@ -90,7 +87,7 @@ def layout(project_id):
                         dbc.Form(inline=True, children=dbc.FormGroup([
                             html.Label('Combination'),
                             dcc.Dropdown(
-                                options=[{'label': f"{c.lib1.drug_name} + {c.lib2.drug_name}", 'value': f"{c.lib1_id}+{c.lib2_id}" } for c in project.combinations],
+                                options=[{'label': f"{c.lib1.drug_name} + {c.lib2.drug_name}", 'value': f"{c.lib1_id}+{c.lib2_id}"} for c in project.combinations],
                                 id='combination-select',
                                 multi=True,
                             ),
@@ -125,17 +122,16 @@ def update_scatter(x_axis_field, y_axis_field, color_field, tissues, combination
         .filter(MatrixResult.model_id == Model.id) \
         .filter(MatrixResult.project_id == int(project_id))
 
-    if (tissues):
+    if tissues:
         all_matrices_query = all_matrices_query.filter(Model.tissue.in_(tissues))
 
-    if (combinations):
+    if combinations:
         rules = []
         for c in combinations:
             lib1,lib2 = c.split('+')
             rule = and_(Combination.lib1_id==lib1, Combination.lib2_id==lib2)
-            print (rule)
             rules.append(rule)
-            print (rules)
+
         all_matrices_query = all_matrices_query .filter(or_(*rules))
 
     summary = pd.read_sql(all_matrices_query.statement,
@@ -156,7 +152,8 @@ def update_scatter(x_axis_field, y_axis_field, color_field, tissues, combination
     fig_data = summary
     return {
         'data': [
-            go.Scattergl(
+            #go.Scattergl(
+            go.Scatter(
                 x=fig_data[x_axis_field],
                 y=fig_data[y_axis_field],
                 mode='markers',
