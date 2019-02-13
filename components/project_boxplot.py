@@ -9,7 +9,7 @@ import plotly.graph_objs as go
 from app import app
 from db import session
 from models import MatrixResult, Model
-from utils import matrix_metrics, tissues
+from utils import matrix_metrics, get_all_tissues
 
 def layout():
 
@@ -33,7 +33,7 @@ def layout():
             children=dbc.Form(inline=True, children=dbc.FormGroup([
                 dbc.Label('Tissue', html_for='tissue', className='mr-2'),
                 dcc.Dropdown(
-                    options=[{'label': c, 'value': c} for c in tissues()],
+                    options=[{'label': c, 'value': c} for c in get_all_tissues()],
                     id='tissue',
                     className='flex-grow-1',
                 )

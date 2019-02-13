@@ -12,7 +12,7 @@ from sqlalchemy import and_, or_
 from app import app
 from db import session
 from models import MatrixResult, Project, Combination, Model
-from utils import plot_colors,  matrix_metrics, tissues
+from utils import plot_colors,  matrix_metrics, get_all_tissues
 
 
 def layout(project_id):
@@ -75,7 +75,7 @@ def layout(project_id):
                         dbc.Form(inline=True, children=dbc.FormGroup([
                             html.Label('Tissue'),
                             dcc.Dropdown(
-                                options=[{'label': c, 'value': c} for c in tissues()],
+                                options=[{'label': c, 'value': c} for c in get_all_tissues()],
                                 id='tissue-select',
                                 multi=True
                             ),
@@ -152,7 +152,6 @@ def update_scatter(x_axis_field, y_axis_field, color_field, tissues, combination
     fig_data = summary
     return {
         'data': [
-            #go.Scattergl(
             go.Scatter(
                 x=fig_data[x_axis_field],
                 y=fig_data[y_axis_field],
