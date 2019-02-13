@@ -24,9 +24,6 @@ def layout(*args, **kwargs):
             dbc.Col(width=6, children=[
                 html.H2("Matrix-level data", className='my-3'),
                 *project_data_links,
-
-                html.H2("Well-level data", className='my-3'),
-                html.P("Coming Soon", className='lead'),
             ]),
             dbc.Col(width=6, children=[
                 html.H2("Documentation", className='my-3'),
