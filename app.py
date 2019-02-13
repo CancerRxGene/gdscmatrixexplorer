@@ -8,6 +8,7 @@ app = dash.Dash(__name__)
 server = app.server
 app.config.suppress_callback_exceptions = True
 app.scripts.config.serve_locally=True
+app.title = "GDSC MatrixExplorer"
 
 STATIC_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'downloads')
 
