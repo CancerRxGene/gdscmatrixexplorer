@@ -14,7 +14,7 @@ x2 = sub("x", 2)
 
 
 def layout(*args, **kwargs):
-    return dbc.Col(width={'size': 8, 'offset': 2}, className='text-justify', children=[
+    return dbc.Col(width={'size': 8, 'offset': 2}, className='text-justify documentation', children=[
         H1("Documentation", className='display-4 text-center my-5'),
 
         H2("Screen Design"),
@@ -118,7 +118,7 @@ def layout(*args, **kwargs):
         ]),
 
         H4("Library drug-related metrics"),
-        P("The two drugs used in the matrices are called &quot;lib1&quot; and &quot;lib2&quot;, with lib1 being the first drug listed in the combination. All metrics below are available for both drugs."),
+        P("The two drugs used in the matrices are called \"lib1\" and \"lib2\", with lib1 being the first drug listed in the combination. All metrics below are available for both drugs."),
         Table(className='table table-sm', children=[
             Tr([Th("Metric name", className='w-25'), Th("Explanation")]),
             Tr([Td("lib1"), Td("Drug set library tag identifier")]),
@@ -160,7 +160,7 @@ def layout(*args, **kwargs):
             Tr([Td("X_window_SO_dose2"), Td("Locator of upper right corner of synergy only window (library 2)D1-D7 with D1 being the highest screened concentration")]),
 
         ]),
-        H4("Day1 & growth-related metrics"),
+        H4("Day1 & growth-related metrics", className='mt-4'),
         Table(className='table table-sm', children=[
             Tr([Th("Metric name", className='w-25'), Th("Explanation")]),
             Tr([Td("day1_intensity_mean"), Td("Mean observed luminescent intensity of Day1 plate")]),

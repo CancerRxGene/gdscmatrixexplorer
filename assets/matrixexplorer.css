@@ -42,3 +42,10 @@ a.nav-link.active{
 .matrix-metric .card-body p{
     padding-bottom: 1.25em;
 }
+
+.documentation h2{
+    margin-top: 2rem !important;
+}
+.documentation h4{
+    margin-top: 1.5rem !important;
+}
