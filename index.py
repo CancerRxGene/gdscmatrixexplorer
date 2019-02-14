@@ -8,7 +8,7 @@ import os
 
 from app import app
 from pages import project, home, matrix, combinations
-from page_components import header
+from page_components import header, footer
 from utils import url_parser
 
 user = os.getenv('MATRIXEXPLORER_USER')
@@ -23,8 +23,10 @@ app.layout = html.Div([
             id='wrapper',
             children=[
                 dbc.Row(dbc.Col(id='page-content', width=12))
-            ]
-        )
+            ],
+            className='pb-5'
+        ),
+        footer
 ])
 
 server = app.server

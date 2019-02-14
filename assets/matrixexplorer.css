@@ -1,3 +1,19 @@
+html {
+  position: relative;
+  min-height: 100%;
+}
+body {
+  margin-bottom: 10rem; /* Margin bottom by footer height */
+}
+.footer-wrapper {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 10rem; /* Set the fixed height of the footer here */
+  /*line-height: 10rem; !* Vertically center the text there *!*/
+  background-color: #17a2b8;
+}
+
 .list-group-item h5,
 .list-group-item p{
     margin-bottom: 0;
@@ -53,6 +69,7 @@ a.nav-link.active{
 }
 
 .navbar .nav a.nav-link{
+    font-size: 1rem;
     color: white;
 }
 
@@ -63,4 +80,16 @@ a.nav-link.active{
 
 .jumbotron{
     background: white;
+}
+.post-lead {
+    font-size: 1rem;
+}
+
+._dash-undo-redo {
+  display: none;
+}
+
+.footer-wrapper,
+.footer-wrapper a{
+    color: white;
 }
