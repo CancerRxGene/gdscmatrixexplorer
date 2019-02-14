@@ -7,9 +7,9 @@ from utils import get_combination_matrices_summary
 
 def get_badge_classname(value, context, metric):
     if value < context.loc["33%", metric]:
-        return 'badge-primary'
-    elif value < context.loc["50%", metric]:
         return 'badge-danger'
+    elif value < context.loc["50%", metric]:
+        return 'badge-warning'
     else:
         return 'badge-success'
 
@@ -41,9 +41,9 @@ def infoblock_matrix(matrix_result):
                     html.Br(),
                     html.Strong("Top 33% ", className='badge badge-success'),
                     html.Span(" "),
-                    html.Strong("Middle 33% ", className='badge badge-danger'),
+                    html.Strong("Middle 33% ", className='badge badge-warning'),
                     html.Span(" "),
-                    html.Strong("Bottom 33% ", className='badge badge-primary'),
+                    html.Strong("Bottom 33% ", className='badge badge-danger'),
                     html.Span(" "),
                 ])
             ]),
