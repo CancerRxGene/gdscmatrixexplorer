@@ -27,7 +27,7 @@ p.list-group-item-text{
 }
 .combinations-list .list-group-item-heading{
     font-size: 0.85rem;
-    color: #D9230F;
+    color: #17a2b8;
 }
 .combinations-list .list-group-item-text{
     font-size: 80%;
@@ -92,4 +92,13 @@ a.nav-link.active{
 .footer-wrapper,
 .footer-wrapper a{
     color: white;
+}
+
+._dash-loading-callback{
+    background: rgba(255, 255, 255, 0.8) url("/assets/loading.gif") no-repeat fixed center;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
 }
