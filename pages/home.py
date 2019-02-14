@@ -10,8 +10,8 @@ def layout(*args, **kwargs):
     projects = session.query(Project).all()
 
     return html.Div([
-        html.H1("GDSC Matrix Explorer", className='display-4 text-center mt-5 mb-3'),
-        html.P("Projects", className='lead text-center'),
+        dbc.Jumbotron(html.Img(src="assets/logo_2tone.svg"), className="d-flex justify-content-center"),
+        html.H1("Matrix Explorer", className='display-4 text-center mb-3'),
         dbc.Row([project_block(p) for p in projects])
     ])
 

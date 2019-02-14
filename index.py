@@ -18,10 +18,10 @@ auth = dash_auth.BasicAuth(app, [[user, password]])
 
 app.layout = html.Div([
         dcc.Location(id='url', refresh=True),
+        header,
         dbc.Container(
             id='wrapper',
             children=[
-                header,
                 dbc.Row(dbc.Col(id='page-content', width=12))
             ]
         )

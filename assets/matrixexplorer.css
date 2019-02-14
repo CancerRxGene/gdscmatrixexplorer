@@ -42,3 +42,25 @@ a.nav-link.active{
 .matrix-metric .card-body p{
     padding-bottom: 1.25em;
 }
+
+
+.navbar{
+    border-top: 5px solid #17a2b8;
+    background: #232642;
+    background: -moz-linear-gradient(left, #232642 0, #17a2b8 58%, #17a2b8 100%);
+    background: -webkit-linear-gradient(left, #232642 0,#17a2b8 58%,#17a2b8 100%);
+    background: linear-gradient(to right, #232642 0,#17a2b8 58%,#17a2b8 100%);
+}
+
+.navbar .nav a.nav-link{
+    color: white;
+}
+
+.dropdown-combinations .dropdown-menu{
+    right: 0;
+    left: auto;
+}
+
+.jumbotron{
+    background: white;
+}
