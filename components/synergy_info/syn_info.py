@@ -34,7 +34,7 @@ def infoblock_matrix(matrix_result):
         html.Div(className='card mb-3 matrix-metric', children=[
             html.Div(className='card-body', children=[
                 html.H4(className='card-title', children=[
-                    "Maximum Effect"
+                    "MaxE"
                 ]),
                 html.P(className='card-text', children=[
                     "Color indicates combination percentile bracket",

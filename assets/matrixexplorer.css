@@ -59,6 +59,12 @@ a.nav-link.active{
     padding-bottom: 1.25em;
 }
 
+.documentation h2{
+    margin-top: 2rem !important;
+}
+.documentation h4{
+    margin-top: 1.5rem !important;
+}
 
 .navbar{
     border-top: 5px solid #17a2b8;
@@ -73,6 +79,10 @@ a.nav-link.active{
     color: white;
 }
 
+.navbar .nav a.nav-link.active{
+    text-decoration: underline;
+    font-weight: 600;
+}
 .dropdown-combinations .dropdown-menu{
     right: 0;
     left: auto;
@@ -101,4 +111,5 @@ a.nav-link.active{
     position: absolute;
     top: 0;
     left: 0;
+    z-index: 1000;
 }

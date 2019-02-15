@@ -81,28 +81,28 @@ matrix_metrics = {
         'value': 'HSA_excess_window_syn'
     },
     'combo_max_effect': {
-        'label': 'Max effect combination',
+        'label': 'MaxE combination',
         'description': 'Maximum inhibition observed in combination',
         'value': 'combo_max_effect'
     },
     'lib1_max_effect': {
-        'label': 'Max effect drug 1',
+        'label': 'MaxE drug 1',
         'description': 'Maximum inhibition observed in drug 1',
         'value': 'lib1_max_effect'
     },
     'lib2_max_effect': {
-        'label': 'Max effect drug 2',
+        'label': 'MaxE drug 2',
         'description': 'Maximum inhibition observed in drug 2',
         'value': 'lib2_max_effect'
     },
     'lib1_delta_max_effect': {
-        'label': 'Delta max effect drug 1',
-        'description': 'Max effect combination minus max effect drug1',
+        'label': 'Delta MaxE drug 1',
+        'description': 'MaxE combination minus MaxE drug1',
         'value': 'lib1_delta_max_effect'
     },
     'lib2_delta_max_effect': {
-        'label': 'Delta max effect drug 2',
-        'description': 'Max effect combination minus max effect drug2',
+        'label': 'Delta MaxE drug 2',
+        'description': 'MaxE combination minus MaxE drug2',
         'value': 'lib2_delta_max_effect'
     },
 }
@@ -168,6 +168,10 @@ def url_parser(url):
         return 'project'
     elif re.fullmatch("/matrix/\d*/\d*", url):
         return 'matrix'
+    elif re.fullmatch("/documentation", url):
+        return 'documentation'
+    elif re.fullmatch('/downloads', url):
+        return 'downloads'
     elif re.fullmatch("/", url):
         return 'home'
 

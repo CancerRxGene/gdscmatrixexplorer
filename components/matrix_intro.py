@@ -215,7 +215,7 @@ def model_information(model_id, passport_data, gr_data, current_model_informatio
                 driver_genes_block +
                 model_attribute_section(cmp_data['model_information'], 'MSI Status', 'msi_status') +
                 model_attribute_section(cmp_data['model_information'], 'Ploidy','ploidy') +
-                model_attribute_section(cmp_data['model_information'], 'Mutational Burden', 'mutations_per_mb') +
+                model_attribute_section(cmp_data['model_information'], 'Mutations per Mb', 'mutations_per_mb') +
                 [html.Br(), html.Br(),
                  html.A(children=f"View {model.name} on Cell Model Passports",
                         href=f"https://cellmodelpassports.sanger.ac.uk/passports/{model.id}")
