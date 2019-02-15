@@ -27,7 +27,7 @@ def layout(*args, **kwargs):
 
         H2("Synergy reference models"),
         H4("Highest Single Agent (HSA)"),
-        P(["According to the HSA model, a combination of Drug 1 and Drug 2 is classified as synergistic if the effect of the combination (", *E12, ") is larger than the effect of either Drug 1 (", *E1, " or Drug 2 (", *E2, ") alone (whichever is larger)."]),
+        P(["According to the HSA model, a combination of Drug 1 and Drug 2 is classified as synergistic if the effect of the combination (", *E12, ") is larger than the effect of either Drug 1 (", *E1, ") or Drug 2 (", *E2, ") alone (whichever is larger)."]),
         P([Em("Synergy: "), Em("E", className="pl-5"), Sub("1,2"), " > max(", *E1, ",", *E2, ")"]),
         P("Whilst the HSA model can simply and effectively identify combinations with a better effect than either of the single agents, it fails to distinguish between responses that are less than or greater than the additive response expected by combining the two drugs. Hence, the HSA model does not distinguish between additive and synergistic effects."),
         P(["HSA excess is calculated by subtracting the highest effect of either single agent from the combination response (", *E12, "), whereby a positive HSA excess indicates synergy."]),
@@ -44,7 +44,7 @@ def layout(*args, **kwargs):
         P(["Loewe additivity focusses on the concentrations necessary to produce a given effect, rather than the effects at given concentrations. To fulfil Loewe additivity, the combination effect ", *E12, " at doses ", *X1, " and ", *X2, " has to produce the same inhibitory effect than the single agent doses at ", *x1, " and ", *x2, "."]),
         P([Em("Loewe index: "), Span("(", className='pl-5'), *x1, " / ", *X1, ") + (", *x2, " / ", *X2, ")"]),
         P("with an index = 1 indicating Loewe additivity, an index > 1 an effect greater than Loewe additivity and an index < 1 an effect smaller than Loewe additivity."),
-        P(["Loewe additivity assumes a constant potency ratio between the two drugs and that there is dose equivalence. This leads to the same combination principle that an equivalent dose of drug 1 (", *x1,") can be substituted for drug 2 (", *x2, ") to produce the same combined effect of ", *E12, "."]),
+        P(["Loewe additivity assumes a constant potency ratio between the two drugs and that there is dose equivalence. This leads to the sham combination principle that an equivalent dose of drug 1 (", *x1,") can be substituted for drug 2 (", *x2, ") to produce the same combined effect of ", *E12, "."]),
         P("A fitted model of the combination interaction surface is currently not available. Hence, no reliable Loewe index can be calculated."),
 
         H4("References"),
