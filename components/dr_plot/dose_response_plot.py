@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import plotly.graph_objs as go
 import dash_core_components as dcc
+import dash_html_components as html
 
 from utils import Colors as C
 
@@ -11,14 +12,18 @@ class DoseResponsePlot:
     def __init__(self, curve,
                  display_datapoints=True,
                  display_screening_range=True,
+                 mark_day1=True,
                  mark_auc=True,
                  label_auc=True,
                  mark_ic50=True,
                  label_ic50=True,
-                 mark_emax=True,
+                 mark_emax=False,
                  label_emax=True,
                  label_rmse=True,
-                 style=None):
+                 label_day1=True,
+                 style={},
+                 width=None,
+                 height=None):
         self.curve = curve
 
         self.plot_data = pd.DataFrame({'xfit': np.linspace(-10, 30, 25)})
@@ -37,11 +42,24 @@ class DoseResponsePlot:
         self.label_ic50 = label_ic50
         self.mark_emax = mark_emax
         self.label_emax = label_emax
+        self.mark_day1 = mark_day1
+        self.label_day1 = label_day1
         self.label_rmse = label_rmse
         self.style = style
+        self.width = width
+        self.height = height
 
     def plot(self):
-        return dcc.Graph(id=self.id, figure=self.figure, style=self.style)
+
+        graph = dcc.Graph(id=self.id,
+                         figure=self.figure,
+                         style=self.style,
+                         config={'displayModeBar': False}
+                         )
+        if self.curve.rmse > 0.3:
+            return html.Div(graph, style={'borderTop': '5px solid red'})
+        else:
+            return graph
 
     def __call__(self, *args, **kwargs):
         return self.plot()
@@ -126,6 +144,8 @@ class DoseResponsePlot:
 
         return go.Layout(
                 # title=f'Single Agent Response for {drug.drug_name}',
+                width=self.width,
+                height=self.height,
                 xaxis={'type': 'log', 'title': 'Concentration (M)',
                        'range': np.log10([self.curve.x_to_conc(-10),
                                           self.curve.x_to_conc(20)])},
@@ -142,6 +162,7 @@ class DoseResponsePlot:
         shapes.extend([self.emax_line] if self.mark_emax else [])
         shapes.extend([self.ic50_line] if self.mark_ic50 else [])
         shapes.extend([self.screening_range] if self.display_screening_range else [])
+        shapes.extend([self.day1_line] if self.mark_day1 else [])
         return shapes
 
 
@@ -191,12 +212,28 @@ class DoseResponsePlot:
         }
 
     @property
+    def day1_line(self):
+        return {
+            'type': 'line',
+            'xref': 'paper',
+            'x0': 0,
+            'y0': self.curve.matrix_results[0].day1_viability_mean,
+            'x1': 1,
+            'y1': self.curve.matrix_results[0].day1_viability_mean,
+            'line': {
+                'color': C.DARKPINK,
+                'width': 1,
+            },
+        }
+
+    @property
     def annotations(self):
         annotations = []
         annotations.extend([self.auc_label] if self.label_auc else [])
         annotations.extend([self.ic50_label] if self.label_ic50 else [])
         annotations.extend([self.emax_label] if self.label_emax else [])
         annotations.extend([self.rmse_label] if self.label_rmse else [])
+        annotations.extend([self.day1_label] if self.label_day1 else [])
         return annotations
 
     @property
@@ -206,7 +243,7 @@ class DoseResponsePlot:
             y=1 - self.curve.emax,
             xref='x',
             yref='y',
-            text=f'<b>Emax</b> {round(1 - self.curve.emax, 3)}',
+            text=f'<b>MaxE</b> {round(1 - self.curve.emax, 3)}',
             showarrow=True,
             arrowhead=6,
             ax=30,
@@ -266,8 +303,26 @@ class DoseResponsePlot:
             showarrow=False,
             xanchor="right",
             yanchor="top",
-            bgcolor=C.DARKGREY_ULTRALIGHT,
+            bgcolor=C.DARKGREY_ULTRALIGHT if self.curve.rmse < 0.3 else C.RED,
             bordercolor=C.DARKGREY_LIGHT,
             borderpad=2,
-            font={"size": 12}
+            font={"size": 12, 'color': C.DARKGREY if self.curve.rmse < 0.3 else 'white'}
+        )
+
+    @property
+    def day1_label(self):
+        return dict(
+            x=1,
+            y=self.curve.matrix_results[0].day1_viability_mean,
+            xref='paper',
+            yref='y',
+            text=f'<b>Day 1 </b> {round(self.curve.matrix_results[0].day1_viability_mean, 3)}',
+            showarrow=False,
+            xanchor="right",
+            yanchor="top",
+            bgcolor=C.DARKGREY_ULTRALIGHT,
+            bordercolor=C.DARKPINK,
+            borderpad=2,
+            font={"size": 12,
+                  'color': C.DARKGREY}
         )

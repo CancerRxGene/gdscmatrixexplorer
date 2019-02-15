@@ -29,7 +29,7 @@ def layout(matrix):
         dbc.Row(className="mt-3 mb-2 pl-3", children=
             dbc.Col(width=12, children=[
                 dcc.Markdown(f"# **{drug1.drug_name}** + **{drug2.drug_name}** in cell model **{model.name}**"),
-                html.P("Combination Matrix Report", className='lead')
+                html.P(f"Combination Matrix Report for barcode {matrix.barcode}", className='lead')
             ])
         ),
         dbc.Row(className="mt-2 mb-5", children=[
@@ -46,8 +46,9 @@ def layout(matrix):
                                 html.Tr([
                                     html.Td([
                                         html.Strong("Tissue "), model.tissue, html.Br(),
-                                        html.Strong("Cancer Type "), model.cancer_type,
-                                        html.Br(), html.Br(),
+                                        html.Strong("Cancer Type "), model.cancer_type, html.Br(),
+                                        html.Strong("Estimated doubling time "), f"{round(matrix.doubling_time, 1)} hours", html.Br(),
+                                        html.Br(),
                                         html.Em("Loading more information from Cell Model Passports...")],
                                         className="pl-0")
                                 ])
@@ -62,18 +63,18 @@ def layout(matrix):
                             id=f"drug-info-{drug1.id}",
                             className="bg-white pt-4 px-4 pb-1 border border-info h-100 shadow-sm",
                             children=[
-                                infoblock(drug1),
-                                curve1.plot(style={'maxHeight': '250px'})
+                                infoblock(drug1, rmse=curve1.rmse),
+                                curve1.plot(height=250)
                             ]
                         ),
                     ),
                     dbc.Col(width=6, children=
                         html.Div(
-                            id=f"drug-info-{drug1.id}",
+                            id=f"drug-info-{drug2.id}",
                             className="bg-white pt-4 px-4 pb-1 border border-info h-100 shadow-sm",
                             children=[
-                                infoblock(drug2),
-                                curve2.plot(style={'maxHeight': '250px'})
+                                infoblock(drug2, rmse=curve2.rmse),
+                                curve2.plot(height=250)
                             ]
                         )
                     )
@@ -116,7 +117,8 @@ def layout(matrix):
         ]),
         # html.Div(id='hidden-div', className='d-none'),
         html.Div(id='model-id', className='d-none', children=matrix.model_id),
-        html.Div(id='passport-data', className='d-none')
+        html.Div(id='passport-data', className='d-none'),
+        html.Div(id='gr-data', className='d-none', children=json.dumps(dict(doubling_time=matrix.doubling_time, growth_rate=matrix.growth_rate, day1_viab=matrix.day1_viability_mean))),
     ]
     )
 
@@ -162,14 +164,16 @@ def compute_value(model_id, passport_data):
 
 @app.callback(dash.dependencies.Output('model-information', 'children'),
               [dash.dependencies.Input('model-id', 'children'),
-               dash.dependencies.Input('passport-data', 'children')],
+               dash.dependencies.Input('passport-data', 'children'),
+               dash.dependencies.Input('gr-data', 'children')],
               [dash.dependencies.State('model-information', 'children')])
-def model_information(model_id, passport_data, current_model_information):
+def model_information(model_id, passport_data, gr_data, current_model_information):
     if model_id is None:
         return current_model_information
 
     model = session.query(Model).get(model_id)
     cmp_data = json.loads(passport_data)
+    gr_data = json.loads(gr_data)
 
     def model_attribute_section(model_attributes, text, attribute, from_sample=False):
 
@@ -199,9 +203,10 @@ def model_information(model_id, passport_data, current_model_information):
             html.Td(
                 [html.Strong("Tissue "), model.tissue, html.Br(),
                  html.Strong("Cancer Type "), model.cancer_type, html.Br()] +
-                 model_attribute_section(cmp_data['model_information'], 'Sample Site', 'sample_site', from_sample=True),
-                 model_attribute_section(cmp_data['model_information'], 'Sample Tissue Status', 'tissue_status', from_sample=True),
-                     className="pl-0", style={"width": "50%"}),
+                 model_attribute_section(cmp_data['model_information'], 'Sample Site', 'sample_site', from_sample=True) +
+                 model_attribute_section(cmp_data['model_information'], 'Sample Tissue Status', 'tissue_status', from_sample=True) +
+                [html.Strong("Estimated doubling time "), round(gr_data['doubling_time'], 1), 'hours (on this plate)', html.Br()],
+                 className="pl-0", style={"width": "50%"}),
             html.Td(
                 driver_genes_block +
                 model_attribute_section(cmp_data['model_information'], 'MSI Status', 'msi_status') +

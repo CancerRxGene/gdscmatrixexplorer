@@ -12,7 +12,7 @@ from sqlalchemy import and_, or_
 from app import app
 from db import session
 from models import MatrixResult, Project, Combination, Model
-from utils import plot_colors,  matrix_metrics, get_all_tissues
+from utils import plot_colors,  matrix_metrics, get_all_tissues, matrix_hover_label
 
 
 def layout(project_id):
@@ -136,6 +136,7 @@ def update_scatter(x_axis_field, y_axis_field, color_field, tissues, combination
 
     summary = pd.read_sql(all_matrices_query.statement,
                           all_matrices_query.session.bind)
+
     all_drugs = pd.read_sql_table('drugs', session.bind)
 
     summary = summary.merge(all_drugs, left_on='lib1_id', right_on='id') \
@@ -164,11 +165,7 @@ def update_scatter(x_axis_field, y_axis_field, color_field, tissues, combination
                                                               for x in fig_data[
                                                                   color_field]]
                 },
-                text=[
-                    f"{s.drug_name_lib1} ({s.target_lib1}) - {s.drug_name_lib2} ({s.target_lib2})<br />"
-                    f"Cell line: {s.model_name}<br />"
-                    f"Tissue: {s.tissue}"
-                    for s in fig_data.itertuples()],
+                text=matrix_hover_label(fig_data),
                 customdata=[{"barcode": row.barcode, "cmatrix": row.cmatrix,
                              "to": f"/matrix/{row.barcode}/{row.cmatrix}"}
                             for row in fig_data.itertuples(index=False)]

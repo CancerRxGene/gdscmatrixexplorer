@@ -9,7 +9,7 @@ import plotly.graph_objs as go
 from app import app
 from db import session
 from models import MatrixResult, Model
-from utils import matrix_metrics, get_all_tissues
+from utils import matrix_metrics, get_all_tissues, matrix_hover_label
 
 def layout():
 
@@ -52,7 +52,10 @@ def get_boxplot_summary_data(boxplot_value, project_id, tissue):
                                        MatrixResult.barcode,
                                        MatrixResult.cmatrix,
                                        MatrixResult.lib1_id,
-                                       MatrixResult.lib2_id) \
+                                       MatrixResult.lib2_id,
+                                       Model.name.label('model_name'),
+                                       Model.tissue) \
+        .filter(Model.id == MatrixResult.model_id)\
         .filter(MatrixResult.project_id == int(project_id))
 
     if tissue:
@@ -86,7 +89,7 @@ def update_boxplot(boxplot_value, project_id, tissue):
 
     def get_drug_names(summary, combo_id):
         row = next(summary.drop_duplicates(subset=['combo_id']).query("combo_id == @combo_id").itertuples())
-        return f"{row.drug_name_lib1} - {row.drug_name_lib2}"
+        return f"{row.drug_name_lib1} + {row.drug_name_lib2}"
 
     return {
         'data': [
@@ -100,22 +103,24 @@ def update_boxplot(boxplot_value, project_id, tissue):
                     size=4,
                     opacity=0.5
                 ),
+                text=matrix_hover_label(summary),
                 customdata=[{"to": f"/matrix/{row.barcode}/{row.cmatrix}"}
                             for row in summary.query("combo_id == @combo_id").itertuples(index=False)],
-                hoveron='points'
+                hoveron='points',
+                hoverinfo='text',
             )
-            for combo_id in summary[['combo_id', boxplot_value]].\
-                groupby(by='combo_id', as_index=False).\
-                median().\
-                sort_values(by=boxplot_value).\
-                combo_id
+            for combo_id in summary[['combo_id', boxplot_value]]
+                .groupby(by='combo_id', as_index=False)\
+                .median()\
+                .sort_values(by=boxplot_value)\
+                .combo_id
         ],
         'layout': go.Layout(
             height=1000,
             margin=dict(l=150, r=70, b=80, t=20),
             showlegend=False,
             xaxis={'type': 'log' if 'index' in boxplot_value else 'linear',
-                   'title': matrix_metrics[boxplot_value]['label']}
+                   'title': matrix_metrics[boxplot_value]['label']},
         )
     }
 
