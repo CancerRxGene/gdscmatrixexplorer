@@ -36,7 +36,7 @@ def layout(matrix):
             dbc.Col(width=9, children=[
                 html.Div(
                     id=f"cell-info-{model.id}",
-                    className="bg-white pt-4 px-4 pb-1 mb-3 border border-warning shadow-sm",
+                    className="bg-white pt-4 px-4 pb-1 mb-3 border shadow-sm",
                     children=html.Div([
                         html.H3(["Cell Line ", html.Strong(model.name)]),
                         html.Table(
@@ -61,7 +61,7 @@ def layout(matrix):
                     dbc.Col(width=6, children=
                         html.Div(
                             id=f"drug-info-{drug1.id}",
-                            className="bg-white pt-4 px-4 pb-1 border border-info h-100 shadow-sm",
+                            className="bg-white pt-4 px-4 pb-1 border h-100 shadow-sm",
                             children=[
                                 infoblock(drug1, rmse=curve1.rmse),
                                 curve1.plot(height=250)
@@ -71,7 +71,7 @@ def layout(matrix):
                     dbc.Col(width=6, children=
                         html.Div(
                             id=f"drug-info-{drug2.id}",
-                            className="bg-white pt-4 px-4 pb-1 border border-info h-100 shadow-sm",
+                            className="bg-white pt-4 px-4 pb-1 border h-100 shadow-sm",
                             children=[
                                 infoblock(drug2, rmse=curve2.rmse),
                                 curve2.plot(height=250)
@@ -86,7 +86,7 @@ def layout(matrix):
                     html.H3("Summary"),
                     html.Strong("Max. observed inhibition %"),
                     html.Hr(),
-                    html.Table([
+                    html.Table(className='table table-borderless table-sm', children=[
                         html.Tr([
                             html.Td(["Combination"]),
                             html.Td([html.Strong(round(matrix.combo_max_effect * 100, 1))])
@@ -105,7 +105,7 @@ def layout(matrix):
                         ])
                     ]),
                 ]),
-                html.Div(className='bg bg-light border pt-4 px-4 pb-1 d-print-none shadow-sm',
+                html.Div(className='bg bg-white border pt-4 px-4 pb-1 d-print-none shadow-sm',
                          children=[
                              html.H3("Quick Navigation"),
                              html.Hr(),
@@ -142,7 +142,7 @@ def compute_value(model_id, passport_data):
 
     try:
         model_information = requests.get(
-            f"https://api.cellmodelpassports.sanger.ac.uk/models/{model.id}?include=sample.tissue,sample.cancer_type,sample.patient", timeout=30).json()
+            f"https://api.cellmodelpassports.sanger.ac.uk/models/{model.id}?include=sample.tissue,sample.cancer_type,sample.patient", timeout=2).json()
     except (requests.exceptions.ConnectionError,
             requests.exceptions.Timeout,
             json.decoder.JSONDecodeError):
@@ -151,7 +151,7 @@ def compute_value(model_id, passport_data):
     if model_information:
         try:
             model_drivers = requests.get(
-                f"https://api.cellmodelpassports.sanger.ac.uk/models/{model.id}/datasets/cancer_drivers?page[size]=0&fields[mutation]=gene&include=gene&fields[gene]=symbol", timeout=30).json()
+                f"https://api.cellmodelpassports.sanger.ac.uk/models/{model.id}/datasets/cancer_drivers?page[size]=0&fields[mutation]=gene&include=gene&fields[gene]=symbol", timeout=2).json()
             driver_genes = []
             for g in model_drivers['included']:
                 driver_genes.append(g['attributes']['symbol'])
@@ -170,6 +170,8 @@ def compute_value(model_id, passport_data):
 def model_information(model_id, passport_data, gr_data, current_model_information):
     if model_id is None:
         return current_model_information
+    if passport_data is None:
+        return current_model_information
 
     model = session.query(Model).get(model_id)
     cmp_data = json.loads(passport_data)
@@ -177,6 +179,8 @@ def model_information(model_id, passport_data, gr_data, current_model_informatio
 
     def model_attribute_section(model_attributes, text, attribute, from_sample=False):
 
+        if model_attributes is None:
+            return ['']
         text = text.strip() + " "
 
         model_attributes = model_attributes['included'][0]['attributes'] \
@@ -211,7 +215,7 @@ def model_information(model_id, passport_data, gr_data, current_model_informatio
                 driver_genes_block +
                 model_attribute_section(cmp_data['model_information'], 'MSI Status', 'msi_status') +
                 model_attribute_section(cmp_data['model_information'], 'Ploidy','ploidy') +
-                model_attribute_section(cmp_data['model_information'], 'Mutational Burden', 'mutations_per_mb') +
+                model_attribute_section(cmp_data['model_information'], 'Mutations per Mb', 'mutations_per_mb') +
                 [html.Br(), html.Br(),
                  html.A(children=f"View {model.name} on Cell Model Passports",
                         href=f"https://cellmodelpassports.sanger.ac.uk/passports/{model.id}")

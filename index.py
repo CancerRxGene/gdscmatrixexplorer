@@ -7,8 +7,9 @@ import dash_auth
 import os
 
 from app import app
-from pages import project, home, matrix, combinations, documentation, downloads
 from components.navigation.header import generate_header
+from components.navigation.footer import footer
+from pages import project, home, matrix, combinations, documentation, downloads
 from utils import url_parser
 
 user = os.getenv('MATRIXEXPLORER_USER')
@@ -18,13 +19,15 @@ auth = dash_auth.BasicAuth(app, [[user, password]])
 
 app.layout = html.Div([
         dcc.Location(id='url', refresh=True),
+        generate_header(),
         dbc.Container(
             id='wrapper',
             children=[
-                generate_header(),
                 dbc.Row(dbc.Col(id='page-content', width=12))
-            ]
-        )
+            ],
+            className='pb-5'
+        ),
+        footer
 ])
 
 server = app.server

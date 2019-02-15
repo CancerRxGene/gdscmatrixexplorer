@@ -32,9 +32,9 @@ def layout(combination):
                     html.P("Combination Report", className='lead')
                 ])
             ),
-            dbc.Row([
+            dbc.Row(className='d-flex', children=[
                 dbc.Col(width=6, children=[
-                    html.Div(className="bg-white pt-3 px-4 pb-2 mb-3 border border-info shadow-sm", children=[
+                    html.Div(className="bg-white pt-3 px-4 pb-2 mb-3 border border-primary shadow-sm", children=[
                         html.H3("Drug information"),
                         html.Hr(),
                         dbc.Row([
@@ -99,10 +99,10 @@ def layout(combination):
                 ]),
                 dbc.Col(
                     width=6,
-                    className='d-print-none',
+                    className='d-print-none align-self-stretch pb-3',
                     children=
                     html.Div(
-                        className="bg-white pt-3 px-4 pb-2 mb-3 border border-warning shadow-sm",
+                        className="bg-white pt-3 px-4 pb-2 mb-3 border shadow-sm h-100",
                         children=[
                             html.H3("View combination in cell line"),
                             html.Hr(),
