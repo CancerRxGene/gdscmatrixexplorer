@@ -8,7 +8,7 @@ import plotly.graph_objs as go
 
 from app import app
 from db import session
-from models import MatrixResult, DoseResponseCurve
+from models import MatrixResult, DoseResponseCurve, SingleAgentWellResult
 
 
 def layout(matrix: MatrixResult):
@@ -19,6 +19,24 @@ def layout(matrix: MatrixResult):
 
     drug1 = matrix.combination.lib1.drug_name
     drug2 = matrix.combination.lib2.drug_name
+
+    # find lib tag
+    lib1_tag = matrix.lib1_tag
+    lib2_tag = matrix.lib2_tag
+    print (lib1_tag)
+    print (lib2_tag)
+
+    # find barcode
+    barcode = matrix.barcode
+    print (barcode)
+
+    # get the single agent data
+    #lib1_df = session.query(SingleAgentWellResult).filter(SingleAgentWellResult.lib_drug==lib1_tag).filter(SingleAgentWellResult.barcode==barcode).all()
+    #print (lib1_df)
+    #lib2_df = session.query(SingleAgentWellResult).filter(SingleAgentWellResult.lib_drug == lib2_tag).filter(
+     #   SingleAgentWellResult.barcode == barcode).all()
+    #print(lib2_df)
+
 
     available_viability_metrics = ['viability', 'inhibition']
 
@@ -56,12 +74,20 @@ def layout(matrix: MatrixResult):
                     dbc.Col(width=4, children=[
                         dcc.Graph(id='viability-surface'),
                     ])
+                ]),
+                dbc.Row([
+                     dbc.Col(width=6, children=[dcc.Graph(id='lib1-viability-heatmap'), ]),
+                     dbc.Col(width=6, children=[dcc.Graph(id='lib2-viability-heatmap'), ])
                 ])
             ]),
             html.Div(id='viability-values', style={'display': 'none'},
                      children=matrix_df.to_json(date_format='iso', orient='split')),
             html.Div(id='drug_names', style={'display': 'none'},
-                     children=f"{drug1}:_:{drug2}")
+                     children=f"{drug1}:_:{drug2}"),
+            html.Div(id='barcode', style={'display': 'none'},
+                     children=f"{barcode}"),
+            html.Div(id='drug_tags', style={'display': 'none'},
+                     children=f"{lib1_tag}:_:{lib2_tag}")
 
         ])
     ])
@@ -75,13 +101,13 @@ def layout(matrix: MatrixResult):
 def update_viability_heatmap(viability_heatmap_zvalue, matrix_json, drug_names):
     matrix_df = pd.read_json(matrix_json, orient='split')
     drug1, drug2 = drug_names.split(':_:')
-
+    #print (matrix_df)
     # sort the data frame before the conc convert to scientific notation
     matrix_df = matrix_df.sort_values(['lib1_conc', 'lib2_conc'])
     matrix_df['lib1_conc'] = [np.format_float_scientific(conc, 3) for conc in matrix_df['lib1_conc']]
     matrix_df['lib2_conc'] = [np.format_float_scientific(conc, 3) for conc in matrix_df['lib2_conc']]
     zvalue = matrix_df[viability_heatmap_zvalue]
-
+    #print (matrix_df['lib1_conc'])
     return {
         'data': [
             go.Heatmap(
@@ -172,4 +198,48 @@ def update_viability_surface(viability_heatmap_zvalue, matrix_json, drug_names):
                 'camera': dict(eye=dict(x=1, y=-2, z=1.25)),
             }
         )
+    }
+
+@app.callback(
+    dash.dependencies.Output('lib1-viability-heatmap','figure'),
+    [#dash.dependencies.Input('viability-heatmap-zvalue', 'value'),
+     dash.dependencies.Input('barcode', 'children'),
+     dash.dependencies.Input('drug_tags', 'children'),
+     dash.dependencies.Input('drug_names', 'children')
+    ]
+)
+
+def update_single_agent_heatmap(barcode,drug_tags,drug_names):
+    print (drug_tags)
+    print (barcode)
+    lib1_tag, lib2_tag = drug_tags.split(':_:')
+    lib1_name, lib2_name = drug_names.split(':_:')
+    # get the single agent data
+    lib1_well_result = session.query(SingleAgentWellResult).filter(SingleAgentWellResult.lib_drug == lib1_tag).filter(
+        SingleAgentWellResult.barcode == barcode).all()
+
+    lib2_well_result = session.query(SingleAgentWellResult).filter(SingleAgentWellResult.lib_drug == lib2_tag).filter(
+        SingleAgentWellResult.barcode == barcode).all()
+    for l in lib2_well_result:
+        ld = l.to_dict()
+        print (ld)
+    lib2_df = pd.DataFrame([ l.to_dict() for l in lib2_well_result ])
+    lib2_df = lib2_df.sort_values('conc')
+
+    print (lib2_df.conc)
+    return {
+        'data': [
+            go.Heatmap(
+                x=lib2_df.conc,
+                y=lib2_df.dose,
+                z=lib2_df.viability,
+                zmax=1,
+                zmin=0,
+                colorscale='Bluered',
+                reversescale=True
+            )
+        ],
+        'layout': go.Layout(title=lib1_name
+                            )
+
     }
