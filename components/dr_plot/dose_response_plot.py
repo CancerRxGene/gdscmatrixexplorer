@@ -243,7 +243,7 @@ class DoseResponsePlot:
             y=1 - self.curve.emax,
             xref='x',
             yref='y',
-            text=f'<b>Emax</b> {round(1 - self.curve.emax, 3)}',
+            text=f'<b>MaxE</b> {round(1 - self.curve.emax, 3)}',
             showarrow=True,
             arrowhead=6,
             ax=30,
