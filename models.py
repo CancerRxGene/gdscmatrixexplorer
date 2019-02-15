@@ -160,8 +160,8 @@ class MatrixResult(ToDictMixin, Base):
 
 
     combination = relationship("Combination", back_populates='matrices',
-                               primaryjoin="and_(and_(Combination.project_id == MatrixResult.project_id, "
-                                           "Combination.lib1_id == MatrixResult.lib1_id),"
+                               primaryjoin="and_(Combination.project_id == MatrixResult.project_id, "
+                                           "Combination.lib1_id == MatrixResult.lib1_id, "
                                            "Combination.lib2_id == MatrixResult.lib2_id)",
                                viewonly=True)
 

@@ -7,8 +7,8 @@ import dash_auth
 import os
 
 from app import app
-from pages import project, home, matrix, combinations
-from page_components import header
+from pages import project, home, matrix, combinations, documentation, downloads
+from components.navigation.header import generate_header
 from utils import url_parser
 
 user = os.getenv('MATRIXEXPLORER_USER')
@@ -21,7 +21,7 @@ app.layout = html.Div([
         dbc.Container(
             id='wrapper',
             children=[
-                header,
+                generate_header(),
                 dbc.Row(dbc.Col(id='page-content', width=12))
             ]
         )
@@ -45,6 +45,10 @@ def display_page(pathname):
         return combinations.layout(pathname)
     elif page_type == 'matrix':
         return matrix.layout(pathname)
+    elif page_type == 'documentation':
+        return documentation.layout(pathname)
+    elif page_type == 'downloads':
+        return downloads.layout(pathname)
 
     else:
         return '404'
