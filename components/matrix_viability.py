@@ -66,16 +66,16 @@ def layout(matrix: MatrixResult):
                # ]),
                 dbc.Row([
                     dbc.Col(width=2,className='align-top', children=[dcc.Graph(id='lib2-viability-heatmap'), ]),
-                    dbc.Col(width=8, children=[
+                    dbc.Col(width=6, children=[
                         dbc.Row(
                             children=[dcc.Graph(id='viability-heatmap')]
                         ),
                         dbc.Row(children=[dcc.Graph(id='lib1-viability-heatmap') ]),
                     ]),
 
-                ]),
-                dbc.Row([
-                    dbc.Col(width=10, children=[
+              #  ]),
+              #  dbc.Row([
+                    dbc.Col(width=4, children=[
                           dcc.Graph(id='viability-surface'),
                      ]),
                 ]),
@@ -121,7 +121,6 @@ def update_viability_heatmap(viability_heatmap_zvalue, matrix_json, drug_names):
             go.Heatmap(
                 x=matrix_df.lib1_conc,
                 y=matrix_df.lib2_conc,
-                #y=[1],
                 z=zvalue,
                 zmax=1,
                 zmin=0,
@@ -132,13 +131,15 @@ def update_viability_heatmap(viability_heatmap_zvalue, matrix_json, drug_names):
         ],
         'layout': go.Layout(title=viability_heatmap_zvalue.capitalize(),
                             xaxis={'type': 'category',
-                                   'title': drug1 + " µM"
+                                   'showticklabels': False
+                                  # 'title': drug1 + " µM"
                                    },
                             yaxis={'type': 'category',
-                                   'title': drug2 + " µM"
-
-                                   },
-                            margin={'l': 100, 't': 40}
+                                   #'title': drug2 + " µM",
+                                    'showticklabels': False
+                                  },
+                            margin={'l': 30, 't': 70,'b': 15},
+                            width=600,height=450
                             )
     }
 
@@ -250,8 +251,8 @@ def update_lib1_heatmap(viability_heatmap_zvalue, barcode,lib1_tag,drug_names):
         'layout': go.Layout(
             xaxis={'type': 'category', 'title': lib1_name +  " µM"},
             yaxis={'type': 'category', 'showticklabels': False},
-            width=680, height=150,
-            margin={'t':30,'l':100}
+            width=600, height=150,
+            margin={'t':30,'l':30}
                 )
 
     }
@@ -297,9 +298,9 @@ def update_lib2_heatmap(viability_heatmap_zvalue, barcode,lib2_tag,drug_names):
         'layout': go.Layout(
             xaxis={'type': 'category', 'showticklabels': False},
             yaxis={'type': 'category', 'title': lib2_name + " µM"},
-            width=200,
-            height = 450,
-            margin={'t': 45}
+            width=150,
+            height = 500,
+            margin={'t': 70, 'r': 10}
                 )
 
     }
