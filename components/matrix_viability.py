@@ -250,8 +250,8 @@ def update_lib1_heatmap(viability_heatmap_zvalue, barcode,lib1_tag,drug_names):
         'layout': go.Layout(
             xaxis={'type': 'category', 'title': lib1_name +  " µM"},
             yaxis={'type': 'category', 'showticklabels': False},
-            width=685, height=150,
-            margin={'t':30,}
+            width=680, height=150,
+            margin={'t':30,'l':100}
                 )
 
     }
