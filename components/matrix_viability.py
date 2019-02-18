@@ -65,7 +65,7 @@ def layout(matrix: MatrixResult):
                #     ])
                # ]),
                 dbc.Row([
-                    dbc.Col(width=2, children=[dcc.Graph(id='lib2-viability-heatmap'), ]),
+                    dbc.Col(width=2,className='align-top', children=[dcc.Graph(id='lib2-viability-heatmap'), ]),
                     dbc.Col(width=8, children=[
                         dbc.Row(
                             children=[dcc.Graph(id='viability-heatmap')]
@@ -75,7 +75,7 @@ def layout(matrix: MatrixResult):
 
                 ]),
                 dbc.Row([
-                    dbc.Col(width='auto', children=[
+                    dbc.Col(width=10, children=[
                           dcc.Graph(id='viability-surface'),
                      ]),
                 ]),
@@ -243,8 +243,9 @@ def update_lib1_heatmap(barcode,lib1_tag,drug_names):
         ],
         'layout': go.Layout(
             xaxis={'type': 'category', 'title': lib1_name +  " µM"},
-            yaxis={'type': 'category'},
-            width=600, height=200,
+            yaxis={'type': 'category', 'showticklabels': False},
+            width=685, height=150,
+            margin={'t':30,}
                 )
 
     }
@@ -282,10 +283,11 @@ def update_lib2_heatmap(barcode,lib2_tag,drug_names):
             )
         ],
         'layout': go.Layout(
-            xaxis={'type': 'category'},
+            xaxis={'type': 'category', 'showticklabels': False},
             yaxis={'type': 'category', 'title': lib2_name + " µM"},
             width=200,
-            height = 600
+            height = 450,
+            margin={'t': 45}
                 )
 
     }
