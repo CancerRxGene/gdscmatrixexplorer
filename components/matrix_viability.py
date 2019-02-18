@@ -211,14 +211,14 @@ def update_viability_surface(viability_heatmap_zvalue, matrix_json, drug_names):
 
 @app.callback(
     dash.dependencies.Output('lib1-viability-heatmap','figure'),
-    [
+    [dash.dependencies.Input('viability-heatmap-zvalue', 'value'),
      dash.dependencies.Input('barcode', 'children'),
      dash.dependencies.Input('lib1_tag', 'children'),
      dash.dependencies.Input('drug_names', 'children')
     ]
 )
 
-def update_lib1_heatmap(barcode,lib1_tag,drug_names):
+def update_lib1_heatmap(viability_heatmap_zvalue, barcode,lib1_tag,drug_names):
     lib1_name, lib2_name = drug_names.split(':_:')
     # get the single agent data
     lib1_well_result = session.query(SingleAgentWellResult).filter(SingleAgentWellResult.lib_drug == lib1_tag).filter(
@@ -228,12 +228,18 @@ def update_lib1_heatmap(barcode,lib1_tag,drug_names):
     lib1_df = lib1_df.sort_values('conc')
     lib1_df.conc = [np.format_float_scientific(conc, 3) for conc in lib1_df.conc]
 
+    z = []
+    if (viability_heatmap_zvalue == 'viability'):
+        z = lib1_df.viability
+    else:
+        z = 1 - lib1_df.viability
+    print (z)
     return {
         'data': [
             go.Heatmap(
                 x=lib1_df.conc,
                 y = [1] * len(lib1_df.conc),
-                z=lib1_df.viability,
+                z=z,
                 zmax=1,
                 zmin=0,
                 colorscale='Bluered',
@@ -252,14 +258,14 @@ def update_lib1_heatmap(barcode,lib1_tag,drug_names):
 
 @app.callback(
     dash.dependencies.Output('lib2-viability-heatmap','figure'),
-    [
+    [dash.dependencies.Input('viability-heatmap-zvalue', 'value'),
      dash.dependencies.Input('barcode', 'children'),
      dash.dependencies.Input('lib2_tag', 'children'),
      dash.dependencies.Input('drug_names', 'children')
     ]
 )
 
-def update_lib2_heatmap(barcode,lib2_tag,drug_names):
+def update_lib2_heatmap(viability_heatmap_zvalue, barcode,lib2_tag,drug_names):
     lib1_name, lib2_name = drug_names.split(':_:')
     # get the single agent data
     lib2_well_result = session.query(SingleAgentWellResult).filter(SingleAgentWellResult.lib_drug == lib2_tag).filter(
@@ -269,12 +275,18 @@ def update_lib2_heatmap(barcode,lib2_tag,drug_names):
     lib2_df = lib2_df.sort_values('conc')
     lib2_df.conc = [np.format_float_scientific(conc, 3) for conc in lib2_df.conc]
 
+    z = []
+    if (viability_heatmap_zvalue == 'viability'):
+        z = lib2_df.viability
+    else:
+        z = 1 - lib2_df.viability
+
     return {
         'data': [
             go.Heatmap(
                 y=lib2_df.conc,
                 x = [1] * len(lib2_df.conc),
-                z=lib2_df.viability,
+                z=z,
                 zmax=1,
                 zmin=0,
                 colorscale='Bluered',
