@@ -2,6 +2,7 @@ import dash
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
+import json
 import pandas as pd
 import numpy as np
 import plotly.graph_objs as go
@@ -17,21 +18,18 @@ def layout(matrix: MatrixResult):
     matrix_df['lib1_conc'] = [np.format_float_scientific(conc, 3) for conc in matrix_df['lib1_conc']]
     matrix_df['lib2_conc'] = [np.format_float_scientific(conc, 3) for conc in matrix_df['lib2_conc']]
 
-    drug1 = matrix.combination.lib1.drug_name
-    drug2 = matrix.combination.lib2.drug_name
-
-    # find lib tag
-    lib1_tag = matrix.lib1_tag
-    lib2_tag = matrix.lib2_tag
-
-    # find barcode
-    barcode = matrix.barcode
-
     available_viability_metrics = ['viability', 'inhibition']
 
     matrix_df = matrix_df.assign(inhibition=lambda df: 1 - df.viability)
 
     matrix_df = matrix_df[['lib1_conc', 'lib2_conc'] + available_viability_metrics]
+
+    drug_info = json.dumps(dict(lib1_tag=matrix.lib1_tag,
+                                lib2_tag=matrix.lib2_tag,
+                                drug1_name=matrix.combination.lib1.drug_name,
+                                drug2_name=matrix.combination.lib2.drug_name,
+                                barcode=matrix.barcode
+                                ))
 
     return dbc.Row(className='pb-5', children=[
         dbc.Col(width=12, children=[
@@ -54,48 +52,26 @@ def layout(matrix: MatrixResult):
                     ]),
                     dbc.Col(html.Hr(), width=12)
                 ]),
-               # dbc.Row([
-               #     dbc.Col(width=8, children=[
-               #         dcc.Graph(id='viability-heatmap'),
-               #         html.Div(className='col-8 offset-2', children=[
-               #         ])
-               #     ]),
-               #     dbc.Col(width=4, children=[
-               #         dcc.Graph(id='viability-surface'),
-               #     ])
-               # ]),
+
                 dbc.Row([
-                    dbc.Col(width=2,className='align-top', children=[dcc.Graph(id='lib2-viability-heatmap'), ]),
+                    dbc.Col(width=2,className='align-top', children=[dcc.Graph(id='lib2-viability-heatmap',config={'displayModeBar': False}), ]),
                     dbc.Col(width=6, children=[
                         dbc.Row(
                             children=[dcc.Graph(id='viability-heatmap')]
                         ),
-                        dbc.Row(children=[dcc.Graph(id='lib1-viability-heatmap') ]),
+                        dbc.Row(children=[dcc.Graph(id='lib1-viability-heatmap',config={'displayModeBar': False}) ]),
                     ]),
 
-              #  ]),
-              #  dbc.Row([
                     dbc.Col(width=4, children=[
                           dcc.Graph(id='viability-surface'),
                      ]),
                 ]),
-              #  dbc.Row([
-              #      dbc.Col(width=8, children=[dcc.Graph(id='lib1-viability-heatmap'), ]),
-              #  ]),
-              #  dbc.Row([
-              #      dbc.Col(width=8, children=[dcc.Graph(id='lib2-viability-heatmap'), ])
-              #  ])
+
             ]),
             html.Div(id='viability-values', style={'display': 'none'},
                      children=matrix_df.to_json(date_format='iso', orient='split')),
-            html.Div(id='drug_names', style={'display': 'none'},
-                     children=f"{drug1}:_:{drug2}"),
-            html.Div(id='barcode', style={'display': 'none'},
-                     children=f"{barcode}"),
-            html.Div(id='lib1_tag', style={'display': 'none'},
-                     children=f"{lib1_tag}"),
-            html.Div(id='lib2_tag', style={'display': 'none'},
-                     children=f"{lib2_tag}")
+            html.Div(id='drug_info', className='d-none',
+                     children= drug_info)
 
         ])
     ])
@@ -208,78 +184,51 @@ def update_viability_surface(viability_heatmap_zvalue, matrix_json, drug_names):
 @app.callback(
     dash.dependencies.Output('lib1-viability-heatmap','figure'),
     [dash.dependencies.Input('viability-heatmap-zvalue', 'value'),
-     dash.dependencies.Input('barcode', 'children'),
-     dash.dependencies.Input('lib1_tag', 'children'),
-     dash.dependencies.Input('drug_names', 'children')
+     dash.dependencies.Input('drug_info', 'children')
     ]
 )
+def update_lib1_heatmap(viability_heatmap_zvalue, drug_info):
+    drug_info=json.loads(drug_info)
+    tag = drug_info['lib1_tag']
+    barcode = drug_info['barcode']
+    drug_name = drug_info['drug1_name']
 
-def update_lib1_heatmap(viability_heatmap_zvalue, barcode,lib1_tag,drug_names):
-    lib1_name, lib2_name = drug_names.split(':_:')
-    # get the single agent data
-    lib1_well_result = session.query(SingleAgentWellResult).filter(SingleAgentWellResult.lib_drug == lib1_tag).filter(
-        SingleAgentWellResult.barcode == barcode).all()
-
-    lib1_df = pd.DataFrame([l.to_dict() for l in lib1_well_result ])
-    lib1_df = lib1_df.sort_values('conc')
-    lib1_df.conc = [np.format_float_scientific(conc, 3) for conc in lib1_df.conc]
-
-    z = []
-    if (viability_heatmap_zvalue == 'viability'):
-        z = lib1_df.viability
-    else:
-        z = 1 - lib1_df.viability
-
-    return {
-        'data': [
-            go.Heatmap(
-                x=lib1_df.conc,
-                y = [1] * len(lib1_df.conc),
-                z=z,
-                zmax=1,
-                zmin=0,
-                colorscale='Bluered',
-                reversescale=True,
-                showscale=False
-            )
-        ],
-        'layout': go.Layout(
-                     xaxis={'type': 'category', 'title': lib1_name + " µM"},
-                     yaxis={'type': 'category', 'showticklabels': False},
-                     width=500, height=150,
-                     margin={'t':30,'l':5}
-                  )
-    }
+    return single_agent_heatmap(viability_heatmap_zvalue, tag, drug_name, barcode,'h')
 
 @app.callback(
     dash.dependencies.Output('lib2-viability-heatmap','figure'),
     [dash.dependencies.Input('viability-heatmap-zvalue', 'value'),
-     dash.dependencies.Input('barcode', 'children'),
-     dash.dependencies.Input('lib2_tag', 'children'),
-     dash.dependencies.Input('drug_names', 'children')
+     dash.dependencies.Input('drug_info', 'children'),
     ]
 )
+def update_lib2_heatmap(viability_heatmap_zvalue, drug_info):
+    drug_info=json.loads(drug_info)
+    tag = drug_info['lib2_tag']
+    barcode = drug_info['barcode']
+    drug_name = drug_info['drug2_name']
 
-def update_lib2_heatmap(viability_heatmap_zvalue, barcode,lib2_tag,drug_names):
-    lib1_name, lib2_name = drug_names.split(':_:')
+    return single_agent_heatmap(viability_heatmap_zvalue, tag, drug_name, barcode,'v')
+
+
+def single_agent_heatmap(viability_heatmap_zvalue, tag, drug_name, barcode, orientation):
     # get the single agent data
-    lib2_well_result = session.query(SingleAgentWellResult).filter(SingleAgentWellResult.lib_drug == lib2_tag).filter(
-        SingleAgentWellResult.barcode == barcode).all()
+    lib_well_result = session.query(SingleAgentWellResult).filter(SingleAgentWellResult.lib_drug == tag).filter(
+        SingleAgentWellResult.barcode == barcode)
 
-    lib2_df = pd.DataFrame([ l.to_dict() for l in lib2_well_result ])
-    lib2_df = lib2_df.sort_values('conc')
-    lib2_df.conc = [np.format_float_scientific(conc, 3) for conc in lib2_df.conc]
+    lib_df = pd.read_sql(lib_well_result.statement, session.bind)
+    lib_df = lib_df.sort_values('conc')
+    lib_df.conc = [np.format_float_scientific(conc, 3) for conc in lib_df.conc]
 
-    z = []
     if (viability_heatmap_zvalue == 'viability'):
-        z = lib2_df.viability
+        z = lib_df.viability
     else:
-        z = 1 - lib2_df.viability
+        z = 1 - lib_df.viability
+
     return {
         'data': [
             go.Heatmap(
-                y=lib2_df.conc,
-                x = [1] * len(lib2_df.conc),
+                y=lib_df.conc if orientation=='v' else [1] * len(lib_df.conc),
+                x=[1] * len(lib_df.conc) if orientation=='v' else lib_df.conc,
                 z=z,
                 zmax=1,
                 zmin=0,
@@ -288,11 +237,23 @@ def update_lib2_heatmap(viability_heatmap_zvalue, barcode,lib2_tag,drug_names):
                 showscale=False,
             )
         ],
+
         'layout': go.Layout(
-                     xaxis={'type': 'category', 'showticklabels': False},
-                     yaxis={'type': 'category', 'title': lib2_name + " µM"},
-                     width=120,
-                     height = 460,
-                     margin={'t': 70, 'r': 0, }
-                   )
+            xaxis={'type': 'category', 'showticklabels': False},
+            yaxis={'type': 'category', 'title': drug_name + " (µM)"},
+            width=120,
+            height=460,
+            margin={'t': 70, 'r': 0, }
+        ) if orientation=='v' else
+            go.Layout(
+               xaxis={'type': 'category', 'title': drug_name + " (µM)"},
+               yaxis={'type': 'category', 'showticklabels': False},
+               width=500, height=150,
+               margin={'t': 30, 'l': 5}
+            ),
+
+        'config': {
+            'displayModeBar': False
+        }
+
     }
