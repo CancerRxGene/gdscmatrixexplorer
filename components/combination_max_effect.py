@@ -57,7 +57,7 @@ def layout(combination):
             dbc.Row(
                 dbc.Col(width=12, children=[
                     html.Div(className="bg-white pt-3 px-4 pb-3 mb-3 border shadow-sm", children=[
-                        html.H3("Max Effect - Monotherapies vs Combination"),
+                        html.H3("MaxE - Monotherapies vs Combination"),
                         html.Hr(),
                         dbc.Row(className="pb-4", children=[
                             dbc.Col(width=5, children=
@@ -81,10 +81,10 @@ def layout(combination):
                                         layout=go.Layout(
                                             showlegend=False,
                                             yaxis={
-                                                'title': "Max Effect",
+                                                'title': "MaxE",
                                                 'range': (0, 1)
                                             },
-                                            title="Max effect monotherapies vs combination",
+                                            title="MaxE monotherapies vs combination",
                                         ),
                                     ),
                                     config={"displayModeBar": False}
@@ -110,7 +110,7 @@ def layout(combination):
                                                 'title': "Combination - Monotherapy",
                                                 'range': (-1, 1)
                                             },
-                                            title="Delta Max Effect"
+                                            title="Delta MaxE"
                                         )
                                     ),
                                     config={"displayModeBar": False}

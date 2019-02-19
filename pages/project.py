@@ -28,13 +28,13 @@ def layout(url):
                    ),
                     dbc.Col(width=3, children=[
                         html.Div(
-                            className="bg-white pt-3 pb-2 mb-3 border border-info shadow-sm",
+                            className="bg-white pt-3 pb-2 mb-3 border border-primary shadow-sm",
                             children=[
                                 html.H3([
                                     f"Combinations ",
                                     dbc.Badge(f" {project.combinations.count()} ",
                                               color='info')
-                                ], className="d-flex justify-content-between align-items-center px-3"),
+                                ], className="d-flex justify-content-between align-items-center px-3 mb-0"),
                                 html.Span(f"in {project.name}, sorted by target", className='small px-3'),
                                 dbc.ListGroup(className='combinations-list mt-2', flush=True, children=[
                                     dbc.ListGroupItem(

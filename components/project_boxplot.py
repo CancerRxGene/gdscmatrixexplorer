@@ -9,14 +9,7 @@ import plotly.graph_objs as go
 from app import app
 from db import session
 from models import MatrixResult, Model
-from utils import matrix_metrics, matrix_hover_label
-
-
-def tissues():
-    tissues = [s[0] for s in session.query(Model.tissue).distinct().all()]
-    tissues.insert(0,'Pan-cancer')
-    return tissues
-
+from utils import matrix_metrics, get_all_tissues, matrix_hover_label
 
 def layout():
 
@@ -40,8 +33,7 @@ def layout():
             children=dbc.Form(inline=True, children=dbc.FormGroup([
                 dbc.Label('Tissue', html_for='tissue', className='mr-2'),
                 dcc.Dropdown(
-                    options=[{'label': c, 'value': c} for c in tissues()],
-                    value='Pan-cancer',
+                    options=[{'label': c, 'value': c} for c in get_all_tissues()],
                     id='tissue',
                     className='flex-grow-1',
                 )
@@ -66,7 +58,7 @@ def get_boxplot_summary_data(boxplot_value, project_id, tissue):
         .filter(Model.id == MatrixResult.model_id)\
         .filter(MatrixResult.project_id == int(project_id))
 
-    if tissue != 'Pan-cancer':
+    if tissue:
         all_matrices_query = all_matrices_query.join(Model) \
             .filter(Model.tissue == tissue)
 
