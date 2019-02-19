@@ -108,7 +108,7 @@ def layout(matrix: MatrixResult):
 )
 def update_viability_heatmap(viability_heatmap_zvalue, matrix_json, drug_names):
     matrix_df = pd.read_json(matrix_json, orient='split')
-    drug1, drug2 = drug_names.split(':_:')
+    #drug1, drug2 = drug_names.split(':_:')
 
     # sort the data frame before the conc convert to scientific notation
     matrix_df = matrix_df.sort_values(['lib1_conc', 'lib2_conc'])
@@ -125,8 +125,8 @@ def update_viability_heatmap(viability_heatmap_zvalue, matrix_json, drug_names):
                 zmax=1,
                 zmin=0,
                 colorscale='Bluered',
-                reversescale=True
-
+                reversescale=True,
+                #showscale=True,
             )
         ],
         'layout': go.Layout(title=viability_heatmap_zvalue.capitalize(),
@@ -138,8 +138,8 @@ def update_viability_heatmap(viability_heatmap_zvalue, matrix_json, drug_names):
                                    #'title': drug2 + " µM",
                                     'showticklabels': False
                                   },
-                            margin={'l': 30, 't': 70,'b': 15},
-                            width=600,height=450
+                            margin={'l': 10, 't': 70,'b': 15, 'r':0 },
+                            width=500,height=400
                             )
     }
 
@@ -177,7 +177,7 @@ def update_viability_surface(viability_heatmap_zvalue, matrix_json, drug_names):
             )
         ],
         'layout': go.Layout(
-            margin=go.layout.Margin(l=40, r=40, b=40, t=40),
+            margin=go.layout.Margin(l=10, r=10, b=40, t=40),
             scene={
                 'xaxis': {
                     'type': 'category',
@@ -227,14 +227,14 @@ def update_lib1_heatmap(viability_heatmap_zvalue, barcode,lib1_tag,drug_names):
 
     lib1_df = pd.DataFrame([l.to_dict() for l in lib1_well_result ])
     lib1_df = lib1_df.sort_values('conc')
-    lib1_df.conc = [np.format_float_scientific(conc, 3) for conc in lib1_df.conc]
+    lib1_df.conc = [np.format_float_scientific(conc, 1) for conc in lib1_df.conc]
 
     z = []
     if (viability_heatmap_zvalue == 'viability'):
         z = lib1_df.viability
     else:
         z = 1 - lib1_df.viability
-    print (z)
+    #print (z)
     return {
         'data': [
             go.Heatmap(
@@ -251,8 +251,8 @@ def update_lib1_heatmap(viability_heatmap_zvalue, barcode,lib1_tag,drug_names):
         'layout': go.Layout(
             xaxis={'type': 'category', 'title': lib1_name +  " µM"},
             yaxis={'type': 'category', 'showticklabels': False},
-            width=600, height=150,
-            margin={'t':30,'l':30}
+            width=500, height=150,
+            margin={'t':30,'l':10}
                 )
 
     }
@@ -274,14 +274,13 @@ def update_lib2_heatmap(viability_heatmap_zvalue, barcode,lib2_tag,drug_names):
 
     lib2_df = pd.DataFrame([ l.to_dict() for l in lib2_well_result ])
     lib2_df = lib2_df.sort_values('conc')
-    lib2_df.conc = [np.format_float_scientific(conc, 3) for conc in lib2_df.conc]
+    lib2_df.conc = [np.format_float_scientific(conc, 1) for conc in lib2_df.conc]
 
     z = []
     if (viability_heatmap_zvalue == 'viability'):
         z = lib2_df.viability
     else:
         z = 1 - lib2_df.viability
-
     return {
         'data': [
             go.Heatmap(
@@ -292,15 +291,16 @@ def update_lib2_heatmap(viability_heatmap_zvalue, barcode,lib2_tag,drug_names):
                 zmin=0,
                 colorscale='Bluered',
                 reversescale=True,
-                showscale = False
+                showscale = False,
+
             )
         ],
         'layout': go.Layout(
             xaxis={'type': 'category', 'showticklabels': False},
             yaxis={'type': 'category', 'title': lib2_name + " µM"},
-            width=150,
-            height = 500,
-            margin={'t': 70, 'r': 10}
+            width=120,
+            height = 460,
+            margin={'t': 70, 'r': 0, }
                 )
 
     }
