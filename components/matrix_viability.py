@@ -10,7 +10,7 @@ import plotly.graph_objs as go
 from app import app
 from db import session
 from models import MatrixResult, DoseResponseCurve, SingleAgentWellResult
-
+from utils import colorscale, reversed_colorscale
 
 def layout(matrix: MatrixResult):
     matrix_df = pd.DataFrame([w.to_dict() for w in matrix.well_results])
@@ -99,8 +99,7 @@ def update_viability_heatmap(viability_heatmap_zvalue, matrix_json):
                 z=zvalue,
                 zmax=1,
                 zmin=0,
-                colorscale='Bluered',
-                reversescale=False if viability_heatmap_zvalue == 'inhibition' else True
+                colorscale=colorscale if viability_heatmap_zvalue == 'inhibition' else reversed_colorscale,
             )
 
         ],
@@ -142,11 +141,10 @@ def update_viability_surface(viability_heatmap_zvalue, matrix_json, drug_names):
                 z=zvalues_table.values,
                 x=lib1_conc_table.values,
                 y=lib2_conc_table.values,
-                colorscale='Bluered',
-                #reversescale=False if viability_heatmap_zvalue == 'inhibition' else True,
+                colorscale= colorscale if viability_heatmap_zvalue == 'inhibition' else reversed_colorscale,
                 cmax=1,
                 cmin=0,
-                #showscale=False,
+                showscale=False,
             )
         ],
         'layout': go.Layout(
@@ -233,8 +231,7 @@ def single_agent_heatmap(viability_heatmap_zvalue, tag, drug_name, barcode, orie
                 z=z,
                 zmax=1,
                 zmin=0,
-                colorscale='Bluered',
-                reversescale=False if viability_heatmap_zvalue == 'inhibition' else True,
+                colorscale=colorscale if viability_heatmap_zvalue == 'inhibition' else reversed_colorscale,
                 showscale=False,
             )
         ],
