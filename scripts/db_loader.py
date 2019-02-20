@@ -33,7 +33,6 @@ def upload_project(combo_matrix_stats_path: str,
     combo_well_stats = pd.read_csv(combo_well_stats_path)
     nlme_stats = pd.read_csv(nlme_stats_path)
 
-
     project = get_project(project_name)
 
     add_new_models(combo_matrix_stats)
@@ -44,10 +43,8 @@ def upload_project(combo_matrix_stats_path: str,
     drug_matrices = extract_drug_matrices(combo_matrix_stats)
     drug_matrices = add_project_id(drug_matrices, project)
     drug_matrices_to_db(drug_matrices)
-    #
-    matrix_results = extract_matrix_results(combo_matrix_stats)
-    # matrix_results = add_delta_max_effects(matrix_results)
-    matrix_results = add_model_id(matrix_results, models, 'cosmic_id')
+    matrix_results = extract_matrix_results(combo_matrix_stats, 'MASTER_CELL_ID')
+    matrix_results = add_model_id(matrix_results, models, 'master_cell_id')
     matrix_results = add_project_id(matrix_results, project)
     matrix_results_to_db(matrix_results)
 
@@ -80,7 +77,7 @@ def get_project(project_name):
 def add_new_models(combo_matrix_stats):
     models = extract_models(combo_matrix_stats)
     new_models = get_new(Model, models)
-    new_models = add_sidms(new_models)
+    new_models = add_sidms(new_models, 'MASTER_CELL_ID', 'master_cell_id')
     new_models = new_models[pd.notna(new_models.id)]
     if not new_models.empty:
         models_to_db(new_models)
@@ -96,7 +93,6 @@ def extract_models(combo_matrix_stats):
             else:
                 models[c] = combo_matrix_stats[c]
 
-    models = models.rename(columns={"CELL_LINE_NAME": "name"})
     models.columns = [c.lower() for c in models.columns]
 
     return models.drop_duplicates()
@@ -122,16 +118,16 @@ def get_new(model, df):
     return new
 
 
-def add_sidms(models: pd.DataFrame, verbose: bool=False) -> pd.DataFrame:
+def add_sidms(models: pd.DataFrame, identifier_type: str, identifier_column: str, verbose: bool=False) -> pd.DataFrame:
     if verbose:
         print("Adding Sanger IDs from Passports...")
     models = models.copy()
     sidms = []
     pbar = tqdm(total=len(models))
     for m in models.itertuples():
-        pbar.set_description(f"Processing {m.cosmic_id:>10}")
+        pbar.set_description(f"Processing {getattr(m, identifier_column):>10}")
         pbar.update(1)
-        sidms.append(get_sidm(m.cosmic_id))
+        sidms.append(get_sidm(getattr(m, identifier_column), identifier_type))
 
     del pbar
     models['id'] = sidms
@@ -139,28 +135,31 @@ def add_sidms(models: pd.DataFrame, verbose: bool=False) -> pd.DataFrame:
     return models
 
 
-def get_sidm(cosmic_id: int, retries: int = 3):
+def get_sidm(identifier: int, identifier_type:str, retries: int = 3):
+    if identifier is None:
+        return None
+
     attempt = 1
     while attempt < retries:
         resp = requests.get(
-            f"https://api.cellmodelpassports.sanger.ac.uk/models/COSMIC_ID/"
-            f"{cosmic_id}?fields[model]=id")
+            f"https://api.cellmodelpassports.sanger.ac.uk/models/{identifier_type}/"
+            f"{identifier}?fields[model]=id")
         attempt += 1
 
         if resp.status_code == 200:
             try:
                 return resp.json()['data']['id']
             except json.decoder.JSONDecodeError as e:
-                print(f"Error parsing {cosmic_id}'s response")
+                print(f"Error parsing {identifier}'s response")
                 continue
         elif resp.status_code == 404:
-            print(f"{cosmic_id} not found")
+            print(f"{identifier} not found")
             return None
         else:
             time.sleep(1)
             continue
 
-    print(f"Max retries exceeded for {cosmic_id}")
+    print(f"Max retries exceeded for {identifier}")
     return None
 
 
@@ -171,6 +170,8 @@ def models_to_db(models):
 
 def to_db(model, df, append=False):
     print(f"Uploading {model.__tablename__}")
+
+    df.columns = [c.lower() for c in df.columns]
 
     df = get_new(model, df) if append else df
     engine.execute(
@@ -194,7 +195,7 @@ def extract_drugs(combo_matrix_stats):
 
 
 def get_drug_details(cms, lib):
-    lib_cols = [lib + '_drug_id', lib + '_drug_name', lib + '_target', lib + '_owner']
+    lib_cols = [lib + '_ID', lib + '_name', lib + '_target', lib + '_pathway', lib + '_owner']
     return cms[lib_cols]\
         .drop_duplicates()\
         .rename(columns={c: c.lower()[len(lib) + 1:] for c in lib_cols})\
@@ -206,65 +207,32 @@ def drugs_to_db(drugs):
 
 
 def extract_drug_matrices(combo_matrix_stats):
-    drug_matrix = combo_matrix_stats[["lib1", "lib1_drug_id", "lib2", "lib2_drug_id", "matrix_size"]]
+    drug_matrix = combo_matrix_stats[["lib1", "lib1_ID", "lib2", "lib2_ID", "matrix_size"]]
     drug_matrix.columns = ["lib1_tag", "lib1_id", "lib2_tag", "lib2_id", "matrix_size"]
     return drug_matrix.drop_duplicates()
 
 def drug_matrices_to_db(drug_matrices):
     to_db(Combination, drug_matrices)
 
-def extract_matrix_results(combo_matrix_stats):
+def extract_matrix_results(combo_matrix_stats, id_mapper):
     hsa_cols = [c for c in combo_matrix_stats.columns if c.startswith("HSA")]
     bliss_cols = [c for c in combo_matrix_stats.columns if c.startswith("Bliss")]
-    max_effect_cols = [c for c in combo_matrix_stats.columns if c.endswith("max_effect")]
+    max_effect_cols = [c for c in combo_matrix_stats.columns if c.endswith("MaxE")]
+    day1_cols = [c for c in combo_matrix_stats.columns if c.startswith("day1")]
 
     matrix_results = combo_matrix_stats[
-        ["COSMIC_ID", "DRUGSET_ID", "cmatrix", "BARCODE",
-         'lib1_drug_id', 'lib2_drug_id',
+        [id_mapper, "DRUGSET_ID", "cmatrix", "BARCODE",
+         'lib1_ID', 'lib2_ID',
          'lib1', 'lib2'] +
         max_effect_cols +
-        ["combo_max2_effect", "combo_max3_effect"] +
         hsa_cols +
         bliss_cols +
-        ["day1_viability_mean", "growth_rate", "doubling_time", "combo_d1_xs"]
+        day1_cols +
+        ["growth_rate", "doubling_time", "Delta_combo_MaxE_day1"]
     ]
 
-
-    matrix_results = matrix_results.rename(
-        columns={
-            "COSMIC_ID": "cosmic_id",
-            "DRUGSET_ID": "drugset_id",
-            "BARCODE": "barcode",
-            "lib1_drug_id": "lib1_id",
-            "lib2_drug_id": "lib2_id",
-            "lib1": "lib1_tag",
-            "lib2": "lib2_tag",
-            "HSA_excess_matrix": "HSA_excess",
-            "HSA_excess_matrix_synergy_only": "HSA_excess_syn",
-            "HSA_excess_synergistic_wells": "HSA_excess_well_count",
-            "Bliss_excess_matrix": "Bliss_excess",
-            "Bliss_excess_matrix_synergy_only": "Bliss_excess_syn",
-            "Bliss_excess_synergistic_wells": "Bliss_excess_well_count",
-            "HSA_window_excess": "HSA_excess_window",
-            "HSA_window_dose1": "HSA_excess_window_dose_lib1",
-            "HSA_window_dose2": "HSA_excess_window_dose_lib2",
-            "HSA_so_window_excess": "HSA_excess_window_syn",
-            "HSA_so_window_dose1": "HSA_excess_window_syn_dose_lib1",
-            "HSA_so_window_dose2": "HSA_excess_window_syn_dose_lib2",
-            "Bliss_window_excess": "Bliss_excess_window",
-            "Bliss_window_dose1": "Bliss_excess_window_dose_lib1",
-            "Bliss_window_dose2": "Bliss_excess_window_dose_lib2",
-            "Bliss_so_window_excess": "Bliss_excess_window_syn",
-            "Bliss_so_window_dose1": "Bliss_excess_window_syn_dose_lib1",
-            "Bliss_so_window_dose2": "Bliss_excess_window_syn_dose_lib2",
-            "HSA_window_size": "window_size",
-            "combo_d1_xs": "combo_max_effect_excess_over_day1"
-        }
-    )
-
-    del matrix_results['Bliss_window_size']
-    del matrix_results['Bliss_so_window_size']
-    del matrix_results['HSA_so_window_size']
+    matrix_results.columns = [c.lower() for c in matrix_results.columns]
+    matrix_results.rename(columns={'lib1': 'lib1_tag', 'lib2': 'lib2_tag'}, inplace=True)
 
     return matrix_results
 
@@ -287,19 +255,14 @@ def matrix_results_to_db(matrix_results):
 def extract_well_results(combo_well_stats):
 
     columns = ['DRUGSET_ID', 'cmatrix', 'BARCODE', 'POSITION', 'lib1', 'lib1_dose',
-               'lib1_conc', 'lib2','lib2_dose', 'lib2_conc', 'combo_viability', 'HSA',
-               'HSA_excess', 'Bliss_additivity', 'Bliss_index', 'Bliss_excess',
-               'lib1_equiv_dose', 'lib2_equiv_dose', 'Loewe_index']
+               'lib1_conc', 'lib2', 'lib2_dose', 'lib2_conc', 'inhibition', 'HSA',
+               'HSA_excess', 'Bliss_additivity', 'Bliss_excess']
     well_results = combo_well_stats[columns]\
         .rename(columns={
-            "DRUGSET_ID": "drugset_id",
-            "BARCODE": 'barcode',
-            "POSITION": "position",
-            "combo_viability": "viability",
             "lib1": "lib1_tag",
             "lib2": "lib2_tag"
         })
-
+    well_results.columns = [c.lower() for c in well_results.columns]
     return well_results
 
 
@@ -309,17 +272,14 @@ def well_results_to_db(well_results):
 
 def extract_dose_response_curves(nlme_stats):
     dr_curves = nlme_stats[
-        ['fitted_treatment', 'treatment_type', 'BARCODE', 'DRUGSET_ID',
+        ['BARCODE', 'DRUGSET_ID',
          'DRUG_ID_lib', 'xmid', 'scal', 'RMSE', 'IC50', 'auc', 'Emax', 'maxc',
-         'minc']
+         'minc', 'lib_drug']
     ]\
-        .query("treatment_type == 'S'")\
         .drop_duplicates()\
-        .rename(columns={'fitted_treatment': 'tag'})
+        .rename(columns={'lib_drug': 'tag'})
 
     dr_curves.columns = [c.lower() for c in dr_curves.columns]
-
-    del dr_curves['treatment_type']
 
     return dr_curves
 
@@ -329,10 +289,8 @@ def dr_curves_to_db(dr_curves):
 
 
 def extract_single_agent_wells(nlme_stats):
-    wells = nlme_stats.query("treatment_type == 'S'")[
-        ['DRUGSET_ID', 'lib_drug', 'BARCODE', 'POSITION', 'dose', 'CONC',
-         'viability']
-    ]\
+    wells = nlme_stats[['DRUGSET_ID', 'lib_drug', 'BARCODE', 'POSITION', 'y']]\
+        .rename(columns={"y": "viability"})\
         .drop_duplicates()
 
     wells.columns = [c.lower() for c in wells.columns]
