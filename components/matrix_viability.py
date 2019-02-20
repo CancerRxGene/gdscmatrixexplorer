@@ -74,6 +74,7 @@ def layout(matrix: MatrixResult):
 )
 def update_viability_heatmap(viability_heatmap_zvalue, matrix_json, drug_names):
     matrix_df = pd.read_json(matrix_json, orient='split')
+
     drug1, drug2 = drug_names.split(':_:')
 
     # sort the data frame before the conc convert to scientific notation
@@ -81,7 +82,7 @@ def update_viability_heatmap(viability_heatmap_zvalue, matrix_json, drug_names):
     matrix_df['lib1_conc'] = [np.format_float_scientific(conc, 3) for conc in matrix_df['lib1_conc']]
     matrix_df['lib2_conc'] = [np.format_float_scientific(conc, 3) for conc in matrix_df['lib2_conc']]
     zvalue = matrix_df[viability_heatmap_zvalue]
-
+    #print (zvalue)
     return {
         'data': [
             go.Heatmap(
@@ -91,7 +92,7 @@ def update_viability_heatmap(viability_heatmap_zvalue, matrix_json, drug_names):
                 zmax=1,
                 zmin=0,
                 colorscale='Bluered',
-                reversescale=True
+                #reversescale=True
 
             )
         ],
@@ -116,6 +117,7 @@ def update_viability_heatmap(viability_heatmap_zvalue, matrix_json, drug_names):
 )
 def update_viability_surface(viability_heatmap_zvalue, matrix_json, drug_names):
     matrix_df = pd.read_json(matrix_json, orient='split')
+
     drug1, drug2 = drug_names.split(':_:')
 
     zvalues_table = matrix_df.pivot(index='lib2_conc', columns='lib1_conc', values=viability_heatmap_zvalue)
@@ -134,10 +136,10 @@ def update_viability_surface(viability_heatmap_zvalue, matrix_json, drug_names):
                 x=lib1_conc_table.values,
                 y=lib2_conc_table.values,
                 colorscale='Bluered',
-                reversescale=True,
+                #reversescale=True,
                 cmax=1,
                 cmin=0,
-                showscale=False,
+                #showscale=False,
             )
         ],
         'layout': go.Layout(
