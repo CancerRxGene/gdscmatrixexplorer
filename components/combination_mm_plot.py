@@ -31,7 +31,7 @@ def layout():
             dbc.Col(width=5, children=[
                 dcc.Dropdown(
                   options=list(matrix_metrics.values()),
-                  value='HSA_excess',
+                  value='hsa_matrix',
                   id='combo-page-color-scale-select',
                   clearable=False
                 ),
@@ -134,7 +134,7 @@ def update_tissue_plot(url, colorscale_select):
     plot_data = get_plot_data_from_url(url)
 
     return go.Figure(
-        data=[ go.Box(
+        data=[go.Box(
             name=plot_data.query("tissue == @tissue").tissue.unique()[0],
             y=plot_data.query("tissue == @tissue")[colorscale_select],
             boxpoints="all",

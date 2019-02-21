@@ -13,7 +13,7 @@ def layout(url):
 
     return html.Div([
         crumbs([("Home", "/"), (combination.project.name, f"/project/{combination.project.slug}"),
-                (f"{combination.lib1.drug_name} + {combination.lib2.drug_name}",)]),
+                (f"{combination.lib1.name} + {combination.lib2.name}",)]),
         intro(combination),
         max_effect_analysis(combination),
         mm_plot()

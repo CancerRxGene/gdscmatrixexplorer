@@ -17,12 +17,12 @@ def layout(combination):
         .with_entities(
             MatrixResult.barcode,
             MatrixResult.cmatrix,
-            MatrixResult.combo_max_effect,
-            MatrixResult.lib1_max_effect,
-            MatrixResult.lib2_max_effect,
-            MatrixResult.lib1_delta_max_effect,
-            MatrixResult.lib2_delta_max_effect,
-            MatrixResult.Bliss_excess,
+            MatrixResult.combo_maxe,
+            MatrixResult.lib1_maxe,
+            MatrixResult.lib2_maxe,
+            MatrixResult.delta_maxe_lib1,
+            MatrixResult.delta_maxe_lib2,
+            MatrixResult.bliss_matrix,
             MatrixResult.lib1_id,
             MatrixResult.lib2_id,
             MatrixResult.model_id
@@ -66,16 +66,16 @@ def layout(combination):
                                     figure=go.Figure(
                                         data=[
                                             generate_standard_box(
-                                                name=f"{combination.lib1.drug_name}",
-                                                y=df_max_effects.lib1_max_effect
+                                                name=f"{combination.lib1.name}",
+                                                y=df_max_effects.lib1_maxe
                                             ),
                                             generate_standard_box(
-                                                name=f"{combination.lib2.drug_name}",
-                                                y=df_max_effects.lib2_max_effect
+                                                name=f"{combination.lib2.name}",
+                                                y=df_max_effects.lib2_maxe
                                             ),
                                             generate_standard_box(
-                                                name=f"{combination.lib1.drug_name} + {combination.lib2.drug_name}",
-                                                y=df_max_effects.combo_max_effect
+                                                name=f"{combination.lib1.name} + {combination.lib2.name}",
+                                                y=df_max_effects.combo_maxe
                                             )
                                         ],
                                         layout=go.Layout(
@@ -96,12 +96,12 @@ def layout(combination):
                                     figure=go.Figure(
                                         data=[
                                             generate_standard_box(
-                                                name=f"Δ {combination.lib1.drug_name}",
-                                                y=df_max_effects.lib1_delta_max_effect
+                                                name=f"Δ {combination.lib1.name}",
+                                                y=df_max_effects.delta_maxe_lib1
                                             ),
                                             generate_standard_box(
-                                                name=f"Δ {combination.lib2.drug_name}",
-                                                y=df_max_effects.lib2_delta_max_effect
+                                                name=f"Δ {combination.lib2.name}",
+                                                y=df_max_effects.delta_maxe_lib2
                                             )
                                         ],
                                         layout=go.Layout(
@@ -123,7 +123,7 @@ def layout(combination):
                                         data=[
                                             generate_standard_box(
                                                 name="Bliss excess",
-                                                y=df_max_effects.Bliss_excess
+                                                y=df_max_effects.bliss_matrix
                                             )
                                         ],
                                         layout=go.Layout(

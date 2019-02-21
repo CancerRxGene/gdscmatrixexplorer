@@ -54,7 +54,7 @@ def upload_project(combo_matrix_stats_path: str,
     well_results = well_results[well_results.barcode.isin(valid_barcodes)]
     well_results_to_db(well_results)
 
-    dr_curves = extract_dose_response_curves(nlme_stats)
+    dr_curves = extract_dose_response_curves(combo_matrix_stats, nlme_stats)
     dr_curves = dr_curves[dr_curves.barcode.isin(valid_barcodes)]
     dr_curves = add_project_id(dr_curves, project)
     dr_curves_to_db(dr_curves)
@@ -223,7 +223,8 @@ def extract_matrix_results(combo_matrix_stats, id_mapper):
     matrix_results = combo_matrix_stats[
         [id_mapper, "DRUGSET_ID", "cmatrix", "BARCODE",
          'lib1_ID', 'lib2_ID',
-         'lib1', 'lib2'] +
+         'lib1', 'lib2',
+         'Delta_MaxE_lib1', 'Delta_MaxE_lib2'] +
         max_effect_cols +
         hsa_cols +
         bliss_cols +
@@ -260,7 +261,7 @@ def extract_well_results(combo_well_stats):
     well_results = combo_well_stats[columns]\
         .rename(columns={
             "lib1": "lib1_tag",
-            "lib2": "lib2_tag"
+            "lib2": "lib2_tag",
         })
     well_results.columns = [c.lower() for c in well_results.columns]
     return well_results
@@ -270,14 +271,25 @@ def well_results_to_db(well_results):
     to_db(WellResult, well_results)
 
 
-def extract_dose_response_curves(nlme_stats):
+def extract_dose_response_curves(matrix_stats, nlme_stats):
+
+    lib1_details = matrix_stats[['BARCODE', 'DRUGSET_ID', 'lib1', 'lib1_ID', 'lib1_MaxE']].drop_duplicates()
+    lib1_details.columns = ['BARCODE', 'DRUGSET_ID', 'tag', 'drug_id_lib', 'maxe']
+
+    lib2_details = matrix_stats[
+        ['BARCODE', 'DRUGSET_ID', 'lib2', 'lib2_ID', 'lib2_MaxE']].drop_duplicates()
+    lib2_details.columns = ['BARCODE', 'DRUGSET_ID', 'tag', 'drug_id_lib', 'maxe']
+
+    drug_details = lib1_details.append(lib2_details, sort=False).drop_duplicates()
+
     dr_curves = nlme_stats[
-        ['BARCODE', 'DRUGSET_ID',
-         'DRUG_ID_lib', 'xmid', 'scal', 'RMSE', 'IC50', 'auc', 'Emax', 'maxc',
-         'minc', 'lib_drug']
+        ['BARCODE', 'DRUGSET_ID', 'xmid', 'scal', 'RMSE', 'IC50', 'auc', 'maxc', 'lib_drug'] # STILL NEED MINC
     ]\
         .drop_duplicates()\
-        .rename(columns={'lib_drug': 'tag'})
+        .rename(columns={'lib_drug': 'tag'})\
+        .merge(drug_details, on=['BARCODE', 'DRUGSET_ID', 'tag'])
+
+    dr_curves['minc'] = dr_curves.maxc / 1000  # TODO: resolve temporary minc fix
 
     dr_curves.columns = [c.lower() for c in dr_curves.columns]
 
@@ -289,8 +301,8 @@ def dr_curves_to_db(dr_curves):
 
 
 def extract_single_agent_wells(nlme_stats):
-    wells = nlme_stats[['DRUGSET_ID', 'lib_drug', 'BARCODE', 'POSITION', 'y']]\
-        .rename(columns={"y": "viability"})\
+    wells = nlme_stats[['DRUGSET_ID', 'lib_drug', 'BARCODE', 'POSITION', 'y', 'x_micromol']]\
+        .rename(columns={"y": "viability", "x_micromol": "conc"})\
         .drop_duplicates()
 
     wells.columns = [c.lower() for c in wells.columns]

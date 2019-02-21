@@ -17,12 +17,12 @@ def layout(matrix: MatrixResult):
     matrix_df['lib1_conc'] = [np.format_float_scientific(conc, 3) for conc in matrix_df['lib1_conc']]
     matrix_df['lib2_conc'] = [np.format_float_scientific(conc, 3) for conc in matrix_df['lib2_conc']]
 
-    drug1 = matrix.combination.lib1.drug_name
-    drug2 = matrix.combination.lib2.drug_name
+    drug1 = matrix.combination.lib1.name
+    drug2 = matrix.combination.lib2.name
 
     available_viability_metrics = ['viability', 'inhibition']
 
-    matrix_df = matrix_df.assign(inhibition=lambda df: 1 - df.viability)
+    matrix_df = matrix_df.assign(viability=lambda df: 1 - df.inhibition)
 
     matrix_df = matrix_df[['lib1_conc', 'lib2_conc'] + available_viability_metrics]
 

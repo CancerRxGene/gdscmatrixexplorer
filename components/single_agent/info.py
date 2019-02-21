@@ -5,7 +5,7 @@ def infoblock(drug, rmse=0):
 
     return html.Div([
         html.H3([
-            html.Strong(drug.drug_name),
+            html.Strong(drug.name),
             html.Span(f" ({drug.target})")
         ]),
         html.Hr(),

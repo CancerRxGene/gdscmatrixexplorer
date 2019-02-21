@@ -40,92 +40,86 @@ class Colors:
 
 
 matrix_metrics = {
-    'Bliss_excess': {
+    'bliss_matrix': {
         'label': 'Bliss Excess',
         'description': 'Average Bliss excess',
-        'value': 'Bliss_excess'
+        'value': 'bliss_matrix'
     },
-    'Bliss_excess_syn': {
+    'bliss_matrix_so': {
         'label': 'Bliss excess synergy',
         'description': 'Average Bliss excess synergistic wells',
-        'value': 'Bliss_excess_syn'
+        'value': 'bliss_matrix_so'
     },
-    'Bliss_excess_window': {
+    'bliss_window': {
         'label': 'Bliss excess 3x3 window',
         'description': 'Average Bliss excess of the highest 3x3 window',
-        'value': 'Bliss_excess_window'
+        'value': 'bliss_window'
     },
-    'Bliss_excess_window_syn': {
+    'bliss_window_so': {
         'label': 'Bliss excess 3x3 window synergy',
         'description': 'Average Bliss excess of highest 3x3 window counting only synergistic wells',
-        'value': 'Bliss_excess_window_syn'
+        'value': 'bliss_window_so'
     },
-    'HSA_excess': {
+    'hsa_matrix': {
         'label': 'HSA excess',
         'description': 'Average HSA excess',
-        'value': 'HSA_excess'
+        'value': 'hsa_matrix'
     },
-    'HSA_excess_syn': {
+    'hsa_matrix_so': {
         'label': 'HSA excess synergy',
         'description': 'Average HSA excess eynergistic wells',
-        'value': 'HSA_excess_syn'
+        'value': 'hsa_matrix_so'
     },
-    'HSA_excess_window': {
+    'hsa_window': {
         'label': 'HSA excess 3x3 window',
         'description': 'Average HSA Excess of the highest 3x3 window',
-        'value': 'HSA_excess_window'
+        'value': 'hsa_window'
     },
-    'HSA_excess_window_syn': {
+    'hsa_window_so': {
         'label': 'HSA excess 3x3 window synergy',
         'description': 'Average HSA excess of highest 3x3 window counting only synergistic wells',
-        'value': 'HSA_excess_window_syn'
+        'value': 'hsa_window_so'
     },
-    'combo_max_effect': {
+    'combo_maxe': {
         'label': 'MaxE combination',
         'description': 'Maximum inhibition observed in combination',
-        'value': 'combo_max_effect'
+        'value': 'combo_maxe'
     },
-    'lib1_max_effect': {
+    'lib1_maxe': {
         'label': 'MaxE drug 1',
         'description': 'Maximum inhibition observed in drug 1',
-        'value': 'lib1_max_effect'
+        'value': 'lib1_maxe'
     },
-    'lib2_max_effect': {
+    'lib2_maxe': {
         'label': 'MaxE drug 2',
         'description': 'Maximum inhibition observed in drug 2',
-        'value': 'lib2_max_effect'
+        'value': 'lib2_maxe'
     },
-    'lib1_delta_max_effect': {
+    'delta_maxe_lib1': {
         'label': 'Delta MaxE drug 1',
         'description': 'MaxE combination minus MaxE drug1',
-        'value': 'lib1_delta_max_effect'
+        'value': 'delta_maxe_lib1'
     },
-    'lib2_delta_max_effect': {
+    'delta_maxe_lib2': {
         'label': 'Delta MaxE drug 2',
         'description': 'MaxE combination minus MaxE drug2',
-        'value': 'lib2_delta_max_effect'
+        'value': 'delta_maxe_lib2'
     },
 }
 
 well_metrics = {
-    'HSA':
+    'hsa':
         {'label': "HSA",
-         'value': "HSA"},
-    'HSA_excess':
+         'value': "hsa"},
+    'hsa_excess':
         {'label': "HSA excess",
-         'value': "HSA_excess"},
-    'Bliss_additivity':
+         'value': "hsa_excess"},
+    'bliss_additivity':
         {'label': "Bliss additivity",
-         'value': "Bliss_additivity"},
-    'Bliss_index':
-        {'label': "Bliss index",
-         'value': "Bliss_index"},
-    'Bliss_excess':
+         'value': "bliss_additivity"},
+    'bliss_excess':
         {'label': "Bliss excess",
-         'value': "Bliss_excess"},
-    'Loewe_index':
-        {'label': "Loewe index",
-         'value': "Loewe_index"}
+         'value': "bliss_excess"},
 }
 
 
@@ -248,14 +242,14 @@ def get_combination_from_url(url):
 
 
 def get_combination_link(combination):
-    text = f"{combination.lib1.drug_name} + {combination.lib2.drug_name}"
+    text = f"{combination.lib1.name} + {combination.lib2.name}"
     return dcc.Link(text, href=combination.url)
 
 
 @lru_cache()
 def get_combination_results_with_sa(combination):
     all_cell_models = pd.read_sql_table('models', session.bind)\
-        .rename(columns={'name': 'model_name'})
+        .rename(columns={'cell_line_name': 'model_name'})
 
     # We need the single agent IC50s for the MM plot
     dr_curves_query = session.query(
@@ -265,7 +259,7 @@ def get_combination_results_with_sa(combination):
         models.DoseResponseCurve.barcode,
         models.DoseResponseCurve.minc,
         models.DoseResponseCurve.maxc,
-        models.Drug.drug_name,
+        models.Drug.name,
         models.Drug.target
     ) \
         .filter(models.Drug.id == models.DoseResponseCurve.drug_id_lib) \
@@ -277,8 +271,8 @@ def get_combination_results_with_sa(combination):
         columns={'lib1_id': 'drug_id'})
 
     combo_matrices = pd.read_sql(combination.matrices.statement, session.bind) \
-        .assign(**{'lib1_name': combination.lib1.drug_name,
-                   'lib2_name': combination.lib2.drug_name}) \
+        .assign(**{'lib1_name': combination.lib1.name,
+                   'lib2_name': combination.lib2.name}) \
         .merge(right=all_dr_curves, left_on=['barcode', 'lib1_tag'],
                right_on=['barcode', 'tag']) \
         .merge(right=all_dr_curves, how='left', left_on=['barcode', 'lib2_tag'],
@@ -306,13 +300,13 @@ def get_all_tissues():
 
 
 def matrix_hover_label_from_obj(m):
-    return f"{m.combination.lib1.drug_name} ({m.combination.lib1.target}) + {m.combination.lib2.drug_name} ({m.combination.lib2.target})<br />" \
-        f"Cell line: {m.model.name}<br />"\
+    return f"{m.combination.lib1.name} ({m.combination.lib1.target}) + {m.combination.lib2.name} ({m.combination.lib2.target})<br />" \
+        f"Cell line: {m.model.cell_line_name}<br />"\
         f"Tissue: {m.model.tissue}"
 
 
 def matrix_hover_label_from_tuple(s):
-    return f"{s.drug_name_lib1} ({s.target_lib1}) - {s.drug_name_lib2} ({s.target_lib2})<br />"\
+    return f"{s.name_lib1} ({s.target_lib1}) - {s.name_lib2} ({s.target_lib2})<br />"\
     f"Cell line: {s.model_name}<br />"\
     f"Tissue: {s.tissue}"
 
@@ -331,7 +325,7 @@ def matrix_hover_label(matrix):
 def add_label_vars(plot_data):
     all_drugs = pd.read_sql_table('drugs', session.bind)
     all_models = pd.read_sql_table('models', session.bind)\
-        .rename(columns={'name': 'model_name'})
+        .rename(columns={'cell_line_name': 'model_name'})
 
     plot_data = plot_data.merge(all_drugs, left_on='lib1_id', right_on='id') \
         .merge(all_drugs, left_on='lib2_id', right_on='id',

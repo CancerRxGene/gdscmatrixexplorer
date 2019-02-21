@@ -244,15 +244,11 @@ class WellResult(ToDictMixin, Base):
     lib2_tag = sa.Column(sa.String, nullable=False)
     lib2_dose = sa.Column(sa.String, nullable=False)
     lib2_conc = sa.Column(sa.Float, nullable=False)
-    viability = sa.Column(sa.Float)
-    HSA = sa.Column(sa.Float)
-    HSA_excess = sa.Column(sa.Float)
-    Bliss_additivity = sa.Column(sa.Float)
-    Bliss_index = sa.Column(sa.Float)
-    Bliss_excess = sa.Column(sa.Float)
-    lib1_equiv_dose = sa.Column(sa.Float)
-    lib2_equiv_dose = sa.Column(sa.Float)
-    Loewe_index = sa.Column(sa.Float)
+    inhibition = sa.Column(sa.Float)
+    hsa = sa.Column(sa.Float)
+    hsa_excess = sa.Column(sa.Float)
+    bliss_additivity = sa.Column(sa.Float)
+    bliss_excess = sa.Column(sa.Float)
 
     matrix_result = relationship("MatrixResult", back_populates='well_results')
 
@@ -272,6 +268,8 @@ class SingleAgentWellResult(ToDictMixin, Base):
     lib_drug = sa.Column(sa.String, nullable=False)
     position = sa.Column(sa.Integer, nullable=False)
     viability = sa.Column(sa.Float, nullable=False)
+    dose = sa.Column(sa.String, nullable=True)
+    conc = sa.Column(sa.Float, nullable=False)
 
 
 @generic_repr
@@ -284,11 +282,11 @@ class DoseResponseCurve(ToDictMixin, Base):
     drug_id_lib = sa.Column(sa.Integer, nullable=False, index=True)
     tag = sa.Column(sa.String, nullable=False)
     maxc = sa.Column(sa.Float, nullable=False)
-    minc = sa.Column(sa.Float, nullable=False)
+    minc = sa.Column(sa.Float, nullable=True)
     rmse = sa.Column(sa.Float)
     ic50 = sa.Column(sa.Float)
     auc = sa.Column(sa.Float)
-    emax = sa.Column(sa.Float)
+    maxe = sa.Column(sa.Float)
     xmid = sa.Column(sa.Float)
     scal = sa.Column(sa.Float)
 

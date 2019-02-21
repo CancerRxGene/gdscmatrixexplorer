@@ -4,7 +4,7 @@ import dash_html_components as html
 
 def replicate_links_from_matrix(matrix):
 
-    link_text = lambda x: f"Barcode {x.barcode} ({x.project.name}) {'*' if x.HSA_excess > 0 else ''}"
+    link_text = lambda x: f"Barcode {x.barcode} ({x.project.name}) {'*' if x.hsa_matrix > 0 else ''}"
 
     children = []
     for rep in sorted(matrix.all_replicates, key=lambda x: x.barcode):

@@ -78,11 +78,11 @@ def dropdown_handler(pathname):
                         dbc.DropdownMenu(
                             children=[
                                 dbc.DropdownMenuItem(
-                                    f"{c.lib1.drug_name} + {c.lib2.drug_name} ({p.name})",
+                                    f"{c.lib1.name} + {c.lib2.name} ({p.name})",
                                     href=f"/project/{p.slug}/combination/{c.lib1_id}+{c.lib2_id}")
                                 for p in all_projects
                                 for c in sorted(p.combinations, key=lambda
-                                    x: f"{x.lib1.drug_name}_{x.lib2.drug_name}")],
+                                    x: f"{x.lib1.name}_{x.lib2.name}")],
                             nav=True,
                             in_navbar=True,
                             label="Combinations",

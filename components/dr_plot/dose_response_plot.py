@@ -17,8 +17,8 @@ class DoseResponsePlot:
                  label_auc=True,
                  mark_ic50=True,
                  label_ic50=True,
-                 mark_emax=False,
-                 label_emax=True,
+                 mark_maxe=False,
+                 label_maxe=True,
                  label_rmse=True,
                  label_day1=True,
                  style={},
@@ -40,8 +40,8 @@ class DoseResponsePlot:
         self.label_auc = label_auc
         self.mark_ic50 = mark_ic50
         self.label_ic50 = label_ic50
-        self.mark_emax = mark_emax
-        self.label_emax = label_emax
+        self.mark_maxe = mark_maxe
+        self.label_maxe = label_maxe
         self.mark_day1 = mark_day1
         self.label_day1 = label_day1
         self.label_rmse = label_rmse
@@ -143,7 +143,7 @@ class DoseResponsePlot:
     def figure_layout(self):
 
         return go.Layout(
-                # title=f'Single Agent Response for {drug.drug_name}',
+                # title=f'Single Agent Response for {drug.name}',
                 width=self.width,
                 height=self.height,
                 xaxis={'type': 'log', 'title': 'Concentration (M)',
@@ -159,7 +159,7 @@ class DoseResponsePlot:
     @property
     def shapes(self):
         shapes = []
-        shapes.extend([self.emax_line] if self.mark_emax else [])
+        shapes.extend([self.maxe_line] if self.mark_maxe else [])
         shapes.extend([self.ic50_line] if self.mark_ic50 else [])
         shapes.extend([self.screening_range] if self.display_screening_range else [])
         shapes.extend([self.day1_line] if self.mark_day1 else [])
@@ -182,13 +182,13 @@ class DoseResponsePlot:
         }
 
     @property
-    def emax_line(self):
+    def maxe_line(self):
         return {
             'type': 'line',
             'x0': self.curve.x_to_conc(-10),
-            'y0': 1 - self.curve.emax,
+            'y0': 1 - self.curve.maxe,
             'x1': self.curve.maxc / 1000000,
-            'y1': 1 - self.curve.emax,
+            'y1': 1 - self.curve.maxe,
             'line': {
                 'color': C.PINKPURPLE,
                 'width': 2,
@@ -231,19 +231,19 @@ class DoseResponsePlot:
         annotations = []
         annotations.extend([self.auc_label] if self.label_auc else [])
         annotations.extend([self.ic50_label] if self.label_ic50 else [])
-        annotations.extend([self.emax_label] if self.label_emax else [])
+        annotations.extend([self.maxe_label] if self.label_maxe else [])
         annotations.extend([self.rmse_label] if self.label_rmse else [])
         annotations.extend([self.day1_label] if self.label_day1 else [])
         return annotations
 
     @property
-    def emax_label(self):
+    def maxe_label(self):
         return dict(
             x=np.log10(self.curve.maxc / 1000000),
-            y=1 - self.curve.emax,
+            y=1 - self.curve.maxe,
             xref='x',
             yref='y',
-            text=f'<b>MaxE</b> {round(1 - self.curve.emax, 3)}',
+            text=f'<b>MaxE</b> {round(1 - self.curve.maxe, 3)}',
             showarrow=True,
             arrowhead=6,
             ax=30,

@@ -16,8 +16,8 @@ def layout(combination):
         lib1_minc, lib1_maxc = single_agent_curves[1].minc, single_agent_curves[1].maxc
 
 
-    lib1_minc = '{:.3e}'.format(lib1_minc)
-    lib2_minc = '{:.3e}'.format(lib2_minc)
+    # lib1_minc = '{:.3e}'.format(lib1_minc)
+    # lib2_minc = '{:.3e}'.format(lib2_minc)
     lib1_maxc = '{:.3e}'.format(lib1_maxc)
     lib2_maxc = '{:.3e}'.format(lib2_maxc)
 
@@ -26,8 +26,8 @@ def layout(combination):
             dbc.Row(className="mt-5 mb-3", children=
                 dbc.Col(width=12, children=[
                     html.H1([
-                        html.Strong(f"{combination.lib1.drug_name}"), " + ",
-                        html.Strong(f"{combination.lib2.drug_name}")
+                        html.Strong(f"{combination.lib1.name}"), " + ",
+                        html.Strong(f"{combination.lib2.name}")
                     ]),
                     html.P("Combination Report", className='lead')
                 ])
@@ -42,7 +42,7 @@ def layout(combination):
                                 dbc.Table(borderless=True, size='sm', children=[
                                     html.Tr([
                                         html.Td(html.Strong("Name")),
-                                        html.Td(combination.lib1.drug_name)
+                                        html.Td(combination.lib1.name)
                                     ]),
                                     html.Tr([
                                         html.Td(html.Strong("Target")),
@@ -56,10 +56,10 @@ def layout(combination):
                                         html.Td(html.Strong("Owner")),
                                         html.Td(combination.lib1.owner)
                                     ]),
-                                    html.Tr([
-                                        html.Td(html.Strong("Min. conc.")),
-                                        html.Td(f"{lib1_minc} µM")
-                                    ]),
+                                    # html.Tr([
+                                    #     html.Td(html.Strong("Min. conc.")),
+                                    #     html.Td(f"{lib1_minc} µM")
+                                    # ]),
                                     html.Tr([
                                         html.Td(html.Strong("Max. conc.")),
                                         html.Td(f"{lib1_maxc} µM")
@@ -70,7 +70,7 @@ def layout(combination):
                                 dbc.Table(borderless=True, size='sm', children=[
                                     html.Tr([
                                         html.Td([html.Strong("Name")]),
-                                        html.Td([combination.lib2.drug_name])
+                                        html.Td([combination.lib2.name])
                                     ]),
                                     html.Tr([
                                         html.Td([html.Strong("Target")]),
@@ -84,10 +84,10 @@ def layout(combination):
                                         html.Td([html.Strong("Owner")]),
                                         html.Td(combination.lib2.owner)
                                     ]),
-                                    html.Tr(children=[
-                                        html.Td(html.Strong("Min. conc.")),
-                                        html.Td(f"{lib2_minc} µM")
-                                    ]),
+                                    # html.Tr(children=[
+                                    #     html.Td(html.Strong("Min. conc.")),
+                                    #     html.Td(f"{lib2_minc} µM")
+                                    # ]),
                                     html.Tr(children=[
                                         html.Td(html.Strong("Max. conc.")),
                                         html.Td(f"{lib2_maxc} µM")

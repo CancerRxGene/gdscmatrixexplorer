@@ -22,7 +22,7 @@ def layout():
                 dbc.Label('Metric', html_for='boxplot-value', className='mr-2'),
                 dcc.Dropdown(
                     options=list(matrix_metrics.values()),
-                    value='Bliss_excess',
+                    value='bliss_matrix',
                     id='boxplot-value',
                     className='flex-grow-1',
                 )
@@ -53,7 +53,7 @@ def get_boxplot_summary_data(boxplot_value, project_id, tissue):
                                        MatrixResult.cmatrix,
                                        MatrixResult.lib1_id,
                                        MatrixResult.lib2_id,
-                                       Model.name.label('model_name'),
+                                       Model.cell_line_name.label('model_name'),
                                        Model.tissue) \
         .filter(Model.id == MatrixResult.model_id)\
         .filter(MatrixResult.project_id == int(project_id))
@@ -89,7 +89,7 @@ def update_boxplot(boxplot_value, project_id, tissue):
 
     def get_drug_names(summary, combo_id):
         row = next(summary.drop_duplicates(subset=['combo_id']).query("combo_id == @combo_id").itertuples())
-        return f"{row.drug_name_lib1} + {row.drug_name_lib2}"
+        return f"{row.name_lib1} + {row.name_lib2}"
 
     return {
         'data': [

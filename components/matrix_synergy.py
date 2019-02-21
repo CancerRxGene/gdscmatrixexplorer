@@ -14,12 +14,12 @@ from utils import get_metric_axis_range, well_metrics
 
 def layout(matrix):
 
-    drug1 = matrix.combination.lib1.drug_name
-    drug2 = matrix.combination.lib2.drug_name
+    drug1 = matrix.combination.lib1.name
+    drug2 = matrix.combination.lib2.name
 
     matrix_df = pd.DataFrame([w.to_dict() for w in matrix.well_results])
 
-    matrix_df = matrix_df.assign(inhibition=lambda df: 1 - df.viability)
+    matrix_df = matrix_df.assign(viability=lambda df: 1 - df.inhibition)
     matrix_df = matrix_df[['lib1_conc', 'lib2_conc'] + list(well_metrics.keys())]
 
     return dbc.Row(
@@ -34,7 +34,7 @@ def layout(matrix):
                             dcc.Dropdown(
                                 id='combo-heatmap-zvalue',
                                 options=list(well_metrics.values()),
-                                value='HSA_excess',
+                                value='bliss_excess',
                                 searchable=False,
                                 clearable=False
                             )

@@ -19,7 +19,7 @@ def generate_model_dropdown(model_list: pd.DataFrame,
             html.H5(title, className='mb-1'),
             html.Span(subtitle),
             dcc.Dropdown(options=[
-                {'label': f"{m.name} ({m.tissue if len(m.tissue) < max_tissue_width else m.tissue[:max_tissue_width - 2] + '...'})",
+                {'label': f"{m.cell_line_name} ({m.tissue if len(m.tissue) < max_tissue_width else m.tissue[:max_tissue_width - 2] + '...'})",
                  'value': f"{m.barcode}__{m.cmatrix}"}
                 for m in model_list.itertuples()
             ], id='dropdown-models', className='mt-2')
@@ -45,7 +45,7 @@ def generate_combos_dropdown(combos: dict):
 
 def model_links_from_matrix(matrix):
 
-    other_model_matrices_query = session.query(MatrixResult.barcode, MatrixResult.cmatrix, MatrixResult.model_id, Model.name, Model.tissue)\
+    other_model_matrices_query = session.query(MatrixResult.barcode, MatrixResult.cmatrix, MatrixResult.model_id, Model.cell_line_name, Model.tissue)\
         .filter(MatrixResult.model_id == Model.id)\
         .filter(MatrixResult.model_id != matrix.model_id)\
         .filter_by(drugset_id=matrix.drugset_id, cmatrix=matrix.cmatrix)
@@ -57,7 +57,7 @@ def model_links_from_matrix(matrix):
 def model_links_from_combo(combination):
     model_matrices_query = combination.matrices.join(Model)\
         .with_entities(MatrixResult.barcode, MatrixResult.cmatrix,
-                       MatrixResult.model_id, Model.name, Model.tissue)
+                       MatrixResult.model_id, Model.cell_line_name, Model.tissue)
     unique_models = get_unique_models_from_matrices_query(model_matrices_query)
     return generate_model_dropdown(unique_models, title="Select cell line",
                                    subtitle='(Navigates to most recent replicate)',
@@ -70,7 +70,7 @@ def get_unique_models_from_matrices_query(matrices_query):
                               con=session.bind)\
         .sort_values('barcode', ascending=False)\
         .drop_duplicates(subset=['model_id'])\
-        .sort_values('name')
+        .sort_values('cell_line_name')
 
 
 def combo_links_from_matrix(matrix):
@@ -80,7 +80,7 @@ def combo_links_from_matrix(matrix):
         .order_by(MatrixResult.barcode.desc())\
         .all()
 
-    dropdown_items = {f"{c.combination.lib1.drug_name} + {c.combination.lib2.drug_name}": f"{c.barcode}__{c.cmatrix}"
+    dropdown_items = {f"{c.combination.lib1.name} + {c.combination.lib2.name}": f"{c.barcode}__{c.cmatrix}"
                       for c in other_combos if c not in matrix.all_replicates}
 
     return generate_combos_dropdown(dropdown_items)
