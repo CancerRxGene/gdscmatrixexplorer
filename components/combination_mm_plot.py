@@ -31,7 +31,7 @@ def layout():
             dbc.Col(width=5, children=[
                 dcc.Dropdown(
                   options=list(matrix_metrics.values()),
-                  value='hsa_matrix',
+                  value='bliss_matrix',
                   id='combo-page-color-scale-select',
                   clearable=False
                 ),
