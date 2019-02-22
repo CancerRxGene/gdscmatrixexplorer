@@ -141,8 +141,6 @@ def update_combo_surface(combo_heatmap_zvalue, combo_json, drug_names):
             )
         ],
         'layout': go.Layout(
-            # width=500,
-            # height=500,
             margin=go.layout.Margin(
                 l=40,
                 r=40,
