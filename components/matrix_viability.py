@@ -10,7 +10,7 @@ import plotly.graph_objs as go
 from app import app
 from db import session
 from models import MatrixResult, DoseResponseCurve, SingleAgentWellResult
-
+from utils import inhibition_colorscale, viability_colorscale
 
 def layout(matrix: MatrixResult):
     matrix_df = pd.DataFrame([w.to_dict() for w in matrix.well_results])
@@ -18,7 +18,7 @@ def layout(matrix: MatrixResult):
     matrix_df['lib1_conc'] = [np.format_float_scientific(conc, 3) for conc in matrix_df['lib1_conc']]
     matrix_df['lib2_conc'] = [np.format_float_scientific(conc, 3) for conc in matrix_df['lib2_conc']]
 
-    available_viability_metrics = ['viability', 'inhibition']
+    available_viability_metrics = ['inhibition', 'viability']
 
     matrix_df = matrix_df.assign(inhibition=lambda df: 1 - df.viability)
 
@@ -44,7 +44,7 @@ def layout(matrix: MatrixResult):
                                 id='viability-heatmap-zvalue',
                                 options=[{'label': i.capitalize(), 'value': i} for i in
                                          available_viability_metrics],
-                                value='viability',
+                                value='inhibition',
                                 searchable=False,
                                 clearable=False
                             )
@@ -99,9 +99,9 @@ def update_viability_heatmap(viability_heatmap_zvalue, matrix_json):
                 z=zvalue,
                 zmax=1,
                 zmin=0,
-                colorscale='Bluered',
-                reversescale=True,
+                colorscale=inhibition_colorscale if viability_heatmap_zvalue == 'inhibition' else viability_colorscale,
             )
+
         ],
         'layout': go.Layout(title=viability_heatmap_zvalue.capitalize(),
                             xaxis={'type': 'category',
@@ -141,8 +141,7 @@ def update_viability_surface(viability_heatmap_zvalue, matrix_json, drug_names):
                 z=zvalues_table.values,
                 x=lib1_conc_table.values,
                 y=lib2_conc_table.values,
-                colorscale='Bluered',
-                reversescale=True,
+                colorscale= inhibition_colorscale if viability_heatmap_zvalue == 'inhibition' else viability_colorscale,
                 cmax=1,
                 cmin=0,
                 showscale=False,
@@ -232,8 +231,7 @@ def single_agent_heatmap(viability_heatmap_zvalue, tag, drug_name, barcode, orie
                 z=z,
                 zmax=1,
                 zmin=0,
-                colorscale='Bluered',
-                reversescale=True,
+                colorscale=inhibition_colorscale if viability_heatmap_zvalue == 'inhibition' else viability_colorscale,
                 showscale=False,
             )
         ],
