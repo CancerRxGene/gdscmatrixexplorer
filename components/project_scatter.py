@@ -34,7 +34,7 @@ def layout(project_id):
                             html.Label('X-Axis'),
                             dcc.Dropdown(
                                 options=list(matrix_metrics.values()),
-                                value='HSA_excess',
+                                value='bliss_matrix',
                                 id='x-axis-select'
                             ),
                         ]))]),
@@ -46,7 +46,7 @@ def layout(project_id):
                             html.Label('Y-Axis'),
                             dcc.Dropdown(
                                 options=list(matrix_metrics.values()),
-                                value='Bliss_excess',
+                                value='combo_maxe',
                                 id='y-axis-select'
                             )
                         ]))]),
@@ -87,7 +87,7 @@ def layout(project_id):
                         dbc.Form(inline=True, children=dbc.FormGroup([
                             html.Label('Combination'),
                             dcc.Dropdown(
-                                options=[{'label': f"{c.lib1.drug_name} + {c.lib2.drug_name}", 'value': f"{c.lib1_id}+{c.lib2_id}"} for c in project.combinations],
+                                options=[{'label': f"{c.lib1.name} + {c.lib2.name}", 'value': f"{c.lib1_id}+{c.lib2_id}"} for c in project.combinations],
                                 id='combination-select',
                                 multi=True,
                             ),
@@ -112,7 +112,7 @@ def update_scatter(x_axis_field, y_axis_field, color_field, tissues, combination
         getattr(MatrixResult, y_axis_field),
         MatrixResult.barcode, MatrixResult.cmatrix, MatrixResult.drugset_id,
         Combination.lib1_id, Combination.lib2_id,
-        Model.name.label('model_name'), Model.tissue
+        Model.cell_line_name.label('model_name'), Model.tissue
     ) \
         .join(Combination) \
         .join(Model) \

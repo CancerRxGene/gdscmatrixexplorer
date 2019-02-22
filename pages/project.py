@@ -42,7 +42,7 @@ def layout(url):
                                         action=True,
                                         children=[
                                             dbc.ListGroupItemHeading(
-                                                f"{c.lib1.drug_name} + {c.lib2.drug_name}"),
+                                                f"{c.lib1.name} + {c.lib2.name}"),
                                             dbc.ListGroupItemText(
                                                 f"{c.lib1.target} + {c.lib2.target}")
                                         ]

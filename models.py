@@ -36,19 +36,21 @@ class Project(ToDictMixin, Base):
 class Model(ToDictMixin, Base):
     __tablename__ = 'models'
     id = sa.Column(sa.String, primary_key=True)
-    name = sa.Column(sa.String)
+    cell_line_name = sa.Column(sa.String)
     master_cell_id = sa.Column(sa.Integer)
     cosmic_id = sa.Column(sa.Integer)
     tissue = sa.Column(sa.String)
     cancer_type = sa.Column(sa.String)
+    name = sa.orm.synonym(cell_line_name)
 
 
 @generic_repr
 class Drug(ToDictMixin, Base):
     __tablename__ = 'drugs'
     id = sa.Column(sa.Integer, primary_key=True)
-    drug_name = sa.Column(sa.String)
+    name = sa.Column(sa.String)
     target = sa.Column(sa.String)
+    pathway = sa.Column(sa.String)
     owner = sa.Column(sa.String)
 
 
@@ -124,40 +126,41 @@ class MatrixResult(ToDictMixin, Base):
                          index=True)
     project_id = sa.Column(sa.Integer, sa.ForeignKey(Project.id),
                            nullable=False, index=True)
-    HSA_excess = sa.Column(sa.Float)
-    HSA_excess_syn = sa.Column(sa.Float)
-    HSA_excess_well_count = sa.Column(sa.Integer)
-    Bliss_excess = sa.Column(sa.Float)
-    Bliss_excess_syn = sa.Column(sa.Float)
-    Bliss_excess_well_count = sa.Column(sa.Integer)
-    window_size = sa.Column(sa.Integer)
-    HSA_excess_window = sa.Column(sa.Float)
-    HSA_excess_window_dose_lib1 = sa.Column(sa.String)
-    HSA_excess_window_dose_lib2 = sa.Column(sa.String)
-    HSA_excess_window_syn = sa.Column(sa.Float)
-    HSA_excess_window_syn_dose_lib1 = sa.Column(sa.String)
-    HSA_excess_window_syn_dose_lib2 = sa.Column(sa.String)
-    Bliss_excess_window = sa.Column(sa.Float)
-    Bliss_excess_window_dose_lib1 = sa.Column(sa.String)
-    Bliss_excess_window_dose_lib2 = sa.Column(sa.String)
-    Bliss_excess_window_syn = sa.Column(sa.Float)
-    Bliss_excess_window_syn_dose_lib1 = sa.Column(sa.String)
-    Bliss_excess_window_syn_dose_lib2 = sa.Column(sa.String)
-    combo_max_effect = sa.Column(sa.Float)
-    combo_max2_effect = sa.Column(sa.Float)
-    combo_max3_effect = sa.Column(sa.Float)
-    lib1_max_effect = sa.Column(sa.Float)
-    lib2_max_effect = sa.Column(sa.Float)
+
+    hsa_synergistic_wells = sa.Column(sa.Integer)
+    hsa_matrix = sa.Column(sa.Float)
+    hsa_matrix_so = sa.Column(sa.Float)
+    hsa_window_size = sa.Column(sa.Integer)
+    hsa_window = sa.Column(sa.Float)
+    hsa_window_dose1 = sa.Column(sa.String)
+    hsa_window_dose2 = sa.Column(sa.String)
+    hsa_window_so = sa.Column(sa.Float)
+    hsa_window_so_dose1 = sa.Column(sa.String)
+    hsa_window_so_dose2 = sa.Column(sa.String)
+
+    bliss_synergistic_wells = sa.Column(sa.Integer)
+    bliss_matrix = sa.Column(sa.Float)
+    bliss_matrix_so = sa.Column(sa.Float)
+    bliss_window_size = sa.Column(sa.Integer)
+    bliss_window = sa.Column(sa.Float)
+    bliss_window_dose1 = sa.Column(sa.String)
+    bliss_window_dose2 = sa.Column(sa.String)
+    bliss_window_so = sa.Column(sa.Float)
+    bliss_window_so_dose1 = sa.Column(sa.String)
+    bliss_window_so_dose2 = sa.Column(sa.String)
+
+    combo_maxe = sa.Column(sa.Float)
+    lib1_maxe = sa.Column(sa.Float)
+    lib2_maxe = sa.Column(sa.Float)
+    delta_maxe_lib1 = sa.Column(sa.Float)
+    delta_maxe_lib2 = sa.Column(sa.Float)
+    delta_combo_maxe_day1 = sa.Column(sa.Float)
+
     day1_viability_mean = sa.Column(sa.Float)
+    day1_intensity_mean = sa.Column(sa.Float)
+    day1_inhibition_scale = sa.Column(sa.Float)
     growth_rate = sa.Column(sa.Float)
     doubling_time = sa.Column(sa.Float)
-    combo_max_effect_excess_over_day1 = sa.Column(sa.Float)
-
-    lib1_delta_max_effect = sa.orm.column_property(
-        (combo_max_effect - lib1_max_effect).label('lib1_delta_max_effect'))
-    lib2_delta_max_effect = sa.orm.column_property(
-        (combo_max_effect - lib2_max_effect).label('lib2_delta_max_effect'))
-
 
     combination = relationship("Combination", back_populates='matrices',
                                primaryjoin="and_(Combination.project_id == MatrixResult.project_id, "
@@ -241,15 +244,11 @@ class WellResult(ToDictMixin, Base):
     lib2_tag = sa.Column(sa.String, nullable=False)
     lib2_dose = sa.Column(sa.String, nullable=False)
     lib2_conc = sa.Column(sa.Float, nullable=False)
-    viability = sa.Column(sa.Float)
-    HSA = sa.Column(sa.Float)
-    HSA_excess = sa.Column(sa.Float)
-    Bliss_additivity = sa.Column(sa.Float)
-    Bliss_index = sa.Column(sa.Float)
-    Bliss_excess = sa.Column(sa.Float)
-    lib1_equiv_dose = sa.Column(sa.Float)
-    lib2_equiv_dose = sa.Column(sa.Float)
-    Loewe_index = sa.Column(sa.Float)
+    inhibition = sa.Column(sa.Float)
+    hsa = sa.Column(sa.Float)
+    hsa_excess = sa.Column(sa.Float)
+    bliss_additivity = sa.Column(sa.Float)
+    bliss_excess = sa.Column(sa.Float)
 
     matrix_result = relationship("MatrixResult", back_populates='well_results')
 
@@ -268,9 +267,9 @@ class SingleAgentWellResult(ToDictMixin, Base):
     drugset_id = sa.Column(sa.Integer, nullable=False)
     lib_drug = sa.Column(sa.String, nullable=False)
     position = sa.Column(sa.Integer, nullable=False)
-    dose = sa.Column(sa.String, nullable=False)
+    inhibition = sa.Column(sa.Float, nullable=False)
+    dose = sa.Column(sa.String, nullable=True)
     conc = sa.Column(sa.Float, nullable=False)
-    viability = sa.Column(sa.Float, nullable=False)
 
 @generic_repr
 class DoseResponseCurve(ToDictMixin, Base):
@@ -282,11 +281,11 @@ class DoseResponseCurve(ToDictMixin, Base):
     drug_id_lib = sa.Column(sa.Integer, nullable=False, index=True)
     tag = sa.Column(sa.String, nullable=False)
     maxc = sa.Column(sa.Float, nullable=False)
-    minc = sa.Column(sa.Float, nullable=False)
+    minc = sa.Column(sa.Float, nullable=True)
     rmse = sa.Column(sa.Float)
     ic50 = sa.Column(sa.Float)
     auc = sa.Column(sa.Float)
-    emax = sa.Column(sa.Float)
+    maxe = sa.Column(sa.Float)
     xmid = sa.Column(sa.Float)
     scal = sa.Column(sa.Float)
 

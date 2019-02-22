@@ -21,13 +21,13 @@ def layout(matrix):
     drug2 = matrix.combination.lib2
     model = matrix.model
 
-    max_hsa = max([w.HSA_excess for w in matrix.well_results])
-    max_bliss = max([w.Bliss_excess for w in matrix.well_results])
+    max_hsa = max([w.hsa_excess for w in matrix.well_results])
+    max_bliss = max([w.bliss_excess for w in matrix.well_results])
 
     return html.Div([
         dbc.Row(className="mt-3 mb-2 pl-3", children=
             dbc.Col(width=12, children=[
-                dcc.Markdown(f"# **{drug1.drug_name}** + **{drug2.drug_name}** in cell model **{model.name}**"),
+                dcc.Markdown(f"# **{drug1.name}** + **{drug2.name}** in cell model **{model.cell_line_name}**"),
                 html.P(f"Combination Matrix Report for barcode {matrix.barcode}", className='lead')
             ])
         ),
@@ -37,7 +37,7 @@ def layout(matrix):
                     id=f"cell-info-{model.id}",
                     className="bg-white pt-4 px-4 pb-1 mb-3 border shadow-sm",
                     children=html.Div([
-                        html.H3(["Cell Line ", html.Strong(model.name)]),
+                        html.H3(["Cell Line ", html.Strong(model.cell_line_name)]),
                         html.Table(
                             id='model-information',
                             className='table',
@@ -88,15 +88,15 @@ def layout(matrix):
                     html.Table(className='table table-borderless table-sm', children=[
                         html.Tr([
                             html.Td(["Combination"]),
-                            html.Td([html.Strong(round(matrix.combo_max_effect * 100, 1))])
+                            html.Td([html.Strong(round(matrix.combo_maxe * 100, 1))])
                             ]),
                         html.Tr([
-                            html.Td([drug1.drug_name]),
-                            html.Td([html.Strong(round(matrix.lib1_max_effect * 100, 1))])
+                            html.Td([drug1.name]),
+                            html.Td([html.Strong(round(matrix.lib1_maxe * 100, 1))])
                         ]),
                         html.Tr([
-                            html.Td([drug2.drug_name]),
-                            html.Td([html.Strong(round(matrix.lib2_max_effect * 100, 1))])
+                            html.Td([drug2.name]),
+                            html.Td([html.Strong(round(matrix.lib2_maxe * 100, 1))])
                         ]),
                         html.Tr([
                             html.Td(["Excess over HSA"]),
@@ -220,7 +220,7 @@ def model_information(model_id, passport_data, gr_data, current_model_informatio
                 model_attribute_section(cmp_data['model_information'], 'Ploidy','ploidy') +
                 model_attribute_section(cmp_data['model_information'], 'Mutations per Mb', 'mutations_per_mb') +
                 [html.Br(), html.Br(),
-                 html.A(children=f"View {model.name} on Cell Model Passports",
+                 html.A(children=f"View {model.cell_line_name} on Cell Model Passports",
                         href=f"https://cellmodelpassports.sanger.ac.uk/passports/{model.id}")
                  ]
             )

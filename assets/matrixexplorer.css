@@ -5,6 +5,14 @@ html {
 body {
   margin-bottom: 10rem; /* Margin bottom by footer height */
 }
+
+.Select {
+    z-index: 1001;
+}
+.Select.is-open{
+    z-index: 1005;
+}
+
 .footer-wrapper {
   position: absolute;
   bottom: 0;
@@ -111,5 +119,5 @@ a.nav-link.active{
     position: absolute;
     top: 0;
     left: 0;
-    z-index: 1000;
+    z-index: 2000;
 }

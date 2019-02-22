@@ -21,8 +21,8 @@ def layout(url):
     return html.Div([
         dcc.Location(id='matrix-url', refresh=True),
         crumbs([("Home", "/"), (p.name, f"/project/{p.slug}"),
-                (f"{c.lib1.drug_name} + {c.lib2.drug_name}", f"/project/{p.slug}/combination/{c.lib1_id}+{c.lib2_id}"),
-                (f"{my_matrix.model.name}",)]),
+                (f"{c.lib1.name} + {c.lib2.name}", f"/project/{p.slug}/combination/{c.lib1_id}+{c.lib2_id}"),
+                (f"{my_matrix.model.cell_line_name}",)]),
         intro(my_matrix),
         viability(my_matrix),
         synergy(my_matrix),

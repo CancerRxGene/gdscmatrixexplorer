@@ -9,8 +9,9 @@ import plotly.graph_objs as go
 
 from app import app
 from db import session
-from models import MatrixResult, DoseResponseCurve, SingleAgentWellResult
+from models import MatrixResult, SingleAgentWellResult
 from utils import inhibition_colorscale, viability_colorscale
+
 
 def layout(matrix: MatrixResult):
     matrix_df = pd.DataFrame([w.to_dict() for w in matrix.well_results])
@@ -18,16 +19,16 @@ def layout(matrix: MatrixResult):
     matrix_df['lib1_conc'] = [np.format_float_scientific(conc, 3) for conc in matrix_df['lib1_conc']]
     matrix_df['lib2_conc'] = [np.format_float_scientific(conc, 3) for conc in matrix_df['lib2_conc']]
 
-    available_viability_metrics = ['inhibition', 'viability']
+    available_viability_metrics = ['viability', 'inhibition']
 
-    matrix_df = matrix_df.assign(inhibition=lambda df: 1 - df.viability)
+    matrix_df = matrix_df.assign(viability=lambda df: 1 - df.inhibition)
 
     matrix_df = matrix_df[['lib1_conc', 'lib2_conc'] + available_viability_metrics]
 
     drug_info = json.dumps(dict(lib1_tag=matrix.lib1_tag,
                                 lib2_tag=matrix.lib2_tag,
-                                drug1_name=matrix.combination.lib1.drug_name,
-                                drug2_name=matrix.combination.lib2.drug_name,
+                                drug1_name=matrix.combination.lib1.name,
+                                drug2_name=matrix.combination.lib2.name,
                                 barcode=matrix.barcode
                                 ))
 
@@ -201,7 +202,7 @@ def update_lib1_heatmap(viability_heatmap_zvalue, drug_info):
     ]
 )
 def update_lib2_heatmap(viability_heatmap_zvalue, drug_info):
-    drug_info=json.loads(drug_info)
+    drug_info = json.loads(drug_info)
     tag = drug_info['lib2_tag']
     barcode = drug_info['barcode']
     drug_name = drug_info['drug2_name']
@@ -218,10 +219,10 @@ def single_agent_heatmap(viability_heatmap_zvalue, tag, drug_name, barcode, orie
     lib_df = lib_df.sort_values('conc')
     lib_df.conc = [np.format_float_scientific(conc, 3) for conc in lib_df.conc]
 
-    if (viability_heatmap_zvalue == 'viability'):
-        z = lib_df.viability
+    if viability_heatmap_zvalue == 'viability':
+        z = 1 - lib_df.inhibition
     else:
-        z = 1 - lib_df.viability
+        z = lib_df.inhibition
 
     return {
         'data': [

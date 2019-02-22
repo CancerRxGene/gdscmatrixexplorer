@@ -23,7 +23,10 @@ def get_context(matrix):
 
 def get_pill(matrix, metric):
     context = get_context(matrix)
-    value = round(getattr(matrix, metric), 3)
+    value = getattr(matrix, metric)
+    if value is None:
+        return ''
+    value = round(value, 3)
     badge_cls = get_badge_classname(value, context, metric)
     return html.Span(f"{value}", className="badge badge-pill " + badge_cls)
 
@@ -52,33 +55,33 @@ def infoblock_matrix(matrix_result):
                     className='list-group-item d-flex justify-content-between align-items-center',
                     children=[
                         html.Strong("Combination"),
-                        get_pill(matrix_result, 'combo_max_effect')
+                        get_pill(matrix_result, 'combo_maxe')
                     ]),
                 html.Li(
                     className='list-group-item d-flex justify-content-between align-items-center',
                     children=[
-                        html.Span(f"{matrix_result.combination.lib1.drug_name}"),
-                        get_pill(matrix_result, 'lib1_max_effect')
-                    ]),
-                html.Li(
-                    className='list-group-item d-flex justify-content-between align-items-center',
-                    children=[
-                        html.Span(
-                            f"∆ {matrix_result.combination.lib1.drug_name}"),
-                        get_pill(matrix_result, 'lib1_delta_max_effect')
-                    ]),
-                html.Li(
-                    className='list-group-item d-flex justify-content-between align-items-center',
-                    children=[
-                        html.Span(f"{matrix_result.combination.lib2.drug_name}"),
-                        get_pill(matrix_result, 'lib2_max_effect')
+                        html.Span(f"{matrix_result.combination.lib1.name}"),
+                        get_pill(matrix_result, 'lib1_maxe')
                     ]),
                 html.Li(
                     className='list-group-item d-flex justify-content-between align-items-center',
                     children=[
                         html.Span(
-                            f"∆ {matrix_result.combination.lib2.drug_name}"),
-                        get_pill(matrix_result, 'lib2_delta_max_effect')
+                            f"∆ {matrix_result.combination.lib1.name}"),
+                        get_pill(matrix_result, 'delta_maxe_lib1')
+                    ]),
+                html.Li(
+                    className='list-group-item d-flex justify-content-between align-items-center',
+                    children=[
+                        html.Span(f"{matrix_result.combination.lib2.name}"),
+                        get_pill(matrix_result, 'lib2_maxe')
+                    ]),
+                html.Li(
+                    className='list-group-item d-flex justify-content-between align-items-center',
+                    children=[
+                        html.Span(
+                            f"∆ {matrix_result.combination.lib2.name}"),
+                        get_pill(matrix_result, 'delta_maxe_lib2')
                     ]),
             ])
         ]),
@@ -91,19 +94,19 @@ def infoblock_matrix(matrix_result):
             html.Ul(className='list-group list-group-flush', children=[
                 html.Li(className='list-group-item d-flex justify-content-between align-items-center', children=[
                     html.Span("Matrix average"),
-                    get_pill(matrix_result, 'Bliss_excess')
+                    get_pill(matrix_result, 'bliss_matrix')
                 ]),
                 html.Li(className='list-group-item d-flex justify-content-between align-items-center', children=[
                     html.Span("Matrix average synergistic wells"),
-                    get_pill(matrix_result, 'Bliss_excess_syn')
+                    get_pill(matrix_result, 'bliss_matrix_so')
                 ]),
                 html.Li(className='list-group-item d-flex justify-content-between align-items-center', children=[
                     html.Span("Highest window"),
-                    get_pill(matrix_result, 'Bliss_excess_window')
+                    get_pill(matrix_result, 'bliss_window')
                 ]),
                 html.Li(className='list-group-item d-flex justify-content-between align-items-center', children=[
                     html.Span("Highest window synergistic wells"),
-                    get_pill(matrix_result, 'Bliss_excess_window_syn')
+                    get_pill(matrix_result, 'bliss_window_so')
                 ])
             ])
         ]),
@@ -118,25 +121,25 @@ def infoblock_matrix(matrix_result):
                     className='list-group-item d-flex justify-content-between align-items-center',
                     children=[
                         html.Span("Matrix average"),
-                        get_pill(matrix_result, 'HSA_excess')
+                        get_pill(matrix_result, 'hsa_matrix')
                     ]),
                 html.Li(
                     className='list-group-item d-flex justify-content-between align-items-center',
                     children=[
                         html.Span("Matrix average synergistic wells"),
-                        get_pill(matrix_result, 'HSA_excess_syn')
+                        get_pill(matrix_result, 'hsa_matrix_so')
                     ]),
                 html.Li(
                     className='list-group-item d-flex justify-content-between align-items-center',
                     children=[
                         html.Span("Highest window"),
-                        get_pill(matrix_result, 'HSA_excess_window')
+                        get_pill(matrix_result, 'hsa_window')
                     ]),
                 html.Li(
                     className='list-group-item d-flex justify-content-between align-items-center',
                     children=[
                         html.Span("Highest window synergistic wells"),
-                        get_pill(matrix_result, 'HSA_excess_window_syn')
+                        get_pill(matrix_result, 'hsa_window_so')
                     ])
             ])
         ])
