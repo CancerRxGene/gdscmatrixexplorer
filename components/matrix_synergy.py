@@ -9,7 +9,7 @@ import plotly.graph_objs as go
 from components.synergy_info.syn_info import infoblock_matrix
 
 from app import app
-from utils import get_metric_axis_range, well_metrics, colorscale
+from utils import get_metric_axis_range, well_metrics, synergy_colorscale
 
 def layout(matrix):
 
@@ -88,7 +88,7 @@ def update_combo_heatmap(combo_heatmap_zvalue, combo_json, drug_names):
                 z=zvalue,
                 zmax=zmax,
                 zmin=zmin,
-                colorscale=colorscale,
+                colorscale=synergy_colorscale,
                 reversescale=False
             )
         ],
@@ -133,7 +133,7 @@ def update_combo_surface(combo_heatmap_zvalue, combo_json, drug_names):
                 z=zvalues_table.values,
                 x=lib1_conc_table.values,
                 y=lib2_conc_table.values,
-                colorscale=colorscale,
+                colorscale=synergy_colorscale,
                 reversescale=True,
                 cmax=zmax,
                 cmin=zmin,

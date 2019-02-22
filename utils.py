@@ -140,7 +140,7 @@ plot_colors = ["rgb(215,150,209)", "rgb(164,250,201)", "rgb(245,167,221)",
                "rgb(172,168,198)", "rgb(255,250,203)", "rgb(196,166,142)",
                "rgb(197,237,225)", "rgb(170,175,138)", "rgb(255,235,208)"]
 
-colorscale = [
+synergy_colorscale = [
                 [0.0, 'rgb(0, 0, 255)'],
                 [0.1, 'rgb(51, 51, 255)'],
                 [0.2, 'rgb(102,102,255)'],
@@ -154,7 +154,7 @@ colorscale = [
                 [1.0, 'rgb(230, 0, 0)']
     ]
 
-heatmap_colorscale = [
+inhibition_colorscale = [
     [0.0, 'rgb(0,0,255)'],
     [0.1, 'rgb(90,0,237)'],
     [0.2, 'rgb(127,0,217)'],
@@ -168,7 +168,7 @@ heatmap_colorscale = [
     [1.0, 'rgb(255,0,0)'],
 ]
 
-heatmap_reversed_colorscale = [
+viability_colorscale = [
     [0.0, 'rgb(255,0,0)'],
     [0.1, 'rgb(243,0,53)'],
     [0.2, 'rgb(229,0,87)'],
