@@ -46,7 +46,7 @@ def layout(project_id):
                             html.Label('Y-Axis'),
                             dcc.Dropdown(
                                 options=list(matrix_metrics.values()),
-                                value='bliss_matrix',
+                                value='combo_maxe',
                                 id='y-axis-select'
                             )
                         ]))]),

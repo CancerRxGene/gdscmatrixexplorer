@@ -271,7 +271,6 @@ class SingleAgentWellResult(ToDictMixin, Base):
     dose = sa.Column(sa.String, nullable=True)
     conc = sa.Column(sa.Float, nullable=False)
 
-
 @generic_repr
 class DoseResponseCurve(ToDictMixin, Base):
     __tablename__ = 'dose_response_curves'

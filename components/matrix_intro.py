@@ -22,7 +22,7 @@ def layout(matrix):
     model = matrix.model
 
     max_hsa = max([w.hsa_excess for w in matrix.well_results])
-
+    max_bliss = max([w.bliss_excess for w in matrix.well_results])
 
     return html.Div([
         dbc.Row(className="mt-3 mb-2 pl-3", children=
@@ -101,6 +101,10 @@ def layout(matrix):
                         html.Tr([
                             html.Td(["Excess over HSA"]),
                             html.Td([html.Strong(round(max_hsa * 100, 1))])
+                        ]),
+                        html.Tr([
+                            html.Td(["Excess over Bliss"]),
+                            html.Td([html.Strong(round(max_bliss * 100, 1))])
                         ])
                     ]),
                 ]),
