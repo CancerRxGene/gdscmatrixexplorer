@@ -267,7 +267,7 @@ class SingleAgentWellResult(ToDictMixin, Base):
     drugset_id = sa.Column(sa.Integer, nullable=False)
     lib_drug = sa.Column(sa.String, nullable=False)
     position = sa.Column(sa.Integer, nullable=False)
-    viability = sa.Column(sa.Float, nullable=False)
+    inhibition = sa.Column(sa.Float, nullable=False)
     dose = sa.Column(sa.String, nullable=True)
     conc = sa.Column(sa.Float, nullable=False)
 

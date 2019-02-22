@@ -33,6 +33,7 @@ class DoseResponsePlot:
         self.datapoints = pd.DataFrame(
             [w.to_dict() for w in curve.well_results]
         )
+        self.datapoints['viability'] = 1 - self.datapoints.inhibition
         self.id = f'dose-response-{curve.id}'
         self.display_datapoints = display_datapoints
         self.display_screening_range = display_screening_range

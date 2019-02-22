@@ -302,7 +302,7 @@ def dr_curves_to_db(dr_curves):
 
 def extract_single_agent_wells(nlme_stats):
     wells = nlme_stats[['DRUGSET_ID', 'lib_drug', 'BARCODE', 'POSITION', 'y', 'x_micromol']]\
-        .rename(columns={"y": "viability", "x_micromol": "conc"})\
+        .rename(columns={"y": "inhibition", "x_micromol": "conc"})\
         .drop_duplicates()
 
     wells.columns = [c.lower() for c in wells.columns]

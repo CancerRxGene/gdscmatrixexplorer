@@ -7,7 +7,10 @@ body {
 }
 
 .Select {
-    z-index: 1002;
+    z-index: 1001;
+}
+.Select.is-open{
+    z-index: 1005;
 }
 
 .footer-wrapper {
