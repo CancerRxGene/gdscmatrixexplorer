@@ -21,7 +21,9 @@ footer = dbc.Container(fluid=True, className='mt-5 pt-3 footer-wrapper', childre
                             html.H4("Contact Sanger"),
                             html.Ul(className='list-unstyled', children=[
                                 html.Li(html.Span("Elizabeth Coker")),
-                                html.Li(html.Span("ec18@sanger.ac.uk"))
+                                html.Li(html.Span("ec18@sanger.ac.uk"), className='mb-2'),
+                                html.Li(html.Span("Patricia Jaaks")),
+                                html.Li(html.Span("pj4@sanger.ac.uk"))
                             ])
                         ])
 
