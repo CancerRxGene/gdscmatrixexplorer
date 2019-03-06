@@ -1,67 +1,99 @@
+from functools import lru_cache
+
 import dash
+import dash_bootstrap_components as dbc
 import dash_core_components as dcc
-import dash_html_components as html
 import pandas as pd
 import plotly.graph_objs as go
-from sqlalchemy import and_
 
 from app import app
 from db import session
-from models import MatrixResult, Combination
-from utils import metrics
+from models import MatrixResult, Model
+from utils import matrix_metrics, get_all_tissues, matrix_hover_label
 
+def layout():
 
-def layout(project_id):
-
-    return html.Div(className='row', children=[
+    return dbc.Row([
         dcc.Location('project-boxplot-url'),
-        html.Div(
-                className="col-12 mt-2 mb-4",
-                children=[
-                    html.Label('X-Axis', htmlFor='boxplot-value'),
-                    dcc.Dropdown(
-                        options=[{'label': c, 'value': c} for c in metrics],
-                        value='Bliss_excess',
-                        id='boxplot-value'
-                    )
-                ]
-            ),
-            html.Div(
-                className="col-12",
-                children=dcc.Graph(id='project-boxplot')
-            )
+        dbc.Col(
+            width=6,
+            className="mt-2 mb-4",
+            children=dbc.Form(inline=True, children=dbc.FormGroup([
+                dbc.Label('Metric', html_for='boxplot-value', className='mr-2'),
+                dcc.Dropdown(
+                    options=list(matrix_metrics.values()),
+                    value='bliss_matrix',
+                    id='boxplot-value',
+                    className='flex-grow-1',
+                )
+            ]))
+        ),
+        dbc.Col(width=6,
+                className="mt-2 mb-4",
+            children=dbc.Form(inline=True, children=dbc.FormGroup([
+                dbc.Label('Tissue', html_for='tissue', className='mr-2'),
+                dcc.Dropdown(
+                    options=[{'label': c, 'value': c} for c in get_all_tissues()],
+                    id='tissue',
+                    className='flex-grow-1',
+                )
+            ]))
+        ),
+        dbc.Col(
+            width=12,
+            children=dcc.Graph(id='project-boxplot')
+        )
     ])
+
+
+@lru_cache()
+def get_boxplot_summary_data(boxplot_value, project_id, tissue):
+    all_matrices_query = session.query(getattr(MatrixResult, boxplot_value),
+                                       MatrixResult.barcode,
+                                       MatrixResult.cmatrix,
+                                       MatrixResult.lib1_id,
+                                       MatrixResult.lib2_id,
+                                       Model.cell_line_name.label('model_name'),
+                                       Model.tissue) \
+        .filter(Model.id == MatrixResult.model_id)\
+        .filter(MatrixResult.project_id == int(project_id))
+
+    if tissue:
+        all_matrices_query = all_matrices_query.join(Model) \
+            .filter(Model.tissue == tissue)
+
+    summary = pd.read_sql(all_matrices_query.statement,
+                          all_matrices_query.session.bind)
+
+    all_drugs = pd.read_sql_table('drugs', session.bind)
+
+    summary = summary.merge(all_drugs, left_on='lib1_id', right_on='id') \
+        .merge(all_drugs, left_on='lib2_id', right_on='id',
+               suffixes=['_lib1', '_lib2'])
+    summary['combo_id'] = str(project_id) + "::" + \
+                          summary.lib1_id.astype(str) + "::" + \
+                          summary.lib2_id.astype(str)
+
+    return summary
 
 
 @app.callback(
     dash.dependencies.Output('project-boxplot', 'figure'),
     [dash.dependencies.Input('boxplot-value', 'value'),
-     dash.dependencies.Input('project-id', 'children')]
+     dash.dependencies.Input('project-id', 'children'),
+     dash.dependencies.Input('tissue', 'value')]
 )
-def update_boxplot(boxplot_value, project_id):
+def update_boxplot(boxplot_value, project_id, tissue):
 
-    all_matrices_query = session.query(getattr(MatrixResult, boxplot_value), MatrixResult.barcode, MatrixResult.cmatrix, MatrixResult.drugset_id, Combination.lib1_id, Combination.lib2_id)\
-        .join(Combination)\
-        .filter(and_(MatrixResult.drugset_id == Combination.drugset_id,
-                     MatrixResult.cmatrix == Combination.cmatrix))\
-        .filter(MatrixResult.project_id == int(project_id))
-
-    summary = pd.read_sql(all_matrices_query.statement, all_matrices_query.session.bind)
-
-    all_drugs = pd.read_sql_table('drugs', session.bind)
-
-    summary = summary.merge(all_drugs, left_on='lib1_id', right_on='id')\
-        .merge(all_drugs, left_on='lib2_id', right_on='id', suffixes=['_lib1', '_lib2'])
-    summary['combo_id'] = summary.cmatrix.astype(str) + "::" + summary.drugset_id.astype(str)
+    summary = get_boxplot_summary_data(boxplot_value, project_id, tissue)
 
     def get_drug_names(summary, combo_id):
         row = next(summary.drop_duplicates(subset=['combo_id']).query("combo_id == @combo_id").itertuples())
-        return f"{row.drug_name_lib1} - {row.drug_name_lib2}"
+        return f"{row.name_lib1} + {row.name_lib2}"
 
     return {
         'data': [
             go.Box(
-                # name=str(cm),
                 name=get_drug_names(summary, combo_id),
                 x=summary.query("combo_id == @combo_id")[boxplot_value],
                 opacity=0.7,
@@ -71,17 +103,24 @@ def update_boxplot(boxplot_value, project_id):
                     size=4,
                     opacity=0.5
                 ),
+                text=matrix_hover_label(summary),
                 customdata=[{"to": f"/matrix/{row.barcode}/{row.cmatrix}"}
                             for row in summary.query("combo_id == @combo_id").itertuples(index=False)],
-                hoveron='points'
-            ) for combo_id in reversed(sorted(summary.combo_id.unique(), key=lambda x: get_drug_names(summary, x)))
+                hoveron='points',
+                hoverinfo='text',
+            )
+            for combo_id in summary[['combo_id', boxplot_value]]
+                .groupby(by='combo_id', as_index=False)\
+                .median()\
+                .sort_values(by=boxplot_value)\
+                .combo_id
         ],
         'layout': go.Layout(
             height=1000,
             margin=dict(l=150, r=70, b=80, t=20),
             showlegend=False,
             xaxis={'type': 'log' if 'index' in boxplot_value else 'linear',
-                   'title': boxplot_value.replace('_', ' ')}
+                   'title': matrix_metrics[boxplot_value]['label']},
         )
     }
 

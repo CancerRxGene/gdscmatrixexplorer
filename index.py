@@ -1,33 +1,34 @@
+import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
+
 from dash.dependencies import Input, Output
-import dash_table_experiments as dt
+import dash_auth
+import os
 
 from app import app
-from pages import project, home, matrix, combinations
-from components import project_scatter
-from page_components import header
+from components.navigation.header import generate_header
+from components.navigation.footer import footer
+from pages import project, home, matrix, combinations, documentation, downloads
+from utils import url_parser
+
+user = os.getenv('MATRIXEXPLORER_USER')
+password = os.getenv('MATRIXEXPLORER_PASSWD')
+
+auth = dash_auth.BasicAuth(app, [[user, password]])
 
 app.layout = html.Div([
         dcc.Location(id='url', refresh=True),
-        html.Div(
+        generate_header(),
+        dbc.Container(
             id='wrapper',
-            className="container",
             children=[
-                header,
-                html.Div(
-                    className='row',
-                    children=[
-                        html.Div(
-                            id='page-content',
-                            className="col-12",
-                            children=[
-                                html.Div(className="d-none", children=dt.DataTable(rows=[{}], id='dummy_table'))
-                        ]),
-                ])
-        ])
-
-    ])
+                dbc.Row(dbc.Col(id='page-content', width=12))
+            ],
+            className='pb-5'
+        ),
+        footer
+])
 
 
 @app.callback(Output('page-content', 'children'),
@@ -35,19 +36,22 @@ app.layout = html.Div([
 def display_page(pathname):
     if pathname is None:
         return ""
-    elif pathname == '/':
-        return home.layout()
-    elif pathname.startswith('/project'):
-        segments = pathname.split("/")
-        if len(segments) == 3:
-            return project.layout(segments[2])
-        elif len(segments) == 4 and segments[-1] == "scatter":
-            return project_scatter.layout(segments[-2])
-        elif len(segments) == 5 and segments[3] == "combination":
-            return combinations.layout(segments[2], segments[4])
-    elif isinstance(pathname, str) and pathname.startswith('/matrix'):
-        segments = pathname.split("/")
-        return matrix.layout(*segments[2:])
+
+    page_type = url_parser(pathname)
+
+    if page_type == 'home':
+        return home.layout(pathname)
+    elif page_type == 'project':
+        return project.layout(pathname)
+    elif page_type == 'combination':
+        return combinations.layout(pathname)
+    elif page_type == 'matrix':
+        return matrix.layout(pathname)
+    elif page_type == 'documentation':
+        return documentation.layout(pathname)
+    elif page_type == 'downloads':
+        return downloads.layout(pathname)
+
     else:
         return '404'
 

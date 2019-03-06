@@ -1,10 +1,11 @@
 import sqlalchemy as sa
 import numpy as np
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship
 from sqlalchemy_utils import generic_repr
 
 from components.dr_plot import DoseResponsePlot
-from db import Base
+from db import Base, session
 
 
 class ToDictMixin:
@@ -20,13 +21,8 @@ class Project(ToDictMixin, Base):
     name = sa.Column(sa.String, unique=True)
     slug = sa.Column(sa.String, unique=True)
     matrices = relationship("MatrixResult", back_populates='project')
-
-    @property
-    def combinations(self):
-        return sa.orm.object_session(self).query(Combination).join(MatrixResult) \
-            .filter(
-                MatrixResult.project_id == self.id,
-        ).distinct().all()
+    dose_responses = relationship("DoseResponseCurve")
+    combinations = relationship("Combination", lazy='dynamic', back_populates='project')
 
     @property
     def models(self):
@@ -40,41 +36,36 @@ class Project(ToDictMixin, Base):
 class Model(ToDictMixin, Base):
     __tablename__ = 'models'
     id = sa.Column(sa.String, primary_key=True)
-    name = sa.Column(sa.String)
+    cell_line_name = sa.Column(sa.String)
     master_cell_id = sa.Column(sa.Integer)
     cosmic_id = sa.Column(sa.Integer)
     tissue = sa.Column(sa.String)
     cancer_type = sa.Column(sa.String)
+    name = sa.orm.synonym(cell_line_name)
 
 
 @generic_repr
 class Drug(ToDictMixin, Base):
     __tablename__ = 'drugs'
     id = sa.Column(sa.Integer, primary_key=True)
-    drug_name = sa.Column(sa.String)
+    name = sa.Column(sa.String)
     target = sa.Column(sa.String)
+    pathway = sa.Column(sa.String)
     owner = sa.Column(sa.String)
 
 
 @generic_repr
 class Combination(ToDictMixin, Base):
     __tablename__ = 'combinations'
-    drugset_id = sa.Column(sa.Integer, primary_key=True)
-    cmatrix = sa.Column(sa.Integer, primary_key=True)
-
-    lib1_id = sa.Column(sa.Integer, sa.ForeignKey(Drug.id), nullable=False,
-                        index=True)
-    lib2_id = sa.Column(sa.Integer, sa.ForeignKey(Drug.id), nullable=False,
-                        index=True)
-    matrix_size = sa.Column(sa.Integer)
-
-    lib1_tag = sa.Column(sa.String)
-    lib2_tag = sa.Column(sa.String)
+    project_id = sa.Column(sa.Integer, sa.ForeignKey(Project.id), primary_key=True, index=True)
+    lib1_id = sa.Column(sa.Integer, sa.ForeignKey(Drug.id), primary_key=True, index=True)
+    lib2_id = sa.Column(sa.Integer, sa.ForeignKey(Drug.id), primary_key=True, index=True)
 
     lib1 = relationship(Drug, foreign_keys=[lib1_id])
     lib2 = relationship(Drug, foreign_keys=[lib2_id])
 
-    matrices = relationship("MatrixResult", lazy='dynamic')
+    matrices = relationship("MatrixResult", lazy='dynamic', back_populates='combination')
+    project = relationship("Project", back_populates='combinations')
 
     @property
     def replicates_query(self):
@@ -92,8 +83,30 @@ class Combination(ToDictMixin, Base):
         ))
 
     @property
+    def models(self):
+        return sa.orm.object_session(self).query(Model) \
+            .join(MatrixResult, Combination)\
+            .filter(
+                Combination.project_id == self.project_id,
+                Combination.lib1_id == self.lib1_id,
+                Combination.lib2_id == self.lib2_id)\
+            .all()
+
+    @property
     def replicates(self):
         return self.replicates_query.all()
+
+    @classmethod
+    def get(cls, project_id, lib1_id, lib2_id):
+        return session.query(Combination) \
+            .filter_by(lib1_id=lib1_id, lib2_id=lib2_id,
+                       project_id=project_id) \
+            .one()
+
+    @property
+    def url(self):
+        return (f"/project/{self.project.slug}/combination/"
+                f"{self.lib1_id}+{self.lib2_id}")
 
 
 @generic_repr
@@ -103,66 +116,88 @@ class MatrixResult(ToDictMixin, Base):
     drugset_id = sa.Column(sa.Integer, nullable=False, primary_key=True)
     cmatrix = sa.Column(sa.Integer, nullable=False, primary_key=True)
 
+    lib1_id = sa.Column(sa.Integer, sa.ForeignKey(Drug.id), nullable=False, index=True)
+    lib2_id = sa.Column(sa.Integer, sa.ForeignKey(Drug.id), nullable=False, index=True)
+
+    lib1_tag = sa.Column(sa.String, nullable=False)
+    lib2_tag = sa.Column(sa.String, nullable=False)
+
     model_id = sa.Column(sa.String, sa.ForeignKey(Model.id), nullable=False,
                          index=True)
     project_id = sa.Column(sa.Integer, sa.ForeignKey(Project.id),
                            nullable=False, index=True)
-    HSA_excess = sa.Column(sa.Float)
-    HSA_excess_syn = sa.Column(sa.Float)
-    HSA_excess_well_count = sa.Column(sa.Integer)
-    Bliss_excess = sa.Column(sa.Float)
-    Bliss_excess_syn = sa.Column(sa.Float)
-    Bliss_excess_well_count = sa.Column(sa.Integer)
-    window_size = sa.Column(sa.Integer)
-    HSA_excess_window = sa.Column(sa.Float)
-    HSA_excess_window_dose_lib1 = sa.Column(sa.String)
-    HSA_excess_window_dose_lib2 = sa.Column(sa.String)
-    HSA_excess_window_syn = sa.Column(sa.Float)
-    HSA_excess_window_syn_dose_lib1 = sa.Column(sa.String)
-    HSA_excess_window_syn_dose_lib2 = sa.Column(sa.String)
-    Bliss_excess_window = sa.Column(sa.Float)
-    Bliss_excess_window_dose_lib1 = sa.Column(sa.String)
-    Bliss_excess_window_dose_lib2 = sa.Column(sa.String)
-    Bliss_excess_window_syn = sa.Column(sa.Float)
-    Bliss_excess_window_syn_dose_lib1 = sa.Column(sa.String)
-    Bliss_excess_window_syn_dose_lib2 = sa.Column(sa.String)
-    combo_max_effect = sa.Column(sa.Float)
-    lib1_max_effect = sa.Column(sa.Float)
-    lib2_max_effect = sa.Column(sa.Float)
-    lib1_delta_max_effect = sa.Column(sa.Float)
-    lib2_delta_max_effect = sa.Column(sa.Float)
 
-    combination = relationship("Combination", back_populates='matrices')
-    well_results = relationship("WellResult")
-    combination_curves = relationship("DoseResponseCurve")
-    model = relationship("Model")
+    hsa_synergistic_wells = sa.Column(sa.Integer)
+    hsa_matrix = sa.Column(sa.Float)
+    hsa_matrix_so = sa.Column(sa.Float)
+    hsa_window_size = sa.Column(sa.Integer)
+    hsa_window = sa.Column(sa.Float)
+    hsa_window_dose1 = sa.Column(sa.String)
+    hsa_window_dose2 = sa.Column(sa.String)
+    hsa_window_so = sa.Column(sa.Float)
+    hsa_window_so_dose1 = sa.Column(sa.String)
+    hsa_window_so_dose2 = sa.Column(sa.String)
+
+    bliss_synergistic_wells = sa.Column(sa.Integer)
+    bliss_matrix = sa.Column(sa.Float)
+    bliss_matrix_so = sa.Column(sa.Float)
+    bliss_window_size = sa.Column(sa.Integer)
+    bliss_window = sa.Column(sa.Float)
+    bliss_window_dose1 = sa.Column(sa.String)
+    bliss_window_dose2 = sa.Column(sa.String)
+    bliss_window_so = sa.Column(sa.Float)
+    bliss_window_so_dose1 = sa.Column(sa.String)
+    bliss_window_so_dose2 = sa.Column(sa.String)
+
+    combo_maxe = sa.Column(sa.Float)
+    lib1_maxe = sa.Column(sa.Float)
+    lib2_maxe = sa.Column(sa.Float)
+    delta_maxe_lib1 = sa.Column(sa.Float)
+    delta_maxe_lib2 = sa.Column(sa.Float)
+    delta_combo_maxe_day1 = sa.Column(sa.Float)
+
+    day1_viability_mean = sa.Column(sa.Float)
+    day1_intensity_mean = sa.Column(sa.Float)
+    day1_inhibition_scale = sa.Column(sa.Float)
+    growth_rate = sa.Column(sa.Float)
+    doubling_time = sa.Column(sa.Float)
+
+    combination = relationship("Combination", back_populates='matrices',
+                               primaryjoin="and_(Combination.project_id == MatrixResult.project_id, "
+                                           "Combination.lib1_id == MatrixResult.lib1_id, "
+                                           "Combination.lib2_id == MatrixResult.lib2_id)",
+                               viewonly=True)
+
     project = relationship("Project", back_populates='matrices')
+
+    well_results = relationship("WellResult")
+    model = relationship("Model")
 
     @property
     def single_agent_curves(self):
         return sa.orm.object_session(self).query(DoseResponseCurve)\
             .filter(
                 DoseResponseCurve.barcode == self.barcode,
-                DoseResponseCurve.treatment_type == 'S',
-                DoseResponseCurve.dosed_tag.in_([
-                    self.combination.lib1_tag,
-                    self.combination.lib2_tag])
-                ).all()
+                # Must match on tag in case multiple tags in ds for the same drug id,
+                DoseResponseCurve.tag.in_([
+                    self.lib1_tag,
+                    self.lib2_tag
+                ])).all()
 
     @property
     def drugs(self):
         return {
-            self.combination.lib1_tag: self.combination.lib1,
-            self.combination.lib2_tag: self.combination.lib2
+            self.combination.lib1_id: self.combination.lib1,
+            self.combination.lib2_id: self.combination.lib2
         }
 
     @property
     def project_replicates_query(self):
         return sa.orm.object_session(self).query(MatrixResult)\
             .filter(MatrixResult.model_id == self.model_id)\
-            .filter(MatrixResult.drugset_id == self.drugset_id)\
-            .filter(MatrixResult.cmatrix == self.cmatrix) \
-            .filter(MatrixResult.project_id == self.project_id)
+            .filter(MatrixResult.project_id == self.project_id)\
+            .filter(MatrixResult.lib1_id == self.lib1_id)\
+            .filter(MatrixResult.lib2_id == self.lib2_id)
 
     @property
     def project_replicates(self):
@@ -178,8 +213,9 @@ class MatrixResult(ToDictMixin, Base):
             .join(Combination) \
             .filter(
                 sa.and_(
-                    Combination.drugset_id == al_reps.drugset_id,
-                    Combination.cmatrix == al_reps.cmatrix
+                    Combination.project_id == al_reps.project_id,
+                    Combination.lib1_id == al_reps.lib1_id,
+                    Combination.lib2_id == al_reps.lib2_id
                 ))\
             .filter(MatrixResult.model_id == self.model_id)
 
@@ -188,8 +224,9 @@ class MatrixResult(ToDictMixin, Base):
         return self.all_replicates_query.all()
 
 
-    __table_args__ = (sa.ForeignKeyConstraint(
-        [drugset_id, cmatrix], [Combination.drugset_id, Combination.cmatrix]), {}
+    __table_args__ = (
+        sa.ForeignKeyConstraint(
+            [project_id, lib1_id, lib2_id], [Combination.project_id, Combination.lib1_id, Combination.lib2_id]), {}
     )
 
 
@@ -207,15 +244,11 @@ class WellResult(ToDictMixin, Base):
     lib2_tag = sa.Column(sa.String, nullable=False)
     lib2_dose = sa.Column(sa.String, nullable=False)
     lib2_conc = sa.Column(sa.Float, nullable=False)
-    viability = sa.Column(sa.Float)
-    HSA = sa.Column(sa.Float)
-    HSA_excess = sa.Column(sa.Float)
-    Bliss_additivity = sa.Column(sa.Float)
-    Bliss_index = sa.Column(sa.Float)
-    Bliss_excess = sa.Column(sa.Float)
-    lib1_equiv_dose = sa.Column(sa.Float)
-    lib2_equiv_dose = sa.Column(sa.Float)
-    Loewe_index = sa.Column(sa.Float)
+    inhibition = sa.Column(sa.Float)
+    hsa = sa.Column(sa.Float)
+    hsa_excess = sa.Column(sa.Float)
+    bliss_additivity = sa.Column(sa.Float)
+    bliss_excess = sa.Column(sa.Float)
 
     matrix_result = relationship("MatrixResult", back_populates='well_results')
 
@@ -234,68 +267,44 @@ class SingleAgentWellResult(ToDictMixin, Base):
     drugset_id = sa.Column(sa.Integer, nullable=False)
     lib_drug = sa.Column(sa.String, nullable=False)
     position = sa.Column(sa.Integer, nullable=False)
-    dose = sa.Column(sa.String, nullable=False)
+    inhibition = sa.Column(sa.Float, nullable=False)
+    dose = sa.Column(sa.String, nullable=True)
     conc = sa.Column(sa.Float, nullable=False)
-    viability = sa.Column(sa.Float, nullable=False)
-
 
 @generic_repr
 class DoseResponseCurve(ToDictMixin, Base):
     __tablename__ = 'dose_response_curves'
     id = sa.Column(sa.Integer, primary_key=True)
     barcode = sa.Column(sa.Integer, nullable=False)
-    cmatrix = sa.Column(sa.Integer, nullable=True)
     drugset_id = sa.Column(sa.Integer, nullable=False)
-    fixed_tag = sa.Column(sa.String, nullable=True)
-    fixed_dose = sa.Column(sa.String, nullable=True)
-    dosed_tag = sa.Column(sa.String, nullable=False)
-    treatment_type = sa.Column(sa.String(1), nullable=False)
+    project_id = sa.Column(sa.Integer, sa.ForeignKey(Project.id), nullable=False, index=True)
+    drug_id_lib = sa.Column(sa.Integer, nullable=False, index=True)
+    tag = sa.Column(sa.String, nullable=False)
     maxc = sa.Column(sa.Float, nullable=False)
-    minc = sa.Column(sa.Float, nullable=False)
+    minc = sa.Column(sa.Float, nullable=True)
     rmse = sa.Column(sa.Float)
     ic50 = sa.Column(sa.Float)
     auc = sa.Column(sa.Float)
-    emax = sa.Column(sa.Float)
+    maxe = sa.Column(sa.Float)
     xmid = sa.Column(sa.Float)
     scal = sa.Column(sa.Float)
 
-    matrix_result = relationship("MatrixResult", back_populates='combination_curves')
-
-    __table_args__ = (sa.ForeignKeyConstraint(
-        [drugset_id, cmatrix, barcode],
-        [MatrixResult.drugset_id, MatrixResult.cmatrix, MatrixResult.barcode]),
-                      {}
-    )
+    @property
+    def matrix_results(self):
+        return sa.orm.object_session(self).query(MatrixResult) \
+            .filter(MatrixResult.barcode == self.barcode)\
+            .filter(sa.or_(MatrixResult.lib1_tag == self.tag,
+                           MatrixResult.lib2_tag == self.tag))\
+            .all()
 
     @property
     def well_results(self):
-        if self.treatment_type != 'S':
-            return sa.orm.object_session(self).query(WellResult)\
-                .filter(
-                    WellResult.barcode == self.barcode,
-                    WellResult.cmatrix == self.cmatrix,
-                    WellResult.barcode == self.barcode,
-                    sa.or_(
-                        sa.and_(WellResult.lib1_tag == self.fixed_tag, WellResult.lib1_dose == self.fixed_dose),
-                        sa.and_(WellResult.lib2_tag == self.fixed_tag, WellResult.lib2_dose == self.fixed_dose)
-                    )
+        return sa.orm.object_session(self).query(SingleAgentWellResult) \
+            .filter(
+                SingleAgentWellResult.drugset_id == self.drugset_id,
+                SingleAgentWellResult.lib_drug == self.tag,
+                SingleAgentWellResult.barcode == self.barcode
             ).all()
-        else:
-            return sa.orm.object_session(self).query(SingleAgentWellResult) \
-                .filter(
-                    SingleAgentWellResult.drugset_id == self.drugset_id,
-                    SingleAgentWellResult.lib_drug == self.dosed_tag,
-                    SingleAgentWellResult.barcode == self.barcode
-                ).all()
-
-    # @property
-    # def minc(self):
-    #     if self.treatment_type == 'S':
-    #         return min([w.conc for w in self.well_results])
-    #     else:
-    #         lib1_doses = {w.lib1_conc for w in self.well_results}
-    #         lib2_doses = {w.lib2_conc for w in self.well_results}
-    #         return min(lib1_doses) if len(lib1_doses) > 1 else min(lib2_doses)
 
     def x_to_conc(self, x):
         try:

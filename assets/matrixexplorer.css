@@ -1,0 +1,123 @@
+html {
+  position: relative;
+  min-height: 100%;
+}
+body {
+  margin-bottom: 10rem; /* Margin bottom by footer height */
+}
+
+.Select {
+    z-index: 1001;
+}
+.Select.is-open{
+    z-index: 1005;
+}
+
+.footer-wrapper {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 10rem; /* Set the fixed height of the footer here */
+  /*line-height: 10rem; !* Vertically center the text there *!*/
+  background-color: #17a2b8;
+}
+
+.list-group-item h5,
+.list-group-item p{
+    margin-bottom: 0;
+}
+p.list-group-item-text{
+    margin-bottom: 0;
+}
+
+.combinations-list .list-group-item{
+    padding: 0.5rem 1.25rem;
+}
+.combinations-list .list-group-item-heading{
+    font-size: 0.85rem;
+    color: #17a2b8;
+}
+.combinations-list .list-group-item-text{
+    font-size: 80%;
+    color: #212529;
+}
+
+.form-inline .form-group{
+    width: 100%
+}
+.form-inline .form-group label + div{
+    flex-grow: 1
+}
+
+a.nav-link{
+    cursor: pointer;
+}
+a.nav-link.active{
+    cursor: default;
+}
+
+.badge{
+    font-size: 100%!important;
+}
+
+.matrix-metric .card-body {
+    padding-bottom: 0 !important;
+}
+.matrix-metric .card-body p{
+    padding-bottom: 1.25em;
+}
+
+.documentation h2{
+    margin-top: 2rem !important;
+}
+.documentation h4{
+    margin-top: 1.5rem !important;
+}
+
+.navbar{
+    border-top: 5px solid #17a2b8;
+    background: #232642;
+    background: -moz-linear-gradient(left, #232642 0, #17a2b8 58%, #17a2b8 100%);
+    background: -webkit-linear-gradient(left, #232642 0,#17a2b8 58%,#17a2b8 100%);
+    background: linear-gradient(to right, #232642 0,#17a2b8 58%,#17a2b8 100%);
+}
+
+.navbar .nav a.nav-link{
+    font-size: 1rem;
+    color: white;
+}
+
+.navbar .nav a.nav-link.active{
+    text-decoration: underline;
+    font-weight: 600;
+}
+.dropdown-combinations .dropdown-menu{
+    right: 0;
+    left: auto;
+}
+
+.jumbotron{
+    background: white;
+}
+.post-lead {
+    font-size: 1rem;
+}
+
+._dash-undo-redo {
+  display: none;
+}
+
+.footer-wrapper,
+.footer-wrapper a{
+    color: white;
+}
+
+._dash-loading-callback{
+    background: rgba(255, 255, 255, 0.8) url("/assets/loading.gif") no-repeat fixed center;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 2000;
+}
