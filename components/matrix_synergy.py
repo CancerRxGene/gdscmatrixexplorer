@@ -43,8 +43,8 @@ def layout(matrix):
                 ]),
                 dbc.Row([
                     dbc.Col(width=7, children=[
-                        dcc.Graph(id='combo-heatmap'),
-                        dcc.Graph(id='combo-surface')
+                        dcc.Loading(dcc.Graph(id='combo-heatmap'), className='gdsc-spinner'),
+                        dcc.Loading(dcc.Graph(id='combo-surface'), className='gdsc-spinner')
                     ]),
                     dbc.Col(width={"size": 4, "offset": 1}, children=[
                         infoblock_matrix(matrix)

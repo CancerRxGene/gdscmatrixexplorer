@@ -61,81 +61,87 @@ def layout(combination):
                         html.Hr(),
                         dbc.Row(className="pb-4", children=[
                             dbc.Col(width=5, children=
-                                dcc.Graph(
-                                    id='combo-max-effect-boxplot',
-                                    figure=go.Figure(
-                                        data=[
-                                            generate_standard_box(
-                                                name=f"{combination.lib1.name}",
-                                                y=df_max_effects.lib1_maxe
+                                dcc.Loading(className='gdsc-spinner', children=
+                                    dcc.Graph(
+                                        id='combo-max-effect-boxplot',
+                                        figure=go.Figure(
+                                            data=[
+                                                generate_standard_box(
+                                                    name=f"{combination.lib1.name}",
+                                                    y=df_max_effects.lib1_maxe
+                                                ),
+                                                generate_standard_box(
+                                                    name=f"{combination.lib2.name}",
+                                                    y=df_max_effects.lib2_maxe
+                                                ),
+                                                generate_standard_box(
+                                                    name=f"{combination.lib1.name} + {combination.lib2.name}",
+                                                    y=df_max_effects.combo_maxe
+                                                )
+                                            ],
+                                            layout=go.Layout(
+                                                showlegend=False,
+                                                yaxis={
+                                                    'title': "MaxE",
+                                                    'range': (0, 1)
+                                                },
+                                                title="MaxE monotherapies vs combination",
                                             ),
-                                            generate_standard_box(
-                                                name=f"{combination.lib2.name}",
-                                                y=df_max_effects.lib2_maxe
-                                            ),
-                                            generate_standard_box(
-                                                name=f"{combination.lib1.name} + {combination.lib2.name}",
-                                                y=df_max_effects.combo_maxe
-                                            )
-                                        ],
-                                        layout=go.Layout(
-                                            showlegend=False,
-                                            yaxis={
-                                                'title': "MaxE",
-                                                'range': (0, 1)
-                                            },
-                                            title="MaxE monotherapies vs combination",
                                         ),
-                                    ),
-                                    config={"displayModeBar": False}
+                                        config={"displayModeBar": False}
+                                    )
                                 )
                             ),
                             dbc.Col(width=4, children=
-                                dcc.Graph(
-                                    id='combo-delta-max-effect-boxplot',
-                                    figure=go.Figure(
-                                        data=[
-                                            generate_standard_box(
-                                                name=f"Δ {combination.lib1.name}",
-                                                y=df_max_effects.delta_maxe_lib1
-                                            ),
-                                            generate_standard_box(
-                                                name=f"Δ {combination.lib2.name}",
-                                                y=df_max_effects.delta_maxe_lib2
+                                dcc.Loading(className='gdsc-spinner', children=
+                                    dcc.Graph(
+                                        id='combo-delta-max-effect-boxplot',
+                                        figure=go.Figure(
+                                            data=[
+                                                generate_standard_box(
+                                                    name=f"Δ {combination.lib1.name}",
+                                                    y=df_max_effects.delta_maxe_lib1
+                                                ),
+                                                generate_standard_box(
+                                                    name=f"Δ {combination.lib2.name}",
+                                                    y=df_max_effects.delta_maxe_lib2
+                                                )
+                                            ],
+                                            layout=go.Layout(
+                                                showlegend=False,
+                                                yaxis={
+                                                    'title': "Combination - Monotherapy",
+                                                    'range': (-1, 1)
+                                                },
+                                                title="Delta MaxE"
                                             )
-                                        ],
-                                        layout=go.Layout(
-                                            showlegend=False,
-                                            yaxis={
-                                                'title': "Combination - Monotherapy",
-                                                'range': (-1, 1)
-                                            },
-                                            title="Delta MaxE"
-                                        )
-                                    ),
-                                    config={"displayModeBar": False}
-                                )
-                            ),
+                                        ),
+                                        config={"displayModeBar": False}
+                                    )
+                                    )
+                                ),
                             dbc.Col(width=3, children=
-                                dcc.Graph(
-                                    id='combo-bliss-boxplot',
-                                    figure=go.Figure(
-                                        data=[
-                                            generate_standard_box(
-                                                name="Bliss excess",
-                                                y=df_max_effects.bliss_matrix
+                                dcc.Loading(className='gdsc-spinner', children=
+                                    dcc.Graph(
+                                        id='combo-bliss-boxplot',
+                                        figure=go.Figure(
+                                            data=[
+                                                generate_standard_box(
+                                                    name="Bliss excess",
+                                                    y=df_max_effects.bliss_matrix
+                                                )
+                                            ],
+                                            layout=go.Layout(
+                                                showlegend=False,
+                                                yaxis={
+                                                    'title': "Bliss Excess",
+                                                    'range': (-1, 1)
+                                                },
+                                                title="Bliss Excess"
                                             )
-                                        ],
-                                        layout=go.Layout(
-                                            showlegend=False,
-                                            yaxis={
-                                                'title': "Bliss Excess",
-                                                'range': (-1, 1)
-                                            },
-                                            title="Bliss Excess"
-                                        )
-                                    ),
-                                    config={"displayModeBar": False}
+                                        ),
+                                        config={"displayModeBar": False}
+                                    )
                                 )
                             )
                         ])

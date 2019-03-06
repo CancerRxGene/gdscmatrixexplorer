@@ -60,7 +60,7 @@ class DoseResponsePlot:
         if self.curve.rmse > 0.3:
             return html.Div(graph, style={'borderTop': '5px solid red'})
         else:
-            return graph
+            return dcc.Loading(className='gdsc-spinner', children=graph)
 
     def __call__(self, *args, **kwargs):
         return self.plot()

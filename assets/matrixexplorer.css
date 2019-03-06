@@ -112,12 +112,18 @@ a.nav-link.active{
     color: white;
 }
 
-._dash-loading-callback{
-    background: rgba(255, 255, 255, 0.8) url("/assets/loading.gif") no-repeat fixed center;
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    top: 0;
-    left: 0;
+.gdsc-spinner .dash-default-spinner {
+    visibility: hidden;
+    padding-bottom: 100px;
+}
+
+.gdsc-spinner .dash-default-spinner::before {
+    content: " ";
+    display: inline-block;
+    visibility: visible;
+    background: rgba(255, 255, 255, 0.8) url("/assets/loading.gif") no-repeat center;
+    background-size: cover;
+    width: 100px;
+    height: 100px;
     z-index: 2000;
 }

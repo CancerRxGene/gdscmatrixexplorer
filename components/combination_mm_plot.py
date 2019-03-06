@@ -35,17 +35,19 @@ def layout():
                   id='combo-page-color-scale-select',
                   clearable=False
                 ),
-                dcc.Graph(
-                  id='intxn-distn',
-                  config={
-                      'displayModeBar': False
-                  }
+                dcc.Loading(className='gdsc-spinner', children=
+                    dcc.Graph(
+                      id='intxn-distn',
+                      config={
+                          'displayModeBar': False
+                      }
+                    )
                 )
             ]),
-            dbc.Col(dcc.Graph(id='combo-page-mm-scatter'), width=7)
+            dbc.Col(dcc.Loading(className='gdsc-spinner', children=dcc.Graph(id='combo-page-mm-scatter')), width=7)
          ]),
         dbc.Row(
-            dbc.Col(dcc.Graph(id='combo-tissue'), width=12, className='py-5')
+            dbc.Col(dcc.Loading(className='gdsc-spinner', children=dcc.Graph(id='combo-tissue')), width=12, className='py-5')
         )
     ])
 
