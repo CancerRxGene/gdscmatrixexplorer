@@ -1,6 +1,8 @@
+import dash
 import dash_bootstrap_components as dbc
 import dash_html_components as html
 
+from app import app
 from components.project_boxplot import layout as project_boxplot
 from components.project_scatter import layout as project_scatter
 from components.breadcrumbs import breadcrumb_generator as crumbs
@@ -20,11 +22,14 @@ def layout(url):
                            html.H3(f"{project.name}"),
                            html.Hr(),
                            dbc.Tabs([
-                               dbc.Tab(project_boxplot(), label='Overview'),
-                               dbc.Tab(project_scatter(project.id),
-                                       label='FlexiScatter')
-                           ])
-                       ])
+                                   dbc.Tab(label='Overview', tab_id="tab-overview"),
+                                   dbc.Tab(label='FlexiScatter', tab_id="tab-flexiscatter")
+                               ],
+                               id="project-tabs",
+                               active_tab='tab-overview'),
+                           html.Div(id="content")
+                       ]),
+
                    ),
                     dbc.Col(width=3, children=[
                         html.Div(
@@ -55,3 +60,17 @@ def layout(url):
         ),
         html.Div(className="d-none", id='project-id', children=project.id)
     ]
+
+
+@app.callback(
+    dash.dependencies.Output("content", "children"),
+    [dash.dependencies.Input("project-tabs", "active_tab")],
+    [dash.dependencies.State("url", "pathname")])
+def switch_tab(at, url):
+    print("Switching tabs", at, url)
+    if at == "tab-overview":
+        return project_boxplot()
+    elif at == "tab-flexiscatter":
+        project = get_project_from_url(url)
+        return project_scatter(project.id)
+    return html.P("This shouldn't ever be displayed...")
