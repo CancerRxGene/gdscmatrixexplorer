@@ -134,7 +134,7 @@ def update_combo_surface(combo_heatmap_zvalue, combo_json, drug_names):
                 x=lib1_conc_table.values,
                 y=lib2_conc_table.values,
                 colorscale=synergy_colorscale,
-                reversescale=True,
+                reversescale=False,
                 cmax=zmax,
                 cmin=zmin,
                 showscale=False
