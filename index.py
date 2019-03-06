@@ -30,7 +30,6 @@ app.layout = html.Div([
         footer
 ])
 
-server = app.server
 
 @app.callback(Output('page-content', 'children'),
               [Input('url', 'pathname')])
@@ -58,4 +57,4 @@ def display_page(pathname):
 
 
 if __name__ == '__main__':
-    app.run_server(debug=True, port=8080, host='0.0.0.0')
+    app.run_server(debug=True)
