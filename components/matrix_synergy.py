@@ -152,7 +152,6 @@ def generate_combo_surface(matrix_df, metric, drug_names):
                 x=lib1_conc_table.values,
                 y=lib2_conc_table.values,
                 colorscale=synergy_colorscale,
-                reversescale=True,
                 cmax=zmax,
                 cmin=zmin,
                 showscale=False
