@@ -67,7 +67,9 @@ def get_viability_matrix_from_url(pathname):
         WellResult.lib1_conc, WellResult.lib2_conc, WellResult.inhibition
     )
     matrix_df = pd.read_sql(well_query.statement, session.bind)
+    matrix_df['viability'] = 1 - matrix_df.inhibition
     return matrix_df
+
 
 @app.callback(
     [dash.dependencies.Output('viability-heatmap', 'figure'),
@@ -77,13 +79,13 @@ def get_viability_matrix_from_url(pathname):
     [dash.dependencies.Input('viability-heatmap-zvalue', 'value')],
     [dash.dependencies.State('url', 'pathname')]
 )
-def update_viability_heatmap(viability_heatmap_zvalue, pathname):
+def update_viability_plots(viability_heatmap_zvalue, pathname):
     matrix = get_matrix_from_url(pathname)
     matrix_df = get_viability_matrix_from_url(pathname)
 
     # sort the data frame before the conc convert to scientific notation
     matrix_df = matrix_df.sort_values(['lib1_conc', 'lib2_conc'])
-    matrix_df['viability'] = 1 - matrix_df.inhibition
+
 
     heatmap = generate_viability_heatmap(matrix_df, viability_heatmap_zvalue)
     surface = generate_viability_surface(matrix_df, viability_heatmap_zvalue,
