@@ -31,6 +31,6 @@ def dynamic_download(project_slug, data_type):
     response = flask.make_response(
         flask.send_from_directory(STATIC_PATH, file_name, as_attachment=True)
     )
-    response.headers['cache-contro'] = 'no-store'
+    response.headers['cache-control'] = 'no-store'
 
     return response
