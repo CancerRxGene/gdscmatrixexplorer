@@ -153,7 +153,7 @@ def update_scatter(x_axis_field, y_axis_field, color_field, tissues, combination
     fig_data = summary
     return {
         'data': [
-            go.Scatter(
+            go.Scattergl(
                 x=fig_data[x_axis_field],
                 y=fig_data[y_axis_field],
                 mode='markers',
