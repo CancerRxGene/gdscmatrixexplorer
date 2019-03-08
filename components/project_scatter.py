@@ -94,7 +94,7 @@ def layout(project_id):
                         ]))]),
             ]),
             dbc.Row(id='correlation', className='ml-3 mt-2'),
-            dbc.Row(dcc.Graph(id='project-scatter'))
+            dbc.Row(dcc.Loading(dcc.Graph(id='project-scatter'), className='gdsc-spinner'))
         ])
     ])
 

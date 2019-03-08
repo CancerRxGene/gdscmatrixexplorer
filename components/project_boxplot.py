@@ -41,7 +41,7 @@ def layout():
         ),
         dbc.Col(
             width=12,
-            children=dcc.Graph(id='project-boxplot')
+            children=dcc.Loading(dcc.Graph(id='project-boxplot'), className='gdsc-spinner')
         )
     ])
 
