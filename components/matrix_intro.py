@@ -83,28 +83,33 @@ def layout(matrix):
             dbc.Col(width=3, children=[
                 html.Div(className='bg bg-light border pt-3 px-4 pb-3 mb-3 shadow-sm', children=[
                     html.H3("Summary"),
-                    html.Strong("Max. observed inhibition %"),
+                    html.Strong("Max. observed inhibition"),
                     html.Hr(),
                     html.Table(className='table table-borderless table-sm', children=[
                         html.Tr([
-                            html.Td(["Combination"]),
-                            html.Td([html.Strong(round(matrix.combo_maxe * 100, 1))])
+                            html.Td(["Combination"], className='w-75'),
+                            html.Td(html.Strong(round(matrix.combo_maxe, 3)), className='w-25')
                             ]),
                         html.Tr([
                             html.Td([drug1.name]),
-                            html.Td([html.Strong(round(matrix.lib1_maxe * 100, 1))])
+                            html.Td([html.Strong(round(matrix.lib1_maxe, 3))])
                         ]),
                         html.Tr([
                             html.Td([drug2.name]),
-                            html.Td([html.Strong(round(matrix.lib2_maxe * 100, 1))])
+                            html.Td([html.Strong(round(matrix.lib2_maxe, 3))])
+                        ]),
+                    ]),
+                    html.Strong("Max. observed interaction"),
+                    html.Hr(),
+                    html.Table(className='table table-borderless table-sm',
+                                   children=[
+                        html.Tr([
+                            html.Td("Max excess over HSA", className='w-75'),
+                            html.Td([html.Strong(round(max_hsa, 3))], className='w-25')
                         ]),
                         html.Tr([
-                            html.Td(["Excess over HSA"]),
-                            html.Td([html.Strong(round(max_hsa * 100, 1))])
-                        ]),
-                        html.Tr([
-                            html.Td(["Excess over Bliss"]),
-                            html.Td([html.Strong(round(max_bliss * 100, 1))])
+                            html.Td(["Max excess over Bliss"]),
+                            html.Td([html.Strong(round(max_bliss, 3))])
                         ])
                     ]),
                 ]),
