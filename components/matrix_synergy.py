@@ -81,6 +81,7 @@ def get_synergy_matrix_from_url(pathname):
     [dash.dependencies.Input('combo-heatmap-zvalue', 'value')],
     [dash.dependencies.State('url', 'pathname')]
 )
+@lru_cache(maxsize=10000)
 def update_synergy_plots(metric, pathname):
     matrix = get_matrix_from_url(pathname)
     matrix_df = get_synergy_matrix_from_url(pathname)

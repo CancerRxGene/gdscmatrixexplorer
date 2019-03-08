@@ -62,6 +62,7 @@ def layout():
      dash.dependencies.Output('combo-tissue', 'figure')],
     [dash.dependencies.Input('combo-page-color-scale-select', 'value')],
     [dash.dependencies.State('url', 'pathname')])
+@lru_cache(maxsize=1000)
 def update_plots(colorscale_select, pathname):
     if not url_is_combination_page(pathname):
         return None

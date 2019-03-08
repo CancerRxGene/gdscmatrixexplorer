@@ -79,6 +79,7 @@ def get_viability_matrix_from_url(pathname):
     [dash.dependencies.Input('viability-heatmap-zvalue', 'value')],
     [dash.dependencies.State('url', 'pathname')]
 )
+@lru_cache(maxsize=10000)
 def update_viability_plots(viability_heatmap_zvalue, pathname):
     matrix = get_matrix_from_url(pathname)
     matrix_df = get_viability_matrix_from_url(pathname)

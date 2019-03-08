@@ -83,6 +83,7 @@ def get_boxplot_summary_data(boxplot_value, project_id, tissue):
      dash.dependencies.Input('project-id', 'children'),
      dash.dependencies.Input('tissue', 'value')]
 )
+@lru_cache()
 def update_boxplot(boxplot_value, project_id, tissue):
 
     summary = get_boxplot_summary_data(boxplot_value, project_id, tissue)

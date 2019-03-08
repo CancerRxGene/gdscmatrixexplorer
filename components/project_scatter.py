@@ -1,3 +1,5 @@
+from functools import lru_cache
+
 import dash
 import dash_core_components as dcc
 import dash_bootstrap_components as dbc
@@ -99,13 +101,15 @@ def layout(project_id):
     ])
 
 @app.callback(
-    dash.dependencies.Output('project-scatter', 'figure'),
+    [dash.dependencies.Output('project-scatter', 'figure'),
+     dash.dependencies.Output('correlation', 'children')],
     [dash.dependencies.Input('x-axis-select', 'value'),
      dash.dependencies.Input('y-axis-select', 'value'),
      dash.dependencies.Input('color-select', 'value'),
      dash.dependencies.Input('tissue-select', 'value'),
      dash.dependencies.Input('combination-select', 'value'),
      dash.dependencies.Input('project-id', 'children')])
+@lru_cache(maxsize=1000)
 def update_scatter(x_axis_field, y_axis_field, color_field, tissues, combinations, project_id):
     all_matrices_query = session.query(MatrixResult.project_id,
         getattr(MatrixResult, x_axis_field),
@@ -144,7 +148,19 @@ def update_scatter(x_axis_field, y_axis_field, color_field, tissues, combination
                suffixes=['_lib1', '_lib2'])
     summary['combo_id'] = summary.project_id.astype(str) + "::" + summary.lib1_id.astype(str) + "::" + summary.lib2_id.astype(str)
 
+    return (get_scatter(summary, x_axis_field, y_axis_field, color_field),
+            get_correlation(summary, x_axis_field, y_axis_field))
 
+
+def get_correlation(summary, x_axis_field, y_axis_field):
+
+    corr = pearsonr(
+        summary[x_axis_field],
+        summary[y_axis_field])
+    return html.Div([html.Span("Pearson correlation: "), html.Strong(f"{round(corr[0], 3)}")])
+
+
+def get_scatter(summary, x_axis_field, y_axis_field, color_field):
     color_values = {}
     if color_field != 'default':
         for i, v in enumerate(summary[color_field].unique()):
@@ -180,26 +196,6 @@ def update_scatter(x_axis_field, y_axis_field, color_field, tissues, combination
                    'title': matrix_metrics[y_axis_field]['label']}
         )
     }
-
-
-@app.callback(
-    dash.dependencies.Output('correlation', 'children'),
-    [dash.dependencies.Input('x-axis-select', 'value'),
-     dash.dependencies.Input('y-axis-select', 'value'),
-     dash.dependencies.Input('project-id', 'children')])
-def update_correlation(x_axis_field, y_axis_field, project_id):
-    all_matrices_query = session.query(MatrixResult) \
-        .filter_by(project_id=int(project_id))
-
-    summary = pd.read_sql(all_matrices_query.statement,
-                          all_matrices_query.session.bind)
-    corr = pearsonr(
-        np.log(summary[x_axis_field]) if 'index' in x_axis_field else summary[
-            x_axis_field],
-        np.log(summary[y_axis_field]) if 'index' in y_axis_field else summary[
-            y_axis_field])
-    return html.Div([html.Span("Pearson correlation: "), html.Strong(f"{round(corr[0], 3)}")])
-
 
 @app.callback(
     dash.dependencies.Output('project-scatter-url', 'pathname'),
