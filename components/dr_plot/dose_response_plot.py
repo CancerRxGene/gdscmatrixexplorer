@@ -163,7 +163,7 @@ class DoseResponsePlot:
         shapes.extend([self.maxe_line] if self.mark_maxe else [])
         shapes.extend([self.ic50_line] if self.mark_ic50 else [])
         shapes.extend([self.screening_range] if self.display_screening_range else [])
-        shapes.extend([self.day1_line] if self.mark_day1 else [])
+        shapes.extend([self.day1_line] if self.mark_day1 and self.curve.matrix_results[0].day1_viability_mean is not None else [])
         return shapes
 
 
@@ -234,7 +234,7 @@ class DoseResponsePlot:
         annotations.extend([self.ic50_label] if self.label_ic50 else [])
         annotations.extend([self.maxe_label] if self.label_maxe else [])
         annotations.extend([self.rmse_label] if self.label_rmse else [])
-        annotations.extend([self.day1_label] if self.label_day1 else [])
+        annotations.extend([self.day1_label] if (self.label_day1 and self.curve.matrix_results[0].day1_viability_mean is not None) else [])
         return annotations
 
     @property
