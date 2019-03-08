@@ -46,7 +46,7 @@ def layout(matrix):
                                     html.Td([
                                         html.Strong("Tissue "), model.tissue, html.Br(),
                                         html.Strong("Cancer Type "), model.cancer_type, html.Br(),
-                                        html.Strong("Estimated doubling time "), f"{round(matrix.doubling_time, 1)} hours", html.Br(),
+                                        html.Strong("Estimated doubling time "), f"{round(matrix.doubling_time, 1)} hours" if matrix.doubling_time is not None else None,
                                         html.Br(),
                                         html.Em("Loading more information from Cell Model Passports...")],
                                         className="pl-0")
@@ -212,7 +212,7 @@ def model_information(model_id, passport_data, gr_data, current_model_informatio
                  html.Strong("Cancer Type "), model.cancer_type, html.Br()] +
                  model_attribute_section(cmp_data['model_information'], 'Sample Site', 'sample_site', from_sample=True) +
                  model_attribute_section(cmp_data['model_information'], 'Sample Tissue Status', 'tissue_status', from_sample=True) +
-                [html.Strong("Estimated doubling time "), round(gr_data['doubling_time'], 1), 'hours (on this plate)', html.Br()],
+                [html.Strong("Estimated doubling time "), round(gr_data['doubling_time'], 1), 'hours (on this plate)' if gr_data['doubling_time'] else None],
                  className="pl-0", style={"width": "50%"}),
             html.Td(
                 driver_genes_block +

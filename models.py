@@ -170,7 +170,7 @@ class MatrixResult(ToDictMixin, Base):
 
     project = relationship("Project", back_populates='matrices')
 
-    well_results = relationship("WellResult")
+    well_results = relationship("WellResult", lazy='dynamic')
     model = relationship("Model")
 
     @property

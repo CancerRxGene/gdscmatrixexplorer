@@ -374,3 +374,5 @@ def add_label_vars(plot_data):
         .merge(all_models, left_on='model_id', right_on='id')
 
     return plot_data
+
+float_formatter = lambda x: f"{x:.3e}"
