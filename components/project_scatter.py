@@ -4,10 +4,8 @@ import dash
 import dash_core_components as dcc
 import dash_bootstrap_components as dbc
 import dash_html_components as html
-import numpy as np
 import pandas as pd
 import plotly.graph_objs as go
-from scipy.stats import pearsonr
 import sqlalchemy as sa
 from sqlalchemy import and_, or_
 
@@ -154,10 +152,8 @@ def update_scatter(x_axis_field, y_axis_field, color_field, tissues, combination
 
 def get_correlation(summary, x_axis_field, y_axis_field):
 
-    corr = pearsonr(
-        summary[x_axis_field],
-        summary[y_axis_field])
-    return html.Div([html.Span("Pearson correlation: "), html.Strong(f"{round(corr[0], 3)}")])
+    corr = summary[[x_axis_field, y_axis_field]].corr().iloc[0,1]
+    return html.Div([html.Span("Pearson correlation: "), html.Strong(f"{round(corr, 3)}")])
 
 
 def get_scatter(summary, x_axis_field, y_axis_field, color_field):
