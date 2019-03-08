@@ -24,6 +24,6 @@ def layout(url):
                 (f"{c.lib1.name} + {c.lib2.name}", f"/project/{p.slug}/combination/{c.lib1_id}+{c.lib2_id}"),
                 (f"{my_matrix.model.cell_line_name}",)]),
         intro(my_matrix),
-        viability(my_matrix),
+        viability(),
         synergy(my_matrix),
     ])

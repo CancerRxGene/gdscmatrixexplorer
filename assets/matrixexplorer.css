@@ -91,6 +91,10 @@ a.nav-link.active{
     text-decoration: underline;
     font-weight: 600;
 }
+
+.dropdown-menu{
+    z-index: 1004;
+}
 .dropdown-combinations .dropdown-menu{
     right: 0;
     left: auto;
