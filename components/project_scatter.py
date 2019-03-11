@@ -107,8 +107,17 @@ def layout(project_id):
      dash.dependencies.Input('tissue-select', 'value'),
      dash.dependencies.Input('combination-select', 'value'),
      dash.dependencies.Input('project-id', 'children')])
-@lru_cache(maxsize=1000)
 def update_scatter(x_axis_field, y_axis_field, color_field, tissues, combinations, project_id):
+    if isinstance(combinations, list):
+        combinations = tuple(combinations)
+    if isinstance(tissues, list):
+        tissues = tuple(tissues)
+
+    return cached_update_scatter(x_axis_field, y_axis_field, color_field, tissues, combinations, project_id)
+
+
+@lru_cache(maxsize=1000)
+def cached_update_scatter(x_axis_field, y_axis_field, color_field, tissues, combinations, project_id):
     all_matrices_query = session.query(MatrixResult.project_id,
         getattr(MatrixResult, x_axis_field),
         getattr(MatrixResult, y_axis_field),
