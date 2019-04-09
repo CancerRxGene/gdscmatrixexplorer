@@ -8,7 +8,7 @@ footer = dbc.Container(fluid=True, className='mt-5 pt-3 footer-wrapper', childre
                         html.Div([
                             html.H4("GDSC² Matrix Explorer"),
                             html.Ul(className='list-unstyled', children=[
-                                html.Li(html.Span("Interface version: 1.0.0")),
+                                html.Li(html.Span("Interface version: 1.0.1")),
                                 html.Li(html.Span("Data version: 2019.02.0")),
                                 html.Li(html.A("Code on GitHub", href='https://github.com/CancerRxGene/gdscmatrixexplorer'), className='mt-3')
 
