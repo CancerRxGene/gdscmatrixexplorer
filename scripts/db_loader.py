@@ -101,7 +101,7 @@ def extract_models(combo_matrix_stats):
 def get_new(model, df):
     db_models = pd.read_sql(session.query(model).statement, session.bind)
     if not db_models.empty:
-        db_models = db_models[df.columns]
+        db_models = db_models[df.columns].copy()
 
     # Make sure the column types match
     for col in db_models.columns:
@@ -165,27 +165,38 @@ def get_sidm(identifier: int, identifier_type:str, retries: int = 3):
 
 def models_to_db(models):
     models = models.where((pd.notnull(models)), None)
-    to_db(Model, models, append=True)
+    upsert(Model, models)
 
 
-def to_db(model, df, append=False):
-    print(f"Uploading {model.__tablename__}")
-
-    df.columns = [c.lower() for c in df.columns]
-
-    df = get_new(model, df) if append else df
-    engine.execute(
-        model.__table__.insert(),
-        df.drop_duplicates().to_dict('records')
-    )
+def upsert(model, df):
+    assert 'id' in df.columns, "Upsert requires an 'id'-column in df"
+    print(f"Updating {model.__tablename__}")
+    for row in df.itertuples():
+        in_db = session.query(model).get(row.id)
+        if not in_db:
+            in_db = model()
+            in_db.id = row.id
+            session.add(in_db)
+        for column in Drug.__table__.columns:
+            try:
+                setattr(in_db, column.key, getattr(row, column.key))
+            except AttributeError:
+                continue
     session.commit()
-    return
+
+
+def upsert_new(model, df):
+    assert 'id' in df.columns, "Upsert requires an 'id'-column in df"
+    print(f"Updating {model.__tablename__}")
+    for row in df.itertuples():
+        in_db = model(**row._asdict())
+        session.merge(in_db)
 
 
 def add_new_drugs(combo_matrix_stats):
     drugs = extract_drugs(combo_matrix_stats)
     new_drugs = get_new(Drug, drugs)
-    drugs_to_db(new_drugs)
+    upsert(Drug, new_drugs)
 
 
 def extract_drugs(combo_matrix_stats):
@@ -202,17 +213,28 @@ def get_drug_details(cms, lib):
         .rename(columns={"drug_id": "id"})
 
 
-def drugs_to_db(drugs):
-    to_db(Drug, drugs, append=True)
-
-
 def extract_drug_matrices(combo_matrix_stats):
     drug_matrix = combo_matrix_stats[["lib1", "lib1_ID", "lib2", "lib2_ID", "matrix_size"]]
     drug_matrix.columns = ["lib1_tag", "lib1_id", "lib2_tag", "lib2_id", "matrix_size"]
     return drug_matrix.drop_duplicates()
 
+
 def drug_matrices_to_db(drug_matrices):
     to_db(Combination, drug_matrices)
+
+
+def to_db(model, df, append=False):
+    print(f"Uploading {model.__tablename__}")
+
+    df.columns = [c.lower() for c in df.columns]
+
+    df = get_new(model, df) if append else df
+    engine.execute(
+        model.__table__.insert(),
+        df.drop_duplicates().to_dict('records')
+    )
+    session.commit()
+    return
 
 def extract_matrix_results(combo_matrix_stats, id_mapper):
     hsa_cols = [c for c in combo_matrix_stats.columns if c.startswith("HSA")]
