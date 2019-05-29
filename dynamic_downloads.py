@@ -54,7 +54,7 @@ def generate_matrix_results(project_slug):
                                     MatrixResult.lib1_tag == DoseResponseCurve.tag,
                                     MatrixResult.drugset_id == DoseResponseCurve.drugset_id))\
       .join(curve_alias, and_(MatrixResult.barcode == curve_alias.barcode,
-                              MatrixResult.lib1_tag == curve_alias.tag,
+                              MatrixResult.lib2_tag == curve_alias.tag,
                               MatrixResult.drugset_id == curve_alias.drugset_id))\
         .filter(Project.slug == project_slug)\
         .with_entities(MatrixResult.barcode, MatrixResult.drugset_id,
