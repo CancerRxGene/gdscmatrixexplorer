@@ -2,7 +2,7 @@ version: "3"
 services:
   web:
     # replace username/repo:tag with your name and image details
-    image: registry.production.team215.sanger.ac.uk/matrixexplorer:v1.0.0-beta1
+    image: registry.team215.sanger.ac.uk/matrixexplorer:v1.0.0
     env_file:
       - matrix_env.env
     deploy:
@@ -10,7 +10,7 @@ services:
       # labels are needed for traefik
       labels:
         # Traefik will redirect requests to this service
-        - "traefik.api.frontend.rule=Host:matrixexplorer.staging.team215.sanger.ac.uk"
+        - "traefik.api.frontend.rule=Host:matrixexplorer.staging.team215.sanger.ac.uk,matrixexplorer.eta-staging.team215.sanger.ac.uk"
         - "traefik.api.port=8080"
         - "traefik.docker.network=traefik_net"
         - "traefik.frontend.entryPoints=http"

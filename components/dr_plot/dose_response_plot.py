@@ -60,7 +60,7 @@ class DoseResponsePlot:
         if self.curve.rmse > 0.3:
             return html.Div(graph, style={'borderTop': '5px solid red'})
         else:
-            return graph
+            return dcc.Loading(className='gdsc-spinner', children=graph)
 
     def __call__(self, *args, **kwargs):
         return self.plot()
@@ -93,7 +93,7 @@ class DoseResponsePlot:
                 15)
         })
         auc_data['conc_fit'] = self.curve.x_to_conc(auc_data.xfit)
-        auc_data['nlme_model'] = self.curve.nlme_model(auc_data.xfit)
+        auc_data['nlme_model'] = 1 - self.curve.nlme_model(auc_data.xfit)
 
         return go.Scatter(
             x=auc_data.conc_fit,
@@ -110,7 +110,7 @@ class DoseResponsePlot:
     def fitted_curve(self):
         return go.Scatter(
             x=self.plot_data.conc_fit,
-            y=self.plot_data.nlme_model,
+            y=1 - self.plot_data.nlme_model,
             mode='lines',
             name="Fitted Curve",
             line=dict(shape='spline', color=C.DEEPDARKBLUE),
@@ -130,7 +130,7 @@ class DoseResponsePlot:
             x = (0,)
         return go.Scatter(
             x=x / 1000000,
-            y=self.datapoints.viability,
+            y=1 - self.datapoints.viability,
             mode='markers',
             name="measurement",
             marker=dict(
@@ -150,7 +150,7 @@ class DoseResponsePlot:
                 xaxis={'type': 'log', 'title': 'Concentration (M)',
                        'range': np.log10([self.curve.x_to_conc(-10),
                                           self.curve.x_to_conc(20)])},
-                yaxis={'title': 'Viability'},
+                yaxis={'title': 'Inhibition'},
                 shapes=self.shapes,
                 margin=go.layout.Margin(l=50, r=20, b=80, t=0, pad=10),
                 showlegend=False,
@@ -163,7 +163,7 @@ class DoseResponsePlot:
         shapes.extend([self.maxe_line] if self.mark_maxe else [])
         shapes.extend([self.ic50_line] if self.mark_ic50 else [])
         shapes.extend([self.screening_range] if self.display_screening_range else [])
-        shapes.extend([self.day1_line] if self.mark_day1 else [])
+        shapes.extend([self.day1_line] if self.mark_day1 and self.curve.matrix_results[0].day1_viability_mean is not None else [])
         return shapes
 
 
@@ -187,9 +187,9 @@ class DoseResponsePlot:
         return {
             'type': 'line',
             'x0': self.curve.x_to_conc(-10),
-            'y0': 1 - self.curve.maxe,
+            'y0': self.curve.maxe,
             'x1': self.curve.maxc / 1000000,
-            'y1': 1 - self.curve.maxe,
+            'y1': self.curve.maxe,
             'line': {
                 'color': C.PINKPURPLE,
                 'width': 2,
@@ -218,9 +218,9 @@ class DoseResponsePlot:
             'type': 'line',
             'xref': 'paper',
             'x0': 0,
-            'y0': self.curve.matrix_results[0].day1_viability_mean,
+            'y0': 1 - self.curve.matrix_results[0].day1_viability_mean,
             'x1': 1,
-            'y1': self.curve.matrix_results[0].day1_viability_mean,
+            'y1': 1 - self.curve.matrix_results[0].day1_viability_mean,
             'line': {
                 'color': C.DARKPINK,
                 'width': 1,
@@ -234,21 +234,21 @@ class DoseResponsePlot:
         annotations.extend([self.ic50_label] if self.label_ic50 else [])
         annotations.extend([self.maxe_label] if self.label_maxe else [])
         annotations.extend([self.rmse_label] if self.label_rmse else [])
-        annotations.extend([self.day1_label] if self.label_day1 else [])
+        annotations.extend([self.day1_label] if (self.label_day1 and self.curve.matrix_results[0].day1_viability_mean is not None) else [])
         return annotations
 
     @property
     def maxe_label(self):
         return dict(
             x=np.log10(self.curve.maxc / 1000000),
-            y=1 - self.curve.maxe,
+            y=self.curve.maxe,
             xref='x',
             yref='y',
-            text=f'<b>MaxE</b> {round(1 - self.curve.maxe, 3)}',
+            text=f'<b>MaxE</b> {round(self.curve.maxe, 3)}',
             showarrow=True,
             arrowhead=6,
-            ax=30,
-            ay=30,
+            ax=20,
+            ay=20,
             xanchor="left",
             bgcolor=C.DARKGREY_ULTRALIGHT,
             bordercolor=C.PINKPURPLE_TRANS,
@@ -282,7 +282,7 @@ class DoseResponsePlot:
             y=0.15,
             xref='x',
             yref='y',
-            text=f'<b>AUC</b> {round(self.curve.auc, 3)}',
+            text=f'<b>1 - AUC</b> {round(self.curve.auc, 3)}',
             showarrow=True,
             arrowhead=0,
             ax=-20,
@@ -296,13 +296,13 @@ class DoseResponsePlot:
     @property
     def rmse_label(self):
         return dict(
-            x=1,
+            x=0,
             y=0.95,
             xref='paper',
             yref='paper',
             text=f'<b>RMSE</b> {round(self.curve.rmse, 3)}',
             showarrow=False,
-            xanchor="right",
+            xanchor="left",
             yanchor="top",
             bgcolor=C.DARKGREY_ULTRALIGHT if self.curve.rmse < 0.3 else C.RED,
             bordercolor=C.DARKGREY_LIGHT,
@@ -314,10 +314,10 @@ class DoseResponsePlot:
     def day1_label(self):
         return dict(
             x=1,
-            y=self.curve.matrix_results[0].day1_viability_mean,
+            y=1 - self.curve.matrix_results[0].day1_viability_mean,
             xref='paper',
             yref='y',
-            text=f'<b>Day 1 </b> {round(self.curve.matrix_results[0].day1_viability_mean, 3)}',
+            text=f'<b>Day 1 </b> {round(1 - self.curve.matrix_results[0].day1_viability_mean, 3)}',
             showarrow=False,
             xanchor="right",
             yanchor="top",

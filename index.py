@@ -30,6 +30,7 @@ app.layout = html.Div([
         footer
 ])
 
+server = app.server
 
 @app.callback(Output('page-content', 'children'),
               [Input('url', 'pathname')])

@@ -46,7 +46,7 @@ def layout(matrix):
                                     html.Td([
                                         html.Strong("Tissue "), model.tissue, html.Br(),
                                         html.Strong("Cancer Type "), model.cancer_type, html.Br(),
-                                        html.Strong("Estimated doubling time "), f"{round(matrix.doubling_time, 1)} hours", html.Br(),
+                                        html.Strong("Estimated doubling time "), f"{round(matrix.doubling_time, 1)} hours" if matrix.doubling_time is not None else None,
                                         html.Br(),
                                         html.Em("Loading more information from Cell Model Passports...")],
                                         className="pl-0")
@@ -83,28 +83,33 @@ def layout(matrix):
             dbc.Col(width=3, children=[
                 html.Div(className='bg bg-light border pt-3 px-4 pb-3 mb-3 shadow-sm', children=[
                     html.H3("Summary"),
-                    html.Strong("Max. observed inhibition %"),
+                    html.Strong("Max. observed inhibition"),
                     html.Hr(),
                     html.Table(className='table table-borderless table-sm', children=[
                         html.Tr([
-                            html.Td(["Combination"]),
-                            html.Td([html.Strong(round(matrix.combo_maxe * 100, 1))])
+                            html.Td(["Combination"], className='w-75'),
+                            html.Td(html.Strong(round(matrix.combo_maxe, 3)), className='w-25')
                             ]),
                         html.Tr([
                             html.Td([drug1.name]),
-                            html.Td([html.Strong(round(matrix.lib1_maxe * 100, 1))])
+                            html.Td([html.Strong(round(matrix.lib1_maxe, 3))])
                         ]),
                         html.Tr([
                             html.Td([drug2.name]),
-                            html.Td([html.Strong(round(matrix.lib2_maxe * 100, 1))])
+                            html.Td([html.Strong(round(matrix.lib2_maxe, 3))])
+                        ]),
+                    ]),
+                    html.Strong("Max. observed interaction"),
+                    html.Hr(),
+                    html.Table(className='table table-borderless table-sm',
+                                   children=[
+                        html.Tr([
+                            html.Td("Max excess over HSA", className='w-75'),
+                            html.Td([html.Strong(round(max_hsa, 3))], className='w-25')
                         ]),
                         html.Tr([
-                            html.Td(["Excess over HSA"]),
-                            html.Td([html.Strong(round(max_hsa * 100, 1))])
-                        ]),
-                        html.Tr([
-                            html.Td(["Excess over Bliss"]),
-                            html.Td([html.Strong(round(max_bliss * 100, 1))])
+                            html.Td(["Max excess over Bliss"]),
+                            html.Td([html.Strong(round(max_bliss, 3))])
                         ])
                     ]),
                 ]),
@@ -212,7 +217,7 @@ def model_information(model_id, passport_data, gr_data, current_model_informatio
                  html.Strong("Cancer Type "), model.cancer_type, html.Br()] +
                  model_attribute_section(cmp_data['model_information'], 'Sample Site', 'sample_site', from_sample=True) +
                  model_attribute_section(cmp_data['model_information'], 'Sample Tissue Status', 'tissue_status', from_sample=True) +
-                [html.Strong("Estimated doubling time "), round(gr_data['doubling_time'], 1), 'hours (on this plate)', html.Br()],
+                [html.Strong("Estimated doubling time "), round(gr_data['doubling_time'], 1), 'hours (on this plate)' if gr_data['doubling_time'] else None],
                  className="pl-0", style={"width": "50%"}),
             html.Td(
                 driver_genes_block +

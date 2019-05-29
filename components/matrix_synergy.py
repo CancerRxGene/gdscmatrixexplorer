@@ -1,3 +1,5 @@
+from functools import lru_cache
+
 import dash
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
@@ -9,7 +11,11 @@ import plotly.graph_objs as go
 from components.synergy_info.syn_info import infoblock_matrix
 
 from app import app
-from utils import get_metric_axis_range, well_metrics, synergy_colorscale
+from db import session
+from models import WellResult
+from utils import get_metric_axis_range, well_metrics, synergy_colorscale, \
+    get_matrix_from_url, float_formatter
+
 
 def layout(matrix):
 
@@ -43,8 +49,8 @@ def layout(matrix):
                 ]),
                 dbc.Row([
                     dbc.Col(width=7, children=[
-                        dcc.Graph(id='combo-heatmap'),
-                        dcc.Graph(id='combo-surface')
+                        dcc.Loading(dcc.Graph(id='combo-heatmap'), className='gdsc-spinner'),
+                        dcc.Loading(dcc.Graph(id='combo-surface'), className='gdsc-spinner')
                     ]),
                     dbc.Col(width={"size": 4, "offset": 1}, children=[
                         infoblock_matrix(matrix)
@@ -59,32 +65,54 @@ def layout(matrix):
     )
 
 
+@lru_cache()
+def get_synergy_matrix_from_url(pathname):
+    matrix = get_matrix_from_url(pathname)
+
+    well_query = matrix.well_results
+    matrix_df = pd.read_sql(well_query.statement, session.bind)
+    matrix_df['viability'] = 1 - matrix_df.inhibition
+    return matrix_df
+
+
 @app.callback(
-    dash.dependencies.Output('combo-heatmap', 'figure'),
-    [dash.dependencies.Input('combo-heatmap-zvalue', 'value'),
-     dash.dependencies.Input('combo-values', 'children'),
-     dash.dependencies.Input('drug_names', 'children')]
+    [dash.dependencies.Output('combo-heatmap', 'figure'),
+     dash.dependencies.Output('combo-surface', 'figure')],
+    [dash.dependencies.Input('combo-heatmap-zvalue', 'value')],
+    [dash.dependencies.State('url', 'pathname')]
 )
-def update_combo_heatmap(combo_heatmap_zvalue, combo_json, drug_names):
-    matrix_df = pd.read_json(combo_json, orient='split')
-    drug1, drug2 = drug_names.split(':_:')
+@lru_cache(maxsize=10000)
+def update_synergy_plots(metric, pathname):
+    matrix = get_matrix_from_url(pathname)
+    matrix_df = get_synergy_matrix_from_url(pathname)
 
     # sort the data frame before the conc convert to scientific notation
     matrix_df = matrix_df.sort_values(['lib1_conc', 'lib2_conc'])
 
-    matrix_df['lib1_conc'] = matrix_df['lib1_conc'].astype('category')
-    matrix_df['lib2_conc'] = matrix_df['lib2_conc'].astype('category')
-    matrix_df['lib1_conc'] = [np.format_float_scientific(conc, 3) for conc in matrix_df['lib1_conc']]
-    matrix_df['lib2_conc'] = [np.format_float_scientific(conc, 3) for conc in matrix_df['lib2_conc']]
+    combo_heatmap = generate_combo_heatmap(
+        matrix_df, metric, [matrix.combination.lib1.name, matrix.combination.lib2.name]
+    )
+    combo_surface = generate_combo_surface(
+        matrix_df, metric, [matrix.combination.lib1.name, matrix.combination.lib2.name]
+    )
 
-    zvalue = matrix_df[combo_heatmap_zvalue]
-    zmin, zmax = get_metric_axis_range(combo_heatmap_zvalue)
+    return combo_heatmap, combo_surface
+
+
+def generate_combo_heatmap(matrix_df, metric, drug_names):
+
+    # sort the data frame before the conc convert to scientific notation
+    x = matrix_df['lib1_conc'].astype('category').map(float_formatter)
+    y = matrix_df['lib2_conc'].astype('category').map(float_formatter)
+
+    zvalue = matrix_df[metric]
+    zmin, zmax = get_metric_axis_range(metric)
 
     return {
         'data': [
             go.Heatmap(
-                x=matrix_df.lib1_conc,
-                y=matrix_df.lib2_conc,
+                x=x,
+                y=y,
                 z=zvalue,
                 zmax=zmax,
                 zmin=zmin,
@@ -92,40 +120,31 @@ def update_combo_heatmap(combo_heatmap_zvalue, combo_json, drug_names):
                 reversescale=False
             )
         ],
-        'layout': go.Layout(title=well_metrics[combo_heatmap_zvalue]['label'],
+        'layout': go.Layout(title=well_metrics[metric]['label'],
                             xaxis={'type': 'category',
-                                   'title': drug1 + " µM"
+                                   'title': drug_names[0] + " µM"
                                    },
                             yaxis={'type': 'category',
-                                   'title': drug2 + " µM"
+                                   'title': drug_names[1] + " µM"
                                    },
                             margin={'l': 100}
                             )
     }
 
 
-@app.callback(
-    dash.dependencies.Output('combo-surface', 'figure'),
-    [dash.dependencies.Input('combo-heatmap-zvalue', 'value'),
-     dash.dependencies.Input('combo-values', 'children'),
-     dash.dependencies.Input('drug_names', 'children')]
-)
-def update_combo_surface(combo_heatmap_zvalue, combo_json, drug_names):
-    matrix_df = pd.read_json(combo_json, orient='split')
-
-    drug1, drug2 = drug_names.split(':_:')
+def generate_combo_surface(matrix_df, metric, drug_names):
 
     xaxis_labels = [f"{conc:.2e}" for conc in matrix_df.lib1_conc]
     yaxis_labels = [f"{conc:.2e}" for conc in matrix_df.lib2_conc]
 
     # change lib2_conc ascending to 1
-    zvalues_table = matrix_df.pivot(index='lib2_conc', columns='lib1_conc', values=combo_heatmap_zvalue)
-    zvalues_table = zvalues_table.sort_values(by=['lib2_conc'], ascending=1)
-    lib1_conc_table = matrix_df.pivot(index='lib2_conc', columns='lib1_conc', values='lib1_conc')
-    lib1_conc_table = lib1_conc_table.sort_values(by=['lib2_conc'], ascending=1)
-    lib2_conc_table = matrix_df.pivot(index='lib2_conc', columns='lib1_conc', values='lib2_conc')
-    lib2_conc_table = lib2_conc_table.sort_values(by=['lib2_conc'], ascending=1)
-    zmin, zmax = get_metric_axis_range(combo_heatmap_zvalue)
+    zvalues_table = matrix_df.pivot(index='lib2_conc', columns='lib1_conc', values=metric)\
+        .sort_values(by=['lib2_conc'], ascending=True)
+    lib1_conc_table = matrix_df.pivot(index='lib2_conc', columns='lib1_conc', values='lib1_conc')\
+        .sort_values(by=['lib2_conc'], ascending=True)
+    lib2_conc_table = matrix_df.pivot(index='lib2_conc', columns='lib1_conc', values='lib2_conc')\
+        .sort_values(by=['lib2_conc'], ascending=True)
+    zmin, zmax = get_metric_axis_range(metric)
 
     return {
         'data': [
@@ -134,7 +153,6 @@ def update_combo_surface(combo_heatmap_zvalue, combo_json, drug_names):
                 x=lib1_conc_table.values,
                 y=lib2_conc_table.values,
                 colorscale=synergy_colorscale,
-                reversescale=True,
                 cmax=zmax,
                 cmin=zmin,
                 showscale=False
@@ -151,7 +169,7 @@ def update_combo_surface(combo_heatmap_zvalue, combo_json, drug_names):
             scene={
                 'xaxis': {
                     'type': 'category',
-                    'title': drug1 + ' µM',
+                    'title': drug_names[0] + ' µM',
                     'ticktext': xaxis_labels,
                     'tickvals': matrix_df.lib1_conc,
                     'titlefont': {
@@ -163,7 +181,7 @@ def update_combo_surface(combo_heatmap_zvalue, combo_json, drug_names):
                 },
                 'yaxis': {
                     'type': 'category',
-                    'title': drug2 + ' µM',
+                    'title': drug_names[1] + ' µM',
                     'ticktext': yaxis_labels,
                     'tickvals': matrix_df.lib2_conc,
                     'titlefont': {
@@ -175,7 +193,7 @@ def update_combo_surface(combo_heatmap_zvalue, combo_json, drug_names):
                 },
                 'zaxis': {
                     'range': (zmin, zmax),
-                    'title': combo_heatmap_zvalue,
+                    'title': metric,
                     'titlefont': {
                         'size': 12
                     },

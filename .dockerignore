@@ -1,1 +1,3 @@
 downloads/*_results.csv.gz
+*.env
+__pycache__/
