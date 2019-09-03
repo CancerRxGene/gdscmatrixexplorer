@@ -7,7 +7,7 @@ from models import Project
 
 
 def layout(*args, **kwargs):
-    projects = session.query(Project).all()
+    projects = session.query(Project).order_by(Project.name).all()
 
     return html.Div([
         dbc.Jumbotron(html.Img(src="assets/logo_2tone.svg"), className="d-flex justify-content-center"),
