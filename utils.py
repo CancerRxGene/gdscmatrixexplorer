@@ -334,9 +334,13 @@ def get_combination_matrices_summary(project_id, lib1_id, lib2_id, percentiles):
     return pd.read_sql(query.statement, session.get_bind())\
         .describe(percentiles=percentiles)
 
+
 def get_all_tissues():
-    tissues = [s[0] for s in session.query(models.Model.tissue).distinct().all()]
-    return tissues
+    return [s[0] for s in session.query(models.Model.tissue).distinct().order_by(models.Model.tissue).all()]
+
+
+def get_all_cancer_types():
+    return [s[0] for s in session.query(models.Model.cancer_type).distinct().order_by(models.Model.cancer_type).all()]
 
 
 

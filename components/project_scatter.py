@@ -12,7 +12,7 @@ from sqlalchemy import and_, or_
 from app import app
 from db import session
 from models import MatrixResult, Project, Combination, Model
-from utils import plot_colors,  matrix_metrics, get_all_tissues, matrix_hover_label
+from utils import plot_colors,  matrix_metrics, get_all_tissues, get_all_cancer_types, matrix_hover_label
 
 
 def layout(project_id):
@@ -24,38 +24,31 @@ def layout(project_id):
 
     return dbc.Row([
         dcc.Location('project-scatter-url'),
-        dbc.Col(width=12,children=[
+        dbc.Col(width=12, children=[
             dbc.Row([
                 dbc.Col(
-                    width=4,
+                    width=5,
                     className='mt-2 mb-4',
                     children=[
-                        dbc.Form(inline=True, children=dbc.FormGroup([
-                            html.Label('X-Axis'),
+                        html.H4("Plot settings"),
+                        dbc.Form(inline=True, className='mb-2', children=dbc.FormGroup([
+                            html.Label('X-Axis', className="w-25 justify-content-start"),
                             dcc.Dropdown(
                                 options=list(matrix_metrics.values()),
                                 value='bliss_matrix',
                                 id='x-axis-select'
                             ),
-                        ]))]),
-                dbc.Col(
-                    width=4,
-                    className='mt-2 mb-4',
-                    children=[
-                        dbc.Form(inline=True, children=dbc.FormGroup([
-                            html.Label('Y-Axis'),
+                        ])),
+                        dbc.Form(inline=True, className='mb-2', children=dbc.FormGroup([
+                            html.Label('Y-Axis', className="w-25 justify-content-start"),
                             dcc.Dropdown(
                                 options=list(matrix_metrics.values()),
                                 value='combo_maxe',
                                 id='y-axis-select'
                             )
-                        ]))]),
-                dbc.Col(
-                    width=4,
-                    className='mt-2 mb-4',
-                    children=[
+                        ])),
                         dbc.Form(inline=True, children=dbc.FormGroup([
-                            html.Label('Color'),
+                            html.Label('Color', className="w-25 justify-content-start"),
                             dcc.Dropdown(
                                 options=[{'label': l, 'value': v} for l, v in
                                          [('Default', 'default'),
@@ -65,34 +58,44 @@ def layout(project_id):
                                 value='default',
                                 id='color-select'
                             )
-                        ]))]),
-             ]),
-            dbc.Row([
+                        ]))
+                    ]),
                 dbc.Col(
-                    width=6,
+                    width={'size': 6, 'offset': 1},
                     className='mt-2 mb-4',
                     children=[
-                        dbc.Form(inline=True, children=dbc.FormGroup([
-                            html.Label('Tissue'),
+                        html.H4("Data filters"),
+                        dbc.Form(inline=True, className='mb-2', children=dbc.FormGroup([
+                            html.Label('Tissue', className="w-25 justify-content-start"),
                             dcc.Dropdown(
-                                options=[{'label': c, 'value': c} for c in get_all_tissues()],
+                                options=[{'label': c, 'value': c} for c in
+                                         get_all_tissues()],
                                 id='tissue-select',
                                 multi=True
                             ),
-                        ]))]),
-                dbc.Col(
-                    width=6,
-                    className='mt-2 mb-4',
-                    children=[
-                        dbc.Form(inline=True, children=dbc.FormGroup([
-                            html.Label('Combination'),
+                        ])),
+                        dbc.Form(inline=True, className='mb-2', children=dbc.FormGroup([
+                            html.Label('Cancer type',
+                                       className="w-25 justify-content-start"),
                             dcc.Dropdown(
-                                options=[{'label': f"{c.lib1.name} + {c.lib2.name}", 'value': f"{c.lib1_id}+{c.lib2_id}"} for c in project.combinations],
+                                options=[{'label': c, 'value': c} for c in
+                                         get_all_cancer_types()],
+                                id='cancertype-select',
+                                multi=True
+                            ),
+                        ])),
+                        dbc.Form(inline=True, children=dbc.FormGroup([
+                            html.Label('Combination', className="w-25 justify-content-start"),
+                            dcc.Dropdown(
+                                options=[{'label': f"{c.lib1.name} + {c.lib2.name}",
+                                          'value': f"{c.lib1_id}+{c.lib2_id}"} for c in
+                                         project.combinations],
                                 id='combination-select',
                                 multi=True,
                             ),
-                        ]))]),
-            ]),
+                        ]))
+                    ]),
+             ]),
             dbc.Row(id='correlation', className='ml-3 mt-2'),
             dbc.Row(dcc.Loading(dcc.Graph(id='project-scatter'), className='gdsc-spinner'))
         ])
@@ -105,19 +108,22 @@ def layout(project_id):
      dash.dependencies.Input('y-axis-select', 'value'),
      dash.dependencies.Input('color-select', 'value'),
      dash.dependencies.Input('tissue-select', 'value'),
+     dash.dependencies.Input('cancertype-select', 'value'),
      dash.dependencies.Input('combination-select', 'value'),
      dash.dependencies.Input('project-id', 'children')])
-def update_scatter(x_axis_field, y_axis_field, color_field, tissues, combinations, project_id):
+def update_scatter(x_axis_field, y_axis_field, color_field, tissues, cancer_types, combinations, project_id):
     if isinstance(combinations, list):
         combinations = tuple(combinations)
     if isinstance(tissues, list):
         tissues = tuple(tissues)
+    if isinstance(cancer_types, list):
+        cancer_types = tuple(cancer_types)
 
-    return cached_update_scatter(x_axis_field, y_axis_field, color_field, tissues, combinations, project_id)
+    return cached_update_scatter(x_axis_field, y_axis_field, color_field, tissues, cancer_types, combinations, project_id)
 
 
 @lru_cache(maxsize=1000)
-def cached_update_scatter(x_axis_field, y_axis_field, color_field, tissues, combinations, project_id):
+def cached_update_scatter(x_axis_field, y_axis_field, color_field, tissues, cancer_types, combinations, project_id):
     all_matrices_query = session.query(MatrixResult.project_id,
         getattr(MatrixResult, x_axis_field),
         getattr(MatrixResult, y_axis_field),
@@ -135,12 +141,14 @@ def cached_update_scatter(x_axis_field, y_axis_field, color_field, tissues, comb
 
     if tissues:
         all_matrices_query = all_matrices_query.filter(Model.tissue.in_(tissues))
+    if cancer_types:
+        all_matrices_query = all_matrices_query.filter(Model.cancer_type.in_(cancer_types))
 
     if combinations:
         rules = []
         for c in combinations:
-            lib1,lib2 = c.split('+')
-            rule = and_(Combination.lib1_id==lib1, Combination.lib2_id==lib2)
+            lib1, lib2 = c.split('+')
+            rule = and_(Combination.lib1_id == lib1, Combination.lib2_id == lib2)
             rules.append(rule)
 
         all_matrices_query = all_matrices_query .filter(or_(*rules))
