@@ -10,7 +10,7 @@ import plotly.figure_factory as ff
 from app import app
 from utils import url_is_combination_page, get_project_metrics, \
     get_project_from_url, get_combination_results_with_sa, matrix_metrics, \
-    get_combination_from_url, matrix_hover_label
+    get_combination_from_url, matrix_hover_label, get_all_tissues
 
 
 @lru_cache(maxsize=128)
@@ -50,16 +50,53 @@ def layout():
             ]),
             dbc.Col(dcc.Loading(className='gdsc-spinner', children=dcc.Graph(id='combo-page-mm-scatter')), width=7)
          ]),
-        dbc.Row(
-            dbc.Col(dcc.Loading(className='gdsc-spinner', children=dcc.Graph(id='combo-tissue')), width=12, className='py-5')
-        )
+        dbc.Row([
+            dbc.Col(dcc.Loading(className='gdsc-spinner', children=dcc.Graph(id='combo-tissue')), width=12, className='py-5'),
+            dbc.Col(width=4, children=[
+                dbc.Form(inline=True, className='mb-2', children=dbc.FormGroup([
+                    html.Label('Group by',
+                               className="w-25 justify-content-start"),
+                    dcc.Dropdown(
+                        options=[
+                            {'label': 'Tissue', 'value': 'tissue'},
+                            {'label': 'Cancer Type', 'value': 'cancer_type'},
+                        ],
+                        id='grouping-select',
+                        value='tissue',
+                        clearable=False
+                    )
+                ]))
+            ]),
+            dbc.Col(width=4, children=[
+                dbc.Form(inline=True, className='mb-2', children=dbc.FormGroup([
+                    html.Label('Tissue filter', className="w-25 justify-content-start"),
+                    dcc.Dropdown(
+                        options=[{'label': c, 'value': c} for c in
+                                 get_all_tissues()],
+                        id='tissue-select',
+                        multi=True,
+                    ),
+                ])),
+            ]),
+            dbc.Col(width=4, children=[
+                dbc.Form(inline=True, className='mb-2', children=dbc.FormGroup([
+                    html.Label('Hide groups smaller than',
+                               className="w-50 justify-content-start"),
+                    dcc.Dropdown(
+                        options=[{'label': i, 'value': i} for i in [1, 2, 3, 4, 5, 10, 15, 20, 25]],
+                        id='group-size-select',
+                        value=5,
+                        clearable=False,
+                    )
+                ]))
+            ]),
+        ])
     ])
 
 
 @app.callback(
     [dash.dependencies.Output('intxn-distn', 'figure'),
-     dash.dependencies.Output('combo-page-mm-scatter', 'figure'),
-     dash.dependencies.Output('combo-tissue', 'figure')],
+     dash.dependencies.Output('combo-page-mm-scatter', 'figure')],
     [dash.dependencies.Input('combo-page-color-scale-select', 'value')],
     [dash.dependencies.State('url', 'pathname')])
 @lru_cache(maxsize=1000)
@@ -74,9 +111,8 @@ def update_plots(colorscale_select, pathname):
 
     distplot = generate_distplot(project_metrics, plot_data, colorscale_select, drug1_name, drug2_name)
     mm_scatter = generate_mm_scatter(project_metrics, plot_data, colorscale_select, drug1_name, drug2_name)
-    combo_tissues = generate_combo_tissue_plot(plot_data, colorscale_select)
 
-    return distplot, mm_scatter, combo_tissues
+    return distplot, mm_scatter
 
 
 def generate_distplot(project_metrics, plot_data, plot_metric, drug1_name, drug2_name):
@@ -132,19 +168,56 @@ def generate_mm_scatter(project_metrics, plot_data, plot_metric, drug1_name, dru
     })
 
 
-def generate_combo_tissue_plot(plot_data, plot_metric):
+@app.callback(
+    dash.dependencies.Output('combo-tissue', 'figure'),
+    [
+        dash.dependencies.Input('combo-page-color-scale-select', 'value'),
+        dash.dependencies.Input('grouping-select', 'value'),
+        dash.dependencies.Input('tissue-select', 'value'),
+        dash.dependencies.Input('group-size-select', 'value'),
+    ],
+    [dash.dependencies.State('url', 'pathname')])
+def update_combo_boxplot(colorscale_select, grouping_select, tissue_select, min_group_size, pathname):
+    if not url_is_combination_page(pathname):
+        return None
+
+    if isinstance(tissue_select, list):
+        tissue_select = tuple(tissue_select)
+
+    return generate_combo_tissues(colorscale_select, grouping_select, tissue_select, min_group_size, pathname)
+
+
+@lru_cache(maxsize=1000)
+def generate_combo_tissues(colorscale_select, grouping_select, tissue_select, min_group_size, pathname):
+
+    plot_data = get_plot_data_from_url(pathname)
+
+    if tissue_select:
+        plot_data = plot_data[plot_data.tissue.isin(tissue_select)]
+
+    combo_tissues = generate_combo_tissue_plot(
+        plot_data, colorscale_select, grouping_select, min_group_size
+    )
+    return combo_tissues
+
+
+def generate_combo_tissue_plot(plot_data, plot_metric, grouping_var, min_group_size):
 
     boxes = []
 
-    for tissue in (plot_data[['tissue', plot_metric]]
-                       .groupby(by='tissue', as_index=False)
-                       .median()
-                       .sort_values(by=plot_metric, ascending=False)
-                       .tissue):
-        box_data = plot_data[plot_data.tissue == tissue]
+    groups = (plot_data[[grouping_var, plot_metric]]
+              .groupby(by=grouping_var, as_index=False)
+              .median()
+              .sort_values(by=plot_metric, ascending=False))[grouping_var]
+
+
+    for group in groups:
+        box_data = plot_data[plot_data[grouping_var] == group]
+        if len(box_data.model_id.unique()) < min_group_size:
+            continue
         boxes.append(
             go.Box(
-                name=tissue,
+                name=group,
                 y=box_data[plot_metric],
                 boxpoints="all",
                 hoverinfo="y+text",
@@ -162,7 +235,7 @@ def generate_combo_tissue_plot(plot_data, plot_metric):
     return go.Figure(
         data=boxes,
         layout={
-            'title': 'Combination interaction effects by tissue type',
+            'title': f'Combination interaction effects by {grouping_var}'.replace("_", " "),
             'showlegend': False
         }
     )
