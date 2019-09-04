@@ -109,13 +109,13 @@ matrix_metrics = {
 
 well_metrics = {
     'hsa':
-        {'label': "HSA",
+        {'label': "HSA (null model)",
          'value': "hsa"},
     'hsa_excess':
         {'label': "HSA excess",
          'value': "hsa_excess"},
     'bliss_additivity':
-        {'label': "Bliss additivity",
+        {'label': "Bliss additivity (null model)",
          'value': "bliss_additivity"},
     'bliss_excess':
         {'label': "Bliss excess",
