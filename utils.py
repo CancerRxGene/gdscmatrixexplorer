@@ -251,11 +251,7 @@ def get_project_from_url(url):
     segments = url.split("/")
     project_slug = segments[2]
 
-    try:
-        project = session.query(models.Project).filter_by(slug=project_slug).one()
-    except sa.orm.exc.NoResultFound:
-        return html.Div("Project not found")
-    return project
+    return session.query(models.Project).filter_by(slug=project_slug).one_or_none()
 
 
 @lru_cache()

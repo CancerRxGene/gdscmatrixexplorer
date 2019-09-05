@@ -1,5 +1,6 @@
 import dash
 import dash_bootstrap_components as dbc
+import dash_core_components as dcc
 import dash_html_components as html
 
 from app import app
@@ -11,6 +12,19 @@ from utils import get_project_from_url
 
 def layout(url):
     project = get_project_from_url(url)
+
+    if project is None:
+        return [
+            dbc.Row(className="mt-5", children=
+                dbc.Col(width=12, children=[
+                    html.H3("Project not found"),
+                    html.P([
+                        "Go back to the ",
+                        dcc.Link("homepage", href="/")
+                            ]),
+                ])
+            )
+        ]
 
     return [
         crumbs([("Home", "/"), (project.name, "/" + project.slug)]),
