@@ -102,8 +102,8 @@ def update_synergy_plots(metric, pathname):
 def generate_combo_heatmap(matrix_df, metric, drug_names):
 
     # sort the data frame before the conc convert to scientific notation
-    x = matrix_df['lib1_conc'].astype('category').map(float_formatter)
-    y = matrix_df['lib2_conc'].astype('category').map(float_formatter)
+    x = np.round(matrix_df['lib1_conc'], 4).astype('category')
+    y = np.round(matrix_df['lib2_conc'], 4).astype('category')
 
     zvalue = matrix_df[metric]
     zmin, zmax = get_metric_axis_range(metric)
@@ -122,10 +122,10 @@ def generate_combo_heatmap(matrix_df, metric, drug_names):
         ],
         'layout': go.Layout(title=well_metrics[metric]['label'],
                             xaxis={'type': 'category',
-                                   'title': drug_names[0] + " µM"
+                                   'title': f"{drug_names[0]} (µM)"
                                    },
                             yaxis={'type': 'category',
-                                   'title': drug_names[1] + " µM"
+                                   'title': f"{drug_names[1]} (µM)"
                                    },
                             margin={'l': 100}
                             )
@@ -134,8 +134,8 @@ def generate_combo_heatmap(matrix_df, metric, drug_names):
 
 def generate_combo_surface(matrix_df, metric, drug_names):
 
-    xaxis_labels = [f"{conc:.2e}" for conc in matrix_df.lib1_conc]
-    yaxis_labels = [f"{conc:.2e}" for conc in matrix_df.lib2_conc]
+    xaxis_labels = np.round(matrix_df.lib1_conc, 4)
+    yaxis_labels = np.round(matrix_df.lib2_conc, 4)
 
     # change lib2_conc ascending to 1
     zvalues_table = matrix_df.pivot(index='lib2_conc', columns='lib1_conc', values=metric)\
@@ -169,7 +169,7 @@ def generate_combo_surface(matrix_df, metric, drug_names):
             scene={
                 'xaxis': {
                     'type': 'category',
-                    'title': drug_names[0] + ' µM',
+                    'title': f"{drug_names[0]} (µM)",
                     'ticktext': xaxis_labels,
                     'tickvals': matrix_df.lib1_conc,
                     'titlefont': {
@@ -181,7 +181,7 @@ def generate_combo_surface(matrix_df, metric, drug_names):
                 },
                 'yaxis': {
                     'type': 'category',
-                    'title': drug_names[1] + ' µM',
+                    'title': f"{drug_names[1]} (µM)",
                     'ticktext': yaxis_labels,
                     'tickvals': matrix_df.lib2_conc,
                     'titlefont': {
@@ -193,7 +193,7 @@ def generate_combo_surface(matrix_df, metric, drug_names):
                 },
                 'zaxis': {
                     'range': (zmin, zmax),
-                    'title': metric,
+                    'title': well_metrics[metric]['label'],
                     'titlefont': {
                         'size': 12
                     },
