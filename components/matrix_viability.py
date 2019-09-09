@@ -159,8 +159,8 @@ def generate_viability_surface(matrix_df, metric, drug_names):
         'data': [
             go.Surface(
                 z=zvalues_table.values,
-                x=lib1_conc_table.values,
-                y=lib2_conc_table.values,
+                x=np.round(lib1_conc_table.values, 4),
+                y=np.round(lib2_conc_table.values, 4),
                 colorscale=inhibition_colorscale if metric == 'inhibition' else viability_colorscale,
                 cmax=1,
                 cmin=0,
@@ -172,17 +172,17 @@ def generate_viability_surface(matrix_df, metric, drug_names):
             scene={
                 'xaxis': {
                     'type': 'category',
-                    'title': drug1,
-                    'showticklabels': False,
+                    'title': f"{drug1} (µM)",
+                    'showticklabels': True,
                     'titlefont': {
                         'size': 12
                     },
                 },
                 'yaxis': {
                     'type': 'category',
-                    'title': drug2,
+                    'title': f"{drug2} (µM)",
                     'ticktext': None,
-                    'showticklabels': False,
+                    'showticklabels': True,
                     'titlefont': {'size': 12},
                 },
                 'zaxis': {
@@ -210,7 +210,7 @@ def single_agent_heatmap(metric, tag, drug_name, barcode, orientation):
 
     lib_df = pd.read_sql(lib_well_result.statement, session.bind)
     lib_df = lib_df.sort_values('conc')
-    lib_df.conc = [np.format_float_scientific(conc, 3) for conc in lib_df.conc]
+    lib_df.conc = [np.round(conc, 4) for conc in lib_df.conc]
 
     if metric == 'viability':
         z = 1 - lib_df.inhibition

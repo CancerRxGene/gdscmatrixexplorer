@@ -109,13 +109,13 @@ matrix_metrics = {
 
 well_metrics = {
     'hsa':
-        {'label': "HSA",
+        {'label': "HSA (null model)",
          'value': "hsa"},
     'hsa_excess':
         {'label': "HSA excess",
          'value': "hsa_excess"},
     'bliss_additivity':
-        {'label': "Bliss additivity",
+        {'label': "Bliss additivity (null model)",
          'value': "bliss_additivity"},
     'bliss_excess':
         {'label': "Bliss excess",
@@ -150,29 +150,29 @@ synergy_colorscale = [
 
 inhibition_colorscale = [
     [0.0, 'rgb(0,0,255)'],
-    [0.1, 'rgb(90,0,237)'],
-    [0.2, 'rgb(127,0,217)'],
-    [0.3, 'rgb(155,0,194)'],
-    [0.4, 'rgb(177,0,170)'],
-    [0.5,'rgb(186,0,158)'],
-    [0.6, 'rgb(196,0,144)'],
-    [0.7, 'rgb(213,0,118)'],
-    [0.8, 'rgb(229,0,87)'],
-    [0.9, 'rgb(243,0,53)'],
+    [0.13, 'rgb(90,0,237)'],
+    [0.25, 'rgb(127,0,217)'],
+    [0.35, 'rgb(155,0,194)'],
+    [0.43, 'rgb(177,0,170)'],
+    [0.50, 'rgb(186,0,158)'],
+    [0.57, 'rgb(196,0,144)'],
+    [0.65, 'rgb(213,0,118)'],
+    [0.75, 'rgb(229,0,87)'],
+    [0.87, 'rgb(243,0,53)'],
     [1.0, 'rgb(255,0,0)'],
 ]
 
 viability_colorscale = [
     [0.0, 'rgb(255,0,0)'],
-    [0.1, 'rgb(243,0,53)'],
-    [0.2, 'rgb(229,0,87)'],
-    [0.3, 'rgb(213,0,118)'],
-    [0.4, 'rgb(196,0,144)'],
-    [0.5, 'rgb(186,0,158)'],
-    [0.6, 'rgb(177,0,170)'],
-    [0.7, 'rgb(155,0,194)'],
-    [0.8, 'rgb(127,0,217)'],
-    [0.9, 'rgb(90,0,237)'],
+    [0.13, 'rgb(243,0,53)'],
+    [0.25, 'rgb(229,0,87)'],
+    [0.35, 'rgb(213,0,118)'],
+    [0.43, 'rgb(196,0,144)'],
+    [0.50, 'rgb(186,0,158)'],
+    [0.57, 'rgb(177,0,170)'],
+    [0.65, 'rgb(155,0,194)'],
+    [0.75, 'rgb(127,0,217)'],
+    [0.87, 'rgb(90,0,237)'],
     [1.0, 'rgb(0,0,255)'],
 ]
 
@@ -251,11 +251,7 @@ def get_project_from_url(url):
     segments = url.split("/")
     project_slug = segments[2]
 
-    try:
-        project = session.query(models.Project).filter_by(slug=project_slug).one()
-    except sa.orm.exc.NoResultFound:
-        return html.Div("Project not found")
-    return project
+    return session.query(models.Project).filter_by(slug=project_slug).one_or_none()
 
 
 @lru_cache()
@@ -334,9 +330,13 @@ def get_combination_matrices_summary(project_id, lib1_id, lib2_id, percentiles):
     return pd.read_sql(query.statement, session.get_bind())\
         .describe(percentiles=percentiles)
 
+
 def get_all_tissues():
-    tissues = [s[0] for s in session.query(models.Model.tissue).distinct().all()]
-    return tissues
+    return [s[0] for s in session.query(models.Model.tissue).distinct().order_by(models.Model.tissue).all()]
+
+
+def get_all_cancer_types():
+    return [s[0] for s in session.query(models.Model.cancer_type).distinct().order_by(models.Model.cancer_type).all()]
 
 
 

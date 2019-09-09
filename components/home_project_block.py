@@ -13,7 +13,7 @@ def project_block(project):
                 dcc.Link(f"View Project", className='btn btn-primary shadow-sm',
                          href=f"/project/{project.slug}")
             ]),
-            className='shadow-sm'
+            className='shadow-sm mb-4'
         ),
         width=3
     )

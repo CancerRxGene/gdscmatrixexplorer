@@ -3,9 +3,13 @@
 
 import click
 from scripts.db_loader import upload_project as up
+from scripts.delete_project import delete_project as dp
 
+@click.group()
+def manage():
+    pass
 
-@click.command()
+@manage.command()
 @click.option('--matrix-stats', type=click.Path(exists=True),
               help='Combo Matrix Statistics File (CSV format)',
               prompt='Matrix Stats File')
@@ -21,5 +25,14 @@ def upload_project(matrix_stats, well_stats, nlme_stats, project_name):
        nlme_stats_path=nlme_stats, project_name=project_name)
 
 
+@manage.command()
+@click.option('--name', '--project-name', prompt='Project Name',
+              help='Project Name', required=True)
+def delete_project(project_name):
+    """Delete a project"""
+
+    dp(name=project_name)
+
+
 if __name__ == '__main__':
-    upload_project()
+    manage()
