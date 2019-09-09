@@ -103,7 +103,9 @@ def layout(project_id):
 
 @app.callback(
     [dash.dependencies.Output('project-scatter', 'figure'),
-     dash.dependencies.Output('correlation', 'children')],
+     dash.dependencies.Output('correlation', 'children'),
+     dash.dependencies.Output('cancertype-select', 'options'),
+     ],
     [dash.dependencies.Input('x-axis-select', 'value'),
      dash.dependencies.Input('y-axis-select', 'value'),
      dash.dependencies.Input('color-select', 'value'),
@@ -129,7 +131,7 @@ def cached_update_scatter(x_axis_field, y_axis_field, color_field, tissues, canc
         getattr(MatrixResult, y_axis_field),
         MatrixResult.barcode, MatrixResult.cmatrix, MatrixResult.drugset_id,
         Combination.lib1_id, Combination.lib2_id,
-        Model.cell_line_name.label('model_name'), Model.tissue
+        Model.cell_line_name.label('model_name'), Model.tissue, Model.cancer_type
     ) \
         .join(Combination) \
         .join(Model) \
@@ -163,8 +165,21 @@ def cached_update_scatter(x_axis_field, y_axis_field, color_field, tissues, canc
                suffixes=['_lib1', '_lib2'])
     summary['combo_id'] = summary.project_id.astype(str) + "::" + summary.lib1_id.astype(str) + "::" + summary.lib2_id.astype(str)
 
+    if tissues:
+        cancer_type_options = [
+            ct[0]
+            for ct in session.query(Model.cancer_type)
+                .filter(Model.tissue.in_(tissues))\
+                .distinct()\
+                .all()]
+    else:
+        cancer_type_options = get_all_cancer_types()
+
+    ct_options = [{'label': c, 'value': c} for c in sorted(cancer_type_options)]
+
     return (get_scatter(summary, x_axis_field, y_axis_field, color_field),
-            get_correlation(summary, x_axis_field, y_axis_field))
+            get_correlation(summary, x_axis_field, y_axis_field),
+            ct_options)
 
 
 def get_correlation(summary, x_axis_field, y_axis_field):
