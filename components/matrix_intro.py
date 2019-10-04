@@ -226,7 +226,8 @@ def model_information(model_id, passport_data, gr_data, current_model_informatio
                 model_attribute_section(cmp_data['model_information'], 'Mutations per Mb', 'mutations_per_mb') +
                 [html.Br(), html.Br(),
                  html.A(children=f"View {model.cell_line_name} on Cell Model Passports",
-                        href=f"https://cellmodelpassports.sanger.ac.uk/passports/{model.id}")
+                        href=f"https://cellmodelpassports.sanger.ac.uk/passports/{model.id}",
+                        target="_blank")
                  ]
             )
 

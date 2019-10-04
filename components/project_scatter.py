@@ -54,6 +54,7 @@ def layout(project_id):
                                          [('Default', 'default'),
                                           ("Cell Line", 'model_name'),
                                           ("Tissue", 'tissue'),
+                                          ("Cancer Type", "cancer_type"),
                                           ("Combination", 'combo_id')]],
                                 value='default',
                                 id='color-select'
