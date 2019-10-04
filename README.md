@@ -2,4 +2,4 @@
 
 Dash App to explore full-matrix drug combination results
 
-v1.0.3
+v1.0.5
