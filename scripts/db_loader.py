@@ -82,7 +82,6 @@ def add_new_models(combo_matrix_stats):
     if not new_models.empty:
         models_to_db(new_models)
 
-
 def extract_models(combo_matrix_stats):
     models = combo_matrix_stats[["CELL_LINE_NAME"]].copy()
 
@@ -177,7 +176,7 @@ def upsert(model, df):
             in_db = model()
             in_db.id = row.id
             session.add(in_db)
-        for column in Drug.__table__.columns:
+        for column in model.__table__.columns:
             try:
                 setattr(in_db, column.key, getattr(row, column.key))
             except AttributeError:
@@ -252,7 +251,7 @@ def extract_matrix_results(combo_matrix_stats, id_mapper):
         bliss_cols +
         day1_cols +
         ["growth_rate", "doubling_time", "Delta_combo_MaxE_day1"]
-    ]
+    ].copy()
 
     matrix_results.columns = [c.lower() for c in matrix_results.columns]
     matrix_results.rename(columns={'lib1': 'lib1_tag', 'lib2': 'lib2_tag'}, inplace=True)
