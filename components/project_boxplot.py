@@ -9,7 +9,7 @@ import plotly.graph_objs as go
 from app import app
 from db import session
 from models import MatrixResult, Model
-from utils import matrix_metrics, get_all_tissues, matrix_hover_label
+from utils import matrix_metrics, get_all_tissues, get_all_cancer_types, matrix_hover_label
 
 def layout():
 
@@ -39,6 +39,17 @@ def layout():
                 )
             ]))
         ),
+        dbc.Col(width=6,
+                className="mt-2 mb-4",
+                children=dbc.Form(inline=True, children=dbc.FormGroup([
+                    dbc.Label('Cancer type', html_for='cancertype', className='mr-2'),
+                    dcc.Dropdown(
+                        options=[{'label': c, 'value': c} for c in get_all_cancer_types()],
+                        id='cancertype',
+                        className='flex-grow-1',
+                    )
+                ]))
+                ),
         dbc.Col(
             width=12,
             children=dcc.Loading(dcc.Graph(id='project-boxplot'), className='gdsc-spinner')
@@ -47,20 +58,25 @@ def layout():
 
 
 @lru_cache()
-def get_boxplot_summary_data(boxplot_value, project_id, tissue):
+def get_boxplot_summary_data(boxplot_value, project_id, tissue, cancertype):
     all_matrices_query = session.query(getattr(MatrixResult, boxplot_value),
                                        MatrixResult.barcode,
                                        MatrixResult.cmatrix,
                                        MatrixResult.lib1_id,
                                        MatrixResult.lib2_id,
                                        Model.cell_line_name.label('model_name'),
-                                       Model.tissue) \
+                                       Model.tissue,
+                                       Model.cancer_type) \
         .filter(Model.id == MatrixResult.model_id)\
         .filter(MatrixResult.project_id == int(project_id))
 
     if tissue:
         all_matrices_query = all_matrices_query.join(Model) \
             .filter(Model.tissue == tissue)
+
+    if cancertype:
+        all_matrices_query = all_matrices_query.join(Model) \
+            .filter(Model.cancer_type == cancertype)
 
     summary = pd.read_sql(all_matrices_query.statement,
                           all_matrices_query.session.bind)
@@ -81,12 +97,13 @@ def get_boxplot_summary_data(boxplot_value, project_id, tissue):
     dash.dependencies.Output('project-boxplot', 'figure'),
     [dash.dependencies.Input('boxplot-value', 'value'),
      dash.dependencies.Input('project-id', 'children'),
-     dash.dependencies.Input('tissue', 'value')]
+     dash.dependencies.Input('tissue', 'value'),
+     dash.dependencies.Input('cancertype', 'value')]
 )
 @lru_cache()
-def update_boxplot(boxplot_value, project_id, tissue):
+def update_boxplot(boxplot_value, project_id, tissue, cancertype):
 
-    summary = get_boxplot_summary_data(boxplot_value, project_id, tissue)
+    summary = get_boxplot_summary_data(boxplot_value, project_id, tissue, cancertype)
 
     data = []
 
@@ -111,6 +128,18 @@ def update_boxplot(boxplot_value, project_id, tissue):
                 hoverinfo='text',
             )
         )
+
+        # if tissue:
+        #     cancer_type_options = [
+        #         ct[0]
+        #         for ct in session.query(Model.cancer_type)
+        #             .filter(Model.tissue.in_(tissues))\
+        #             .distinct()\
+        #             .all()]
+        # else:
+        #     cancer_type_options = get_all_cancer_types()
+        #
+        # ct_options = [{'label': c, 'value': c} for c in sorted(cancer_type_options)]
 
     return {
         'data': data,
