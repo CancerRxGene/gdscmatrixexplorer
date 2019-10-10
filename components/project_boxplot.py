@@ -92,24 +92,40 @@ def get_boxplot_summary_data(boxplot_value, project_id, tissue, cancertype):
 
     return summary
 
-
+@lru_cache()
 @app.callback(
-    dash.dependencies.Output('project-boxplot', 'figure'),
+    [dash.dependencies.Output('project-boxplot', 'figure'),
+     dash.dependencies.Output('cancertype', 'options')
+     ],
     [dash.dependencies.Input('boxplot-value', 'value'),
      dash.dependencies.Input('project-id', 'children'),
      dash.dependencies.Input('tissue', 'value'),
      dash.dependencies.Input('cancertype', 'value')]
 )
-@lru_cache()
 def update_boxplot(boxplot_value, project_id, tissue, cancertype):
 
     summary = get_boxplot_summary_data(boxplot_value, project_id, tissue, cancertype)
 
-    data = []
+    if tissue:
+        cancer_type_options = [
+            ct[0]
+            for ct in session.query(Model.cancer_type)
+                .filter(Model.tissue == tissue)\
+                .distinct()\
+                .all()]
+    else:
+        cancer_type_options = get_all_cancer_types()
 
+    ct_options = [{'label': c, 'value': c} for c in sorted(cancer_type_options)]
+
+    return (get_boxplot(summary, boxplot_value),
+            ct_options)
+
+
+def get_boxplot(summary, boxplot_value):
+    data = []
     for combo_id in summary[['combo_id', boxplot_value]].groupby(by='combo_id', as_index=False).median().sort_values(by=boxplot_value).combo_id:
         subset = summary[summary.combo_id == combo_id]
-
         data.append(
             go.Box(
                 name=f"{subset.iloc[0].name_lib1} + {subset.iloc[0].name_lib2}",
@@ -128,18 +144,6 @@ def update_boxplot(boxplot_value, project_id, tissue, cancertype):
                 hoverinfo='text',
             )
         )
-
-        # if tissue:
-        #     cancer_type_options = [
-        #         ct[0]
-        #         for ct in session.query(Model.cancer_type)
-        #             .filter(Model.tissue.in_(tissues))\
-        #             .distinct()\
-        #             .all()]
-        # else:
-        #     cancer_type_options = get_all_cancer_types()
-        #
-        # ct_options = [{'label': c, 'value': c} for c in sorted(cancer_type_options)]
 
     return {
         'data': data,
