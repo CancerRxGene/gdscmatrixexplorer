@@ -9,12 +9,34 @@ import plotly.graph_objs as go
 from app import app
 from db import session
 from models import MatrixResult, Model
-from utils import matrix_metrics, get_all_tissues, matrix_hover_label
+from utils import matrix_metrics, get_all_tissues, get_all_cancer_types, matrix_hover_label
+
 
 def layout():
-
     return dbc.Row([
         dcc.Location('project-boxplot-url'),
+        dbc.Col(width=6,
+                className="mt-2 mb-4",
+                children=[dbc.Form(inline=True, children=dbc.FormGroup([
+                    dbc.Label('Tissue', html_for='tissue', className='mr-2'),
+                    dcc.Dropdown(
+                        options=[{'label': c, 'value': c} for c in get_all_tissues()],
+                        id='tissue',
+                        className='flex-grow-1',
+                        multi=True
+                    )
+                ])),
+                          dbc.Form(inline=True, className='mt-2', children=dbc.FormGroup([
+                              dbc.Label('Cancer type', html_for='cancertype', className='mr-2'),
+                              dcc.Dropdown(
+                                  options=[{'label': c, 'value': c} for c in get_all_cancer_types()],
+                                  id='cancertype',
+                                  className='flex-grow-1',
+                                  multi=True
+                              )
+                          ]))
+                          ]
+                ),
         dbc.Col(
             width=6,
             className="mt-2 mb-4",
@@ -25,17 +47,7 @@ def layout():
                     value='bliss_matrix',
                     id='boxplot-value',
                     className='flex-grow-1',
-                )
-            ]))
-        ),
-        dbc.Col(width=6,
-                className="mt-2 mb-4",
-            children=dbc.Form(inline=True, children=dbc.FormGroup([
-                dbc.Label('Tissue', html_for='tissue', className='mr-2'),
-                dcc.Dropdown(
-                    options=[{'label': c, 'value': c} for c in get_all_tissues()],
-                    id='tissue',
-                    className='flex-grow-1',
+                    clearable=False
                 )
             ]))
         ),
@@ -46,21 +58,35 @@ def layout():
     ])
 
 
-@lru_cache()
-def get_boxplot_summary_data(boxplot_value, project_id, tissue):
+def get_boxplot_summary_data(boxplot_value, project_id, tissue, cancertype):
+    if isinstance(tissue, list):
+        tissue = tuple(tissue)
+    if isinstance(cancertype, list):
+        cancertype = tuple(cancertype)
+
+    return(cached_get_boxplot_summary_data(boxplot_value, project_id, tissue, cancertype))
+
+
+@lru_cache(maxsize=1000)
+def cached_get_boxplot_summary_data(boxplot_value, project_id, tissue, cancertype):
     all_matrices_query = session.query(getattr(MatrixResult, boxplot_value),
                                        MatrixResult.barcode,
                                        MatrixResult.cmatrix,
                                        MatrixResult.lib1_id,
                                        MatrixResult.lib2_id,
                                        Model.cell_line_name.label('model_name'),
-                                       Model.tissue) \
+                                       Model.tissue,
+                                       Model.cancer_type) \
         .filter(Model.id == MatrixResult.model_id)\
         .filter(MatrixResult.project_id == int(project_id))
 
     if tissue:
-        all_matrices_query = all_matrices_query.join(Model) \
-            .filter(Model.tissue == tissue)
+        all_matrices_query = all_matrices_query\
+            .filter(Model.tissue.in_(tissue))
+
+    if cancertype:
+        all_matrices_query = all_matrices_query\
+            .filter(Model.cancer_type.in_(cancertype))
 
     summary = pd.read_sql(all_matrices_query.statement,
                           all_matrices_query.session.bind)
@@ -76,23 +102,40 @@ def get_boxplot_summary_data(boxplot_value, project_id, tissue):
 
     return summary
 
-
+@lru_cache()
 @app.callback(
-    dash.dependencies.Output('project-boxplot', 'figure'),
+    [dash.dependencies.Output('project-boxplot', 'figure'),
+     dash.dependencies.Output('cancertype', 'options')
+     ],
     [dash.dependencies.Input('boxplot-value', 'value'),
      dash.dependencies.Input('project-id', 'children'),
-     dash.dependencies.Input('tissue', 'value')]
+     dash.dependencies.Input('tissue', 'value'),
+     dash.dependencies.Input('cancertype', 'value')]
 )
-@lru_cache()
-def update_boxplot(boxplot_value, project_id, tissue):
+def update_boxplot(boxplot_value, project_id, tissue, cancertype):
 
-    summary = get_boxplot_summary_data(boxplot_value, project_id, tissue)
+    summary = get_boxplot_summary_data(boxplot_value, project_id, tissue, cancertype)
 
+    if tissue:
+        cancer_type_options = [
+            ct[0]
+            for ct in session.query(Model.cancer_type)
+                .filter(Model.tissue.in_(tissue))\
+                .distinct()\
+                .all()]
+    else:
+        cancer_type_options = get_all_cancer_types()
+
+    ct_options = [{'label': c, 'value': c} for c in sorted(cancer_type_options)]
+
+    return (get_boxplot(summary, boxplot_value),
+            ct_options)
+
+
+def get_boxplot(summary, boxplot_value):
     data = []
-
     for combo_id in summary[['combo_id', boxplot_value]].groupby(by='combo_id', as_index=False).median().sort_values(by=boxplot_value).combo_id:
         subset = summary[summary.combo_id == combo_id]
-
         data.append(
             go.Box(
                 name=f"{subset.iloc[0].name_lib1} + {subset.iloc[0].name_lib2}",
