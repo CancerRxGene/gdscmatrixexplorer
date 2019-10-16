@@ -47,7 +47,8 @@ def generate_matrix_results(project_slug):
 
     query = session.query(Project, MatrixResult, Model, Drug,
                           drug_alias, DoseResponseCurve, curve_alias)\
-        .join(MatrixResult).join(Model) \
+        .join(MatrixResult, Project.id == MatrixResult.project_id)\
+        .join(Model, MatrixResult.model_id == Model.id) \
         .join(Drug, MatrixResult.lib1_id == Drug.id) \
         .join(drug_alias, MatrixResult.lib2_id == drug_alias.id) \
         .join(DoseResponseCurve, and_(MatrixResult.barcode == DoseResponseCurve.barcode,
