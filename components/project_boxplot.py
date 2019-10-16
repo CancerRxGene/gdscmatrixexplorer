@@ -11,10 +11,32 @@ from db import session
 from models import MatrixResult, Model
 from utils import matrix_metrics, get_all_tissues, get_all_cancer_types, matrix_hover_label
 
-def layout():
 
+def layout():
     return dbc.Row([
         dcc.Location('project-boxplot-url'),
+        dbc.Col(width=6,
+                className="mt-2 mb-4",
+                children=[dbc.Form(inline=True, children=dbc.FormGroup([
+                    dbc.Label('Tissue', html_for='tissue', className='mr-2'),
+                    dcc.Dropdown(
+                        options=[{'label': c, 'value': c} for c in get_all_tissues()],
+                        id='tissue',
+                        className='flex-grow-1',
+                        multi=True
+                    )
+                ])),
+                          dbc.Form(inline=True, className='mt-2', children=dbc.FormGroup([
+                              dbc.Label('Cancer type', html_for='cancertype', className='mr-2'),
+                              dcc.Dropdown(
+                                  options=[{'label': c, 'value': c} for c in get_all_cancer_types()],
+                                  id='cancertype',
+                                  className='flex-grow-1',
+                                  multi=True
+                              )
+                          ]))
+                          ]
+                ),
         dbc.Col(
             width=6,
             className="mt-2 mb-4",
@@ -25,31 +47,10 @@ def layout():
                     value='bliss_matrix',
                     id='boxplot-value',
                     className='flex-grow-1',
+                    clearable=False
                 )
             ]))
         ),
-        dbc.Col(width=6,
-                className="mt-2 mb-4",
-            children=dbc.Form(inline=True, children=dbc.FormGroup([
-                dbc.Label('Tissue', html_for='tissue', className='mr-2'),
-                dcc.Dropdown(
-                    options=[{'label': c, 'value': c} for c in get_all_tissues()],
-                    id='tissue',
-                    className='flex-grow-1',
-                )
-            ]))
-        ),
-        dbc.Col(width=6,
-                className="mt-2 mb-4",
-                children=dbc.Form(inline=True, children=dbc.FormGroup([
-                    dbc.Label('Cancer type', html_for='cancertype', className='mr-2'),
-                    dcc.Dropdown(
-                        options=[{'label': c, 'value': c} for c in get_all_cancer_types()],
-                        id='cancertype',
-                        className='flex-grow-1',
-                    )
-                ]))
-                ),
         dbc.Col(
             width=12,
             children=dcc.Loading(dcc.Graph(id='project-boxplot'), className='gdsc-spinner')
@@ -57,7 +58,7 @@ def layout():
     ])
 
 
-@lru_cache()
+# @lru_cache()
 def get_boxplot_summary_data(boxplot_value, project_id, tissue, cancertype):
     all_matrices_query = session.query(getattr(MatrixResult, boxplot_value),
                                        MatrixResult.barcode,
@@ -71,12 +72,12 @@ def get_boxplot_summary_data(boxplot_value, project_id, tissue, cancertype):
         .filter(MatrixResult.project_id == int(project_id))
 
     if tissue:
-        all_matrices_query = all_matrices_query.join(Model) \
-            .filter(Model.tissue == tissue)
+        all_matrices_query = all_matrices_query\
+            .filter(Model.tissue.in_(tissue))
 
     if cancertype:
-        all_matrices_query = all_matrices_query.join(Model) \
-            .filter(Model.cancer_type == cancertype)
+        all_matrices_query = all_matrices_query\
+            .filter(Model.cancer_type.in_(cancertype))
 
     summary = pd.read_sql(all_matrices_query.statement,
                           all_matrices_query.session.bind)
@@ -104,13 +105,17 @@ def get_boxplot_summary_data(boxplot_value, project_id, tissue, cancertype):
 )
 def update_boxplot(boxplot_value, project_id, tissue, cancertype):
 
+    print(tissue)
+
+    print(cancertype)
+
     summary = get_boxplot_summary_data(boxplot_value, project_id, tissue, cancertype)
 
     if tissue:
         cancer_type_options = [
             ct[0]
             for ct in session.query(Model.cancer_type)
-                .filter(Model.tissue == tissue)\
+                .filter(Model.tissue.in_(tissue))\
                 .distinct()\
                 .all()]
     else:
