@@ -58,8 +58,17 @@ def layout():
     ])
 
 
-# @lru_cache()
 def get_boxplot_summary_data(boxplot_value, project_id, tissue, cancertype):
+    if isinstance(tissue, list):
+        tissue = tuple(tissue)
+    if isinstance(cancertype, list):
+        cancertype = tuple(cancertype)
+
+    return(cached_get_boxplot_summary_data(boxplot_value, project_id, tissue, cancertype))
+
+
+@lru_cache(maxsize=1000)
+def cached_get_boxplot_summary_data(boxplot_value, project_id, tissue, cancertype):
     all_matrices_query = session.query(getattr(MatrixResult, boxplot_value),
                                        MatrixResult.barcode,
                                        MatrixResult.cmatrix,
@@ -104,10 +113,6 @@ def get_boxplot_summary_data(boxplot_value, project_id, tissue, cancertype):
      dash.dependencies.Input('cancertype', 'value')]
 )
 def update_boxplot(boxplot_value, project_id, tissue, cancertype):
-
-    print(tissue)
-
-    print(cancertype)
 
     summary = get_boxplot_summary_data(boxplot_value, project_id, tissue, cancertype)
 
