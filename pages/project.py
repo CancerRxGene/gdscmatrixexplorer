@@ -2,6 +2,7 @@ import dash
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
+import plotly.express as px
 
 from app import app
 from components.project_boxplot import layout as project_boxplot
@@ -9,6 +10,12 @@ from components.project_scatter import layout as project_scatter
 from components.breadcrumbs import breadcrumb_generator as crumbs
 from utils import get_project_from_url
 
+##
+
+data=[[1, 25, 30, 50, 1], [20, 1, 60, 80, 30], [30, 60, 1, 5, 20]]
+
+
+##
 
 def layout(url):
     project = get_project_from_url(url)
@@ -25,55 +32,115 @@ def layout(url):
                 ])
             )
         ]
+    if(project.combination_type == 'matrix'):
+        return [
+            crumbs([("Home", "/"), (project.name, "/" + project.slug)]),
+            dbc.Row(
+                dbc.Col(width=12, children=[
+                    dbc.Row([
+                       dbc.Col(width=9, children=
+                           html.Div(className="bg-white pt-3 px-4 pb-2 mb-3 border border shadow-sm", children=[
+                               html.H3(f"{project.name}"),
+                               html.Hr(),
+                               dbc.Tabs([
+                                       dbc.Tab(label='Overview', tab_id="tab-overview"),
+                                       dbc.Tab(label='FlexiScatter', tab_id="tab-flexiscatter")
+                                   ],
+                                   id="project-tabs",
+                                   active_tab='tab-overview'),
+                               html.Div(id="content")
+                           ]),
 
-    return [
-        crumbs([("Home", "/"), (project.name, "/" + project.slug)]),
-        dbc.Row(
-            dbc.Col(width=12, children=[
-                dbc.Row([
-                   dbc.Col(width=9, children=
-                       html.Div(className="bg-white pt-3 px-4 pb-2 mb-3 border border shadow-sm", children=[
-                           html.H3(f"{project.name}"),
-                           html.Hr(),
-                           dbc.Tabs([
-                                   dbc.Tab(label='Overview', tab_id="tab-overview"),
-                                   dbc.Tab(label='FlexiScatter', tab_id="tab-flexiscatter")
-                               ],
-                               id="project-tabs",
-                               active_tab='tab-overview'),
-                           html.Div(id="content")
-                       ]),
-
-                   ),
-                    dbc.Col(width=3, children=[
-                        html.Div(
-                            className="bg-white pt-3 pb-2 mb-3 border border-primary shadow-sm",
-                            children=[
-                                html.H3([
-                                    f"Combinations ",
-                                    dbc.Badge(f" {project.combinations.count()} ",
-                                              color='info')
-                                ], className="d-flex justify-content-between align-items-center px-3 mb-0"),
-                                html.Span(f"in {project.name}, sorted by target", className='small px-3'),
-                                dbc.ListGroup(className='combinations-list mt-2', flush=True, children=[
-                                    dbc.ListGroupItem(
-                                        href=c.url,
-                                        action=True,
-                                        children=[
-                                            dbc.ListGroupItemHeading(
-                                                f"{c.lib1.name} + {c.lib2.name}"),
-                                            dbc.ListGroupItemText(
-                                                f"{c.lib1.target} + {c.lib2.target}")
-                                        ]
-                                    ) for c in project.combinations
+                       ),
+                        dbc.Col(width=3, children=[
+                            html.Div(
+                                className="bg-white pt-3 pb-2 mb-3 border border-primary shadow-sm",
+                                children=[
+                                    html.H3([
+                                        f"Combinations ",
+                                        dbc.Badge(f" {project.combinations.count()} ",
+                                                  color='info')
+                                    ], className="d-flex justify-content-between align-items-center px-3 mb-0"),
+                                    html.Span(f"in {project.name}, sorted by target", className='small px-3'),
+                                    dbc.ListGroup(className='combinations-list mt-2', flush=True, children=[
+                                        dbc.ListGroupItem(
+                                            href=c.url,
+                                            action=True,
+                                            children=[
+                                                dbc.ListGroupItemHeading(
+                                                    f"{c.lib1.name} + {c.lib2.name}"),
+                                                dbc.ListGroupItemText(
+                                                    f"{c.lib1.target} + {c.lib2.target}")
+                                            ]
+                                        ) for c in project.combinations
+                                    ])
                                 ])
-                            ])
+                        ])
                     ])
                 ])
-            ])
-        ),
-        html.Div(className="d-none", id='project-id', children=project.id)
-    ]
+            ),
+            html.Div(className="d-none", id='project-id', children=project.id)
+        ]
+    else:
+        return [
+            crumbs([("Home", "/"), (project.name, "/" + project.slug)]),
+
+            dbc.Row(
+                dbc.Col(width=12, children=[
+                    dbc.Row([
+                        dbc.Col(width=9, children=[
+                           html.Div(
+                               className="bg-white pt-3 px-4 pb-2 mb-3 border border shadow-sm",
+                               children=[
+                                  html.H3(f"{project.name}"),
+                                  html.Hr(),
+                                  dcc.Dropdown(
+                                      options=[
+                                          {'label': '# synergistic cell lines',
+                                           'value': 'count'
+                                           },
+                                          {'label': '% synergistic cell lines',
+                                            'value': 'percentage'
+                                          }
+                                      ],
+                                      id = "cellline",
+                                      value='count'
+                                  ),
+                                  # html.Div(id="synergy_heatmap"),
+                                  dcc.Graph(
+                                       id='synergy_heatmap',
+                                       figure =[]
+                                   )
+
+                                ])]),
+                        dbc.Col(width=3, children=[
+                            html.Div(
+                                className="bg-white pt-3 pb-2 mb-3 border border-primary shadow-sm",
+                                children=[
+                                    html.H3([
+                                        f"Combinations ",
+                                        dbc.Badge(f" {project.combinations.count()} ",
+                                                  color='info')
+                                    ], className="d-flex justify-content-between align-items-center px-3 mb-0"),
+                                    html.Span(f"in {project.name}, sorted by target", className='small px-3'),
+                                    dbc.ListGroup(className='combinations-list mt-2', flush=True, children=[
+                                        dbc.ListGroupItem(
+                                            href=c.url,
+                                            action=True,
+                                            children=[
+                                                dbc.ListGroupItemHeading(
+                                                    f"{c.lib1.name} + {c.lib2.name}"),
+                                                dbc.ListGroupItemText(
+                                                    f"{c.lib1.target} + {c.lib2.target}")
+                                            ]
+                                        ) for c in project.combinations
+                                    ])
+                                ])
+                        ])
+                    ])
+                ])
+            )
+        ]
 
 
 @app.callback(
@@ -87,3 +154,17 @@ def switch_tab(at, url):
         project = get_project_from_url(url)
         return project_scatter(project.id)
     return html.P("This shouldn't ever be displayed...")
+
+@app.callback(
+    dash.dependencies.Output("synergy_heatmap", "figure"),
+    # dash.dependencies.Output("synergy_heatmap", "children"),
+    [dash.dependencies.Input("cellline","value")],
+    [dash.dependencies.State("url", "pathname")])
+def load_heatmap(cellline, url):
+    fig = px.imshow(data,
+                    labels=dict(x="Day of Week", y="Time of Day", color="Productivity"),
+                    x=['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+                    y=['Morning', 'Afternoon', 'Evening'])
+    return fig
+
+    # return html.P("you choose " + cellline + "  "+ url)

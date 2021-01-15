@@ -20,7 +20,10 @@ class Project(ToDictMixin, Base):
     id = sa.Column(sa.Integer, primary_key=True)
     name = sa.Column(sa.String, unique=True)
     slug = sa.Column(sa.String, unique=True)
+    combination_type = sa.Column(sa.String)
+
     matrices = relationship("MatrixResult", back_populates='project')
+    # anchor = relationship("AnchorCombi", back_populates='project')
     dose_responses = relationship("DoseResponseCurve")
     combinations = relationship("Combination", lazy='dynamic', back_populates='project')
 
@@ -64,7 +67,10 @@ class Combination(ToDictMixin, Base):
     lib1 = relationship(Drug, foreign_keys=[lib1_id])
     lib2 = relationship(Drug, foreign_keys=[lib2_id])
 
-    matrices = relationship("MatrixResult", lazy='dynamic', back_populates='combination')
+    matrices = relationship("MatrixResult", lazy='dynamic', back_populates='combination',
+                            sync_backref=False)
+
+    # anchor = relationship("AnchorCombi", lazy='dynamic', back_populates='combination')
     project = relationship("Project", back_populates='combinations')
 
     @property
@@ -84,14 +90,23 @@ class Combination(ToDictMixin, Base):
 
     @property
     def models(self):
-        return sa.orm.object_session(self).query(Model) \
-            .join(MatrixResult, Combination)\
-            .filter(
-                Combination.project_id == self.project_id,
-                Combination.lib1_id == self.lib1_id,
-                Combination.lib2_id == self.lib2_id)\
-            .all()
+        if(self.combination_type == 'matrix'):
+            return sa.orm.object_session(self).query(Model) \
+                .join(MatrixResult, Combination)\
+                .filter(
+                    Combination.project_id == self.project_id,
+                    Combination.lib1_id == self.lib1_id,
+                    Combination.lib2_id == self.lib2_id)\
+                .all()
 
+        # else:
+        #     return sa.orm.object_session(self).query(Model) \
+        #         .join(AnchorCombi, Combination)\
+        #         .filter(
+        #             Combination.project_id == self.project_id,
+        #             Combination.lib1_id == self.lib1_id,
+        #             Combination.lib2_id == self.lib2_id)\
+        #         .all()
     @property
     def replicates(self):
         return self.replicates_query.all()
@@ -166,7 +181,8 @@ class MatrixResult(ToDictMixin, Base):
                                primaryjoin="and_(Combination.project_id == MatrixResult.project_id, "
                                            "Combination.lib1_id == MatrixResult.lib1_id, "
                                            "Combination.lib2_id == MatrixResult.lib2_id)",
-                               viewonly=True)
+                               viewonly=True
+                               )
 
     project = relationship("Project", back_populates='matrices')
 
@@ -325,3 +341,86 @@ class DoseResponseCurve(ToDictMixin, Base):
 
     def plot(self, *args, **kwargs):
         return DoseResponsePlot(self, *args, **kwargs).plot()
+
+@generic_repr
+def AnchorCombi(ToDictMixin, Base):
+    __tablename__ = 'anchor_combi'
+
+    cell_line_name = sa.Column(sa.String)
+    cl = sa.Column(sa.String)
+    maxc = sa.Column(sa.Float)
+    drug = sa.Column(sa.Integer)
+    library_id = sa.Column(sa.Integer, sa.ForeignKey(Drug.id), nullable=False, index=True)
+    barcode = sa.Column(sa.Integer)
+    scan_id = sa.Column(sa.Integer)
+    drugset_id = sa.Column(sa.Integer)
+    norm_neg_pos = sa.Column(sa.String)
+    cl_spec = sa.Column(sa.String)
+    drug_spec = sa.Column(sa.String)
+    time_stamp = sa.Column(sa.DateTime)
+    sw_version = sa.Column(sa.String)
+    research_project = sa.Column(sa.String)
+    scal = sa.Column(sa.Float)
+    anchor_id = sa.Column(sa.Integer, sa.ForeignKey(Drug.id), nullable=False, index=True)
+    anchor_conc = sa.Column(sa.Float)
+    anchor_viability = sa.Column(sa.Float)
+    anchor_viability_sd = sa.Column(sa.Float)
+    al_uid = sa.Column(sa.String)
+    library_xmid = sa.Column(sa.Float)
+    library_scal = sa.Column(sa.Float)
+    library_auc = sa.Column(sa.Float)
+    library_rmse = sa.Column(sa.Float)
+    synergy_xmid = sa.Column(sa.Float)
+    scale = sa.Column(sa.Float)
+    synergy_auc = sa.Column(sa.Float)
+    synergy_rmse = sa.Column(sa.Float)
+    synergy_exp_auc = sa.Column(sa.Float)
+    synergy_delta_auc = sa.Column(sa.Float)
+    library_fauc = sa.Column(sa.Float)
+    synergy_exp_fauc = sa.Column(sa.Float)
+    synergy_obs_fauc = sa.Column(sa.Float)
+    synergy_delta_fauc = sa.Column(sa.Float)
+    synergy_zscore = sa.Column(sa.Float)
+    library_emax = sa.Column(sa.Float)
+    synergy_exp_emax = sa.Column(sa.Float)
+    synergy_obs_emax = sa.Column(sa.Float)
+    synergy_delta_emax = sa.Column(sa.Float)
+    synergy_delta_xmid = sa.Column(sa.Float)
+    synergy_xmid_uM = sa.Column(sa.Float)
+    library_xmid_uM = sa.Column(sa.Float)
+    synergy_delta_xmid_uM = sa.Column(sa.Float)
+    library_name = sa.Column(sa.String)
+    library_target = sa.Column(sa.String)
+    library_gene_target = sa.Column(sa.String)
+    library_drug_type = sa.Column(sa.String)
+    library_target_pathway = sa.Column(sa.String)
+    anchor_name = sa.Column(sa.String)
+    anchor_target = sa.Column(sa.String)
+    anchor_gene_target = sa.Column(sa.String)
+    anchor_drug_type = sa.Column(sa.String)
+    anchor_target_pathway = sa.Column(sa.String)
+    anchor_uid = sa.Column(sa.String)
+    anchor_uname = sa.Column(sa.String)
+    day1_intensity_mean = sa.Column(sa.Float)
+    day1_intensity_sd = sa.Column(sa.Float)
+    day1_norm_mean = sa.Column(sa.Float)
+    day1_norm_sd = sa.Column(sa.Float)
+    growth_rate = sa.Column(sa.Float)
+    doubling_time = sa.Column(sa.Float)
+    master_cell_id = sa.Column(sa.Integer)
+    cosmic_id = sa.Column(sa.Integer)
+    tcga_desc = sa.Column(sa.String)
+    sidm = sa.Column(sa.String)
+    msi_status = sa.Column(sa.String)
+    tissue = sa.Column(sa.String)
+    cancer_type = sa.Column(sa.String)
+    project_id = sa.Column(sa.Integer)
+
+    model = relationship("Model")
+    project = relationship("Project", back_populates='anchor')
+
+    # combination = relationship("Combination", back_populates='anchor',
+    #                            primaryjoin="and_(Combination.project_id == AnchorCombi.project_id, "
+    #                                        "Combination.lib1_id == AnchorCombi.library_id, "
+    #                                        "Combination.lib2_id == AnchorCombi.anchor_id)",
+    #                            viewonly=True)

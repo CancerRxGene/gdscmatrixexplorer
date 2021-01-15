@@ -4,6 +4,7 @@
 import click
 from scripts.db_loader import upload_project as up
 from scripts.delete_project import delete_project as dp
+from scripts.upload_anchor import upload_anchor
 
 @click.group()
 def manage():
@@ -33,6 +34,10 @@ def delete_project(project_name):
 
     dp(name=project_name)
 
+@manage.command()
+@click.option('--name','--project-name', prompt='Project Name', help='Project Name', required=True)
+def upload_anchor_project(project_name, file):
+    upload_anchor(project_name=project_name, file=file)
 
 if __name__ == '__main__':
     manage()
