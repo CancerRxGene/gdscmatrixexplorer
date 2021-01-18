@@ -36,8 +36,11 @@ def delete_project(project_name):
 
 @manage.command()
 @click.option('--name','--project-name', prompt='Project Name', help='Project Name', required=True)
-def upload_anchor_project(project_name, file):
-    upload_anchor(project_name=project_name, file=file)
+@click.option('--anchor_combi', type=click.Path(exists=True),
+              help='Anchor Combi File (CSV format)',
+              prompt='Anchor Combi File')
+def upload_anchor_project(project_name, anchor_combi):
+    upload_anchor(anchor_result_path=anchor_combi, project_name=project_name)
 
 if __name__ == '__main__':
     manage()

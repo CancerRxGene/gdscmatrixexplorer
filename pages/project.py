@@ -2,20 +2,13 @@ import dash
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
-import plotly.express as px
 
 from app import app
 from components.project_boxplot import layout as project_boxplot
 from components.project_scatter import layout as project_scatter
+from components.anchor_heatmap import layout as anchor_heatmap
 from components.breadcrumbs import breadcrumb_generator as crumbs
 from utils import get_project_from_url
-
-##
-
-data=[[1, 25, 30, 50, 1], [20, 1, 60, 80, 30], [30, 60, 1, 5, 20]]
-
-
-##
 
 def layout(url):
     project = get_project_from_url(url)
@@ -157,14 +150,9 @@ def switch_tab(at, url):
 
 @app.callback(
     dash.dependencies.Output("synergy_heatmap", "figure"),
-    # dash.dependencies.Output("synergy_heatmap", "children"),
     [dash.dependencies.Input("cellline","value")],
     [dash.dependencies.State("url", "pathname")])
 def load_heatmap(cellline, url):
-    fig = px.imshow(data,
-                    labels=dict(x="Day of Week", y="Time of Day", color="Productivity"),
-                    x=['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
-                    y=['Morning', 'Afternoon', 'Evening'])
-    return fig
+    project = get_project_from_url(url)
+    return anchor_heatmap(project.id)
 
-    # return html.P("you choose " + cellline + "  "+ url)

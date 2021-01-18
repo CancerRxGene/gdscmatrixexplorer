@@ -23,9 +23,18 @@ session = Session()
 
 Base.metadata.create_all(engine)
 
-def upload_anchor(project_name:str, file:str):
+def upload_anchor(anchor_result_path: str, project_name: str):
+    anchor_result = pd.read_csv(anchor_result_path)
+    print(project_name)
     project = get_project(project_name)
-    anchor_data = pd.read_csv(file)
+    print(project)
+   # add_new_models(anchor_result)
+   #  models = pd.read_sql(session.query(Model).statement, session.bind)
+   #  print(models)
+   # add_new_drugs(anchor_result)
+
+    # project = get_project(project_name)
+    # anchor_data = pd.read_csv(file)
 
 
 

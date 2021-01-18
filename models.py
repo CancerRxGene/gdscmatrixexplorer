@@ -23,7 +23,7 @@ class Project(ToDictMixin, Base):
     combination_type = sa.Column(sa.String)
 
     matrices = relationship("MatrixResult", back_populates='project')
-    # anchor = relationship("AnchorCombi", back_populates='project')
+    anchor = relationship("AnchorCombi", back_populates='project')
     dose_responses = relationship("DoseResponseCurve")
     combinations = relationship("Combination", lazy='dynamic', back_populates='project')
 
@@ -56,6 +56,8 @@ class Drug(ToDictMixin, Base):
     pathway = sa.Column(sa.String)
     owner = sa.Column(sa.String)
 
+    def get_name(self):
+        return self.name
 
 @generic_repr
 class Combination(ToDictMixin, Base):
@@ -70,7 +72,8 @@ class Combination(ToDictMixin, Base):
     matrices = relationship("MatrixResult", lazy='dynamic', back_populates='combination',
                             sync_backref=False)
 
-    # anchor = relationship("AnchorCombi", lazy='dynamic', back_populates='combination')
+    anchor = relationship("AnchorCombi", lazy='dynamic', back_populates='combination',
+                          sync_backref=False)
     project = relationship("Project", back_populates='combinations')
 
     @property
@@ -99,14 +102,14 @@ class Combination(ToDictMixin, Base):
                     Combination.lib2_id == self.lib2_id)\
                 .all()
 
-        # else:
-        #     return sa.orm.object_session(self).query(Model) \
-        #         .join(AnchorCombi, Combination)\
-        #         .filter(
-        #             Combination.project_id == self.project_id,
-        #             Combination.lib1_id == self.lib1_id,
-        #             Combination.lib2_id == self.lib2_id)\
-        #         .all()
+        else:
+            return sa.orm.object_session(self).query(Model) \
+                .join(AnchorCombi, Combination)\
+                .filter(
+                    Combination.project_id == self.project_id,
+                    Combination.lib1_id == self.lib1_id,
+                    Combination.lib2_id == self.lib2_id)\
+                .all()
     @property
     def replicates(self):
         return self.replicates_query.all()
@@ -343,9 +346,9 @@ class DoseResponseCurve(ToDictMixin, Base):
         return DoseResponsePlot(self, *args, **kwargs).plot()
 
 @generic_repr
-def AnchorCombi(ToDictMixin, Base):
+class AnchorCombi(ToDictMixin, Base):
     __tablename__ = 'anchor_combi'
-
+    id = sa.Column(sa.Integer, primary_key=True)
     cell_line_name = sa.Column(sa.String)
     cl = sa.Column(sa.String)
     maxc = sa.Column(sa.Float)
@@ -357,7 +360,7 @@ def AnchorCombi(ToDictMixin, Base):
     norm_neg_pos = sa.Column(sa.String)
     cl_spec = sa.Column(sa.String)
     drug_spec = sa.Column(sa.String)
-    time_stamp = sa.Column(sa.DateTime)
+    #time_stamp = sa.Column(sa.DateTime)
     sw_version = sa.Column(sa.String)
     research_project = sa.Column(sa.String)
     scal = sa.Column(sa.Float)
@@ -391,14 +394,15 @@ def AnchorCombi(ToDictMixin, Base):
     synergy_delta_xmid_uM = sa.Column(sa.Float)
     library_name = sa.Column(sa.String)
     library_target = sa.Column(sa.String)
-    library_gene_target = sa.Column(sa.String)
+    # library_gene_target = sa.Column(sa.String)
     library_drug_type = sa.Column(sa.String)
-    library_target_pathway = sa.Column(sa.String)
+    # library_target_pathway = sa.Column(sa.String)
     anchor_name = sa.Column(sa.String)
+
     anchor_target = sa.Column(sa.String)
-    anchor_gene_target = sa.Column(sa.String)
+    # anchor_gene_target = sa.Column(sa.String)
     anchor_drug_type = sa.Column(sa.String)
-    anchor_target_pathway = sa.Column(sa.String)
+    # anchor_target_pathway = sa.Column(sa.String)
     anchor_uid = sa.Column(sa.String)
     anchor_uname = sa.Column(sa.String)
     day1_intensity_mean = sa.Column(sa.Float)
@@ -410,17 +414,35 @@ def AnchorCombi(ToDictMixin, Base):
     master_cell_id = sa.Column(sa.Integer)
     cosmic_id = sa.Column(sa.Integer)
     tcga_desc = sa.Column(sa.String)
-    sidm = sa.Column(sa.String)
+    sidm = sa.Column(sa.String, sa.ForeignKey(Model.id), nullable=False, index=True)
     msi_status = sa.Column(sa.String)
     tissue = sa.Column(sa.String)
     cancer_type = sa.Column(sa.String)
-    project_id = sa.Column(sa.Integer)
+    project_id = sa.Column(sa.Integer, sa.ForeignKey(Project.id),primary_key=True, index= True)
 
     model = relationship("Model")
-    project = relationship("Project", back_populates='anchor')
+    project = relationship("Project")
 
-    # combination = relationship("Combination", back_populates='anchor',
-    #                            primaryjoin="and_(Combination.project_id == AnchorCombi.project_id, "
-    #                                        "Combination.lib1_id == AnchorCombi.library_id, "
-    #                                        "Combination.lib2_id == AnchorCombi.anchor_id)",
-    #                            viewonly=True)
+    combination = relationship("Combination", back_populates='anchor',
+                               primaryjoin="and_(Combination.project_id == AnchorCombi.project_id, "
+                                           "Combination.lib1_id == AnchorCombi.library_id, "
+                                           "Combination.lib2_id == AnchorCombi.anchor_id)",
+                               viewonly=True)
+
+
+    __table_args__ = (
+        sa.ForeignKeyConstraint(
+            [project_id, library_id, anchor_id], [Combination.project_id, Combination.lib1_id, Combination.lib2_id]), {}
+    )
+
+@generic_repr
+class AnchorSynergy(ToDictMixin, Base):
+    __tablename__ = 'synergy'
+    project_id = sa.Column(sa.Integer, sa.ForeignKey(Project.id),primary_key=True, index= True)
+    cell_line_name = sa.Column(sa.String, primary_key=True, index=True)
+    anchor_id = sa.Column(sa.Integer, sa.ForeignKey(Drug.id), primary_key=True, index=True)
+    library_id = sa.Column(sa.Integer, sa.ForeignKey(Drug.id), primary_key=True, index=True)
+    maxc = sa.Column(sa.Float)
+    synergy = sa.Column(sa.Integer)
+
+    project = relationship("Project")
