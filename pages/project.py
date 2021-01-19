@@ -99,11 +99,12 @@ def layout(url):
                                       id = "cellline",
                                       value='count'
                                   ),
-                                  # html.Div(id="synergy_heatmap"),
-                                  dcc.Graph(
-                                       id='synergy_heatmap',
-                                       figure =[]
-                                   )
+                                  #html.Div(id="synergy_heatmap",children=[])
+                                  dcc.Loading(className='gdsc-spinner', children=
+                                      dcc.Graph(
+                                           id='synergy_heatmap',
+                                           figure =[]
+                                   ))
 
                                 ])]),
                         dbc.Col(width=3, children=[
@@ -150,9 +151,10 @@ def switch_tab(at, url):
 
 @app.callback(
     dash.dependencies.Output("synergy_heatmap", "figure"),
+    # dash.dependencies.Output("synergy_heatmap", "children"),
     [dash.dependencies.Input("cellline","value")],
     [dash.dependencies.State("url", "pathname")])
 def load_heatmap(cellline, url):
     project = get_project_from_url(url)
-    return anchor_heatmap(project.id)
+    return anchor_heatmap(project.id,cellline)
 
