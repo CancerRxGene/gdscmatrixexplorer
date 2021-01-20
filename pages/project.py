@@ -96,7 +96,7 @@ def layout(url):
                                             'value': 'percentage'
                                           }
                                       ],
-                                      id = "cellline",
+                                      id = "display_opt",
                                       value='count'
                                   ),
                                   #html.Div(id="synergy_heatmap",children=[])
@@ -152,9 +152,8 @@ def switch_tab(at, url):
 @app.callback(
     dash.dependencies.Output("synergy_heatmap", "figure"),
     # dash.dependencies.Output("synergy_heatmap", "children"),
-    [dash.dependencies.Input("cellline","value")],
+    [dash.dependencies.Input("display_opt","value")],
     [dash.dependencies.State("url", "pathname")])
-def load_heatmap(cellline, url):
-    project = get_project_from_url(url)
-    return anchor_heatmap(project.id,cellline)
+def load_heatmap(display_opt, url):
+    return anchor_heatmap(display_opt,url)
 

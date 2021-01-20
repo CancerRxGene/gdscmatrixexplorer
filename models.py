@@ -29,10 +29,16 @@ class Project(ToDictMixin, Base):
 
     @property
     def models(self):
-        return sa.orm.object_session(self).query(Model).join(MatrixResult) \
-            .filter(
-            MatrixResult.project_id == self.id,
-        ).distinct().all()
+        if(self.combination_type == 'matrix'):
+            return sa.orm.object_session(self).query(Model).join(MatrixResult) \
+                .filter(
+                MatrixResult.project_id == self.id,
+            ).distinct().all()
+        else:
+            return sa.orm.object_session(self).query(Model).join(AnchorCombi).filter(
+                AnchorCombi.project_id ==  self.id
+            ).distinct().all()
+
 
 
 @generic_repr

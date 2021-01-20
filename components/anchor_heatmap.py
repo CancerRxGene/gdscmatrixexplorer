@@ -10,75 +10,54 @@ import plotly.graph_objs as go
 import sqlalchemy as sa
 import plotly.graph_objects as go
 
-from sqlalchemy.sql.expression import func
-from sqlalchemy import and_, or_
 import plotly.express as px
-from app import app
 from db import session
-from models import MatrixResult, Project, Combination, Model, Drug, AnchorCombi, AnchorSynergy
-from utils import plot_colors,  matrix_metrics, get_all_tissues, get_all_cancer_types, matrix_hover_label
+from models import  Drug, AnchorSynergy
+from utils import get_project_from_url
 
-
-def layout(project_id, celline):
+def layout(display_opt,url):
     try:
-        project = session.query(Project).get(project_id)
-        print(project)
+        project = get_project_from_url(url)
+        project_id = project.id
+
     except sa.orm.exc.NoResultFound:
         return html.Div("Project not found")
 
     # get the data ready
-    # models = session.query(Model.tissue).distinct().order_by(Model.tissue).all()
-    lib_drugs = session.query(AnchorSynergy.library_id).filter(AnchorSynergy.project_id == project_id).distinct().all()
-    anchor_drugs = session.query(AnchorSynergy.anchor_id).filter(
-        AnchorSynergy.project_id == project_id).distinct().all()
+    anchor_synergy = session.query(AnchorSynergy).filter(AnchorSynergy.project_id == project_id)
 
-    # print(lib_drugs)
-    # print(anchor_drugs)
+    df = pd.read_sql(anchor_synergy.statement, session.bind)
+    lib_drugs = df['library_id'].drop_duplicates()
+    anchor_drugs = df['anchor_id'].drop_duplicates()
 
     # create list of lib names
     lib_names = []
-    for i in lib_drugs:
-        ld = session.query(Drug).get(i[0])
-        lib_names.append(ld.name)
+    for l in lib_drugs:
+        l_drug = session.query(Drug).get(l)
+        lib_names.append(l_drug.name)
     print(lib_names)
 
     # create list of anchor names
     anchor_names = []
-    for i in anchor_drugs:
-        ad = session.query(Drug).get(i[0])
-        anchor_names.append(ad.name)
+    for ac in anchor_drugs:
+        an_drug = session.query(Drug).get(ac)
+        anchor_names.append(an_drug.name)
     print(anchor_names)
 
     synergy_counts_list = []
-    # for lib in lib_drugs:
-    #     lib_drug_id = lib[0]
 
-    for anc in anchor_drugs:
-        anc_drug_id = anc[0]
-
+    for anc_drug_id in anchor_drugs:
         synergy_counts = []
-        # for anc in anchor_drugs:
-        #     anc_drug_id = anc[0]
 
-        for lib in lib_drugs:
-            lib_drug_id = lib[0]
-            count_query = session.query(func.count(AnchorSynergy.cell_line_name)).filter(
-                AnchorSynergy.library_id == lib_drug_id). \
-                filter(AnchorSynergy.anchor_id == anc_drug_id).filter(AnchorSynergy.project_id == project_id).filter(
-                AnchorSynergy.synergy == 1)
+        for lib_drug_id in lib_drugs:
+            synergy_count_per_combi_df = df.loc[(df['library_id'] == lib_drug_id) & (df['anchor_id'] == anc_drug_id) & (df['synergy'] == 1)]
+            total_count_per_combi_df = df.loc[(df['library_id'] == lib_drug_id) & (df['anchor_id'] == anc_drug_id)]
 
-            synergy_count_df = pd.read_sql(count_query.statement, session.bind)
-            synergy_count_per_combi = synergy_count_df.iloc[0, 0]
+            synergy_count_per_combi = synergy_count_per_combi_df.size
+            total_count_per_combi = total_count_per_combi_df.size
 
-            # find the total count
-            total_count_query = session.query(func.count(AnchorSynergy.cell_line_name)).filter(
-                AnchorSynergy.library_id == lib_drug_id). \
-                filter(AnchorSynergy.anchor_id == anc_drug_id).filter(AnchorSynergy.project_id == project_id)
-            total_count_df = pd.read_sql(total_count_query.statement, session.bind)
-            total_count_per_combi = total_count_df.iloc[0,0]
-
-            if (synergy_count_per_combi > 0):
-                if(celline == 'count'):
+            if (total_count_per_combi > 0):
+                if(display_opt == 'count'):
                     z_label = '#synergistic cell lines'
                     synergy_counts.append(synergy_count_per_combi)
                 else:
@@ -102,4 +81,24 @@ def layout(project_id, celline):
     fig.update_xaxes(side="top")
 
     return fig
-
+    #
+    # return {
+    #     'data': [
+    #         go.Heatmap(
+    #             x=lib_names,
+    #             y=anchor_names,
+    #             z=synergy_counts_list,
+    #             # zmax=zmax,
+    #             # zmin=zmin,
+    #         )
+    #     ],
+    #      'layout': go.Layout(#title=well_metrics[metric]['label'],
+    #                         xaxis={'type': 'category',
+    #                                #'title': f"{drug_names[0]} (µM)"
+    #                                },
+    #                         yaxis={'type': 'category',
+    #                                #'title': f"{drug_names[1]} (µM)"
+    #                                },
+    #                         #margin={'l': 100}
+    #                         )
+    # }

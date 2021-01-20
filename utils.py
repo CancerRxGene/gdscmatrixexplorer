@@ -276,7 +276,9 @@ def get_combination_from_url(url):
         return html.Div("Multiple results found for this combination - cannot display")
 
     return combination
-
+#
+# def get_anchor_synergy_from_url(url):
+#     pass
 
 def get_combination_link(combination):
     text = f"{combination.lib1.name} + {combination.lib2.name}"
