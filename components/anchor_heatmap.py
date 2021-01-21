@@ -68,37 +68,62 @@ def layout(display_opt,url):
 
         synergy_counts_list.append(synergy_counts)
 
-    fig = px.imshow(synergy_counts_list,
-                    # labels=dict(x="Anchor", y="Library", color="#synergistic cell lines",
-                    #             color_continuous_scale="sunset"),
-                    # x=anchor_names,
-                    # y=lib_names
-                    labels=dict(x="Library", y="Anchor", color=z_label,
-                                color_continuous_scale="sunset"),
+    # fig = px.imshow(synergy_counts_list,
+    #                 # labels=dict(x="Anchor", y="Library", color="#synergistic cell lines",
+    #                 #             color_continuous_scale="sunset"),
+    #                 # x=anchor_names,
+    #                 # y=lib_names
+    #                 labels=dict(x="Library", y="Anchor", color=z_label,
+    #                             color_continuous_scale="sunset"),
+    #                 x=lib_names,
+    #                 y=anchor_names
+    #                 )
+    # fig.update_xaxes(side="top")
+
+    if(display_opt == 'count'):
+        fig = go.Figure(
+            data=go.Heatmap(
+                    z=synergy_counts_list,
                     x=lib_names,
-                    y=anchor_names
-                    )
+                    y=anchor_names,
+                    colorbar=dict(title='Synergy#'),
+                    hovertemplate='Lib: %{x}<br>Anchor: %{y}<br>Synergy#: %{z}<extra></extra>'
+                ),
+            layout = go.Layout(
+                xaxis={'type': 'category',
+                      'title': {"text": "Library",
+                             "font": { "size": 30}
+                             }
+                   },
+                width= 700,
+                height=600,
+                yaxis={'type': 'category',
+                   'title': {"text": "Anchor",
+                             "font": { "size": 30}
+                             }
+                   },
+            )
+        )
+    else:
+        fig = go.Figure(
+            data=go.Heatmap(
+                z=synergy_counts_list,
+                x=lib_names,
+                y=anchor_names,
+                colorbar=dict(title='Synergy%'),
+                hovertemplate='Lib: %{x}<br>Anchor: %{y}<br>Synergy%: %{z}%<extra></extra>'
+            ),
+            layout=go.Layout(
+                xaxis={'type': 'category',
+                       'title': "Library"
+                       },
+                width=700,
+                height=600,
+                yaxis={'type': 'category',
+                       'title': "Anchor"
+                       },
+            )
+        )
     fig.update_xaxes(side="top")
 
     return fig
-    #
-    # return {
-    #     'data': [
-    #         go.Heatmap(
-    #             x=lib_names,
-    #             y=anchor_names,
-    #             z=synergy_counts_list,
-    #             # zmax=zmax,
-    #             # zmin=zmin,
-    #         )
-    #     ],
-    #      'layout': go.Layout(#title=well_metrics[metric]['label'],
-    #                         xaxis={'type': 'category',
-    #                                #'title': f"{drug_names[0]} (µM)"
-    #                                },
-    #                         yaxis={'type': 'category',
-    #                                #'title': f"{drug_names[1]} (µM)"
-    #                                },
-    #                         #margin={'l': 100}
-    #                         )
-    # }

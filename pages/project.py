@@ -97,9 +97,10 @@ def layout(url):
                                           }
                                       ],
                                       id = "display_opt",
-                                      value='count'
+                                      value='count',
+
                                   ),
-                                  #html.Div(id="synergy_heatmap",children=[])
+
                                   dcc.Loading(className='gdsc-spinner', children=
                                       dcc.Graph(
                                            id='synergy_heatmap',
