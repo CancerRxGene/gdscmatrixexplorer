@@ -12,10 +12,8 @@ from components.navigation.footer import footer
 from pages import project, home, matrix, combinations, documentation, downloads
 from utils import url_parser
 
-# user = os.getenv('MATRIXEXPLORER_USER')
-# password = os.getenv('MATRIXEXPLORER_PASSWD')
-user=''
-password=''
+user = os.getenv('MATRIXEXPLORER_USER')
+password = os.getenv('MATRIXEXPLORER_PASSWD')
 
 auth = dash_auth.BasicAuth(app, [[user, password]])
 
