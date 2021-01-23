@@ -87,11 +87,15 @@ def generate_anchor_boxplot(combination,conc_type):
     title = 'Anchor '+ conc_type
     final_df = anc_via_df.append(lib_emax_df).append(bliss_emax_df).append(combo_emax_df)
 
-    fig = px.strip(final_df, x='type', y='Viability %', title= title)
+    # fig = px.strip(final_df, x='type', y='Viability %', title= title, hover_data=["type","Viability %","cell_line_name"])
+    fig = px.box(final_df, x='type', y='Viability %', title=title,points="all",
+                   hover_data=["type", "Viability %", "cell_line_name"])
+
     return fig
 
 def get_emax_df(df,type,col_name):
-    type_df = df[col_name].to_frame()
+    #type_df = df[col_name].to_frame()
+    type_df = df[[col_name,'cell_line_name']]
     type_df['type'] = type
     type_df = type_df.rename(columns = { col_name: 'Viability %'})
     return type_df
