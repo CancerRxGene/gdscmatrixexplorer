@@ -28,7 +28,7 @@ Jinja2>=2.10.1
 jsonschema==2.6.0
 jupyter-core==4.4.0
 Mako==1.0.7
-MarkupSafe==1.0
+MarkupSafe==1.1.1
 nbformat==4.4.0
 numpy==1.15.2
 pandas==0.23.4

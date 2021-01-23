@@ -69,27 +69,19 @@ def generate_boxplot(combination):
 
     anc_df = pd.read_sql(anchor_combi_query.statement, session.bind)
 
-    anc_via = anc_df['anchor_viability']
-    anc_via_df = anc_via.to_frame()
-    anc_via_df['type'] = 'Anc_Via'
-    anc_via_df = anc_via_df.rename(columns={"anchor_viability": 'Viability %'})
+    anc_via_df = get_emax_df(anc_df,'Anc_via', 'anchor_viability')
+    lib_emax_df = get_emax_df(anc_df,'Lib_Emax','library_emax')
+    bliss_emax_df = get_emax_df(anc_df,'Bliss_Emax','synergy_exp_emax')
+    combo_emax_df = get_emax_df(anc_df,'Combo_Emax','synergy_obs_emax')
 
-    lib_emax_df =  anc_df['library_emax'].to_frame()
-    lib_emax_df['type'] = 'Lib_Emax'
-    lib_emax_df = lib_emax_df.rename(columns = {"library_emax": 'Viability %'})
-
-    final_df = anc_via_df.append(lib_emax_df)
-
-    bliss_emax_df = anc_df['synergy_exp_emax'].to_frame()
-    bliss_emax_df['type'] = 'Bliss_Emax'
-    bliss_emax_df = bliss_emax_df.rename(columns = {"synergy_exp_emax": 'Viability %'})
-    final_df = final_df.append(bliss_emax_df)
-
-    combo_emax_df = anc_df['synergy_obs_emax'].to_frame()
-    combo_emax_df['type'] = 'Combo_Emax'
-    combo_emax_df = combo_emax_df.rename(columns={"synergy_obs_emax": 'Viability %'})
-    final_df = final_df.append(combo_emax_df)
+    final_df = anc_via_df.append(lib_emax_df).append(bliss_emax_df).append(combo_emax_df)
 
     print(final_df)
     fig = px.strip(final_df, x='type', y='Viability %')
     return fig
+
+def get_emax_df(df,type,col_name):
+    type_df = df[col_name].to_frame()
+    type_df['type'] = type
+    type_df = type_df.rename(columns = { col_name: 'Viability %'})
+    return type_df
