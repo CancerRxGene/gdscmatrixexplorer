@@ -10,7 +10,7 @@ services:
       # labels are needed for traefik
       labels:
         # Traefik will redirect requests to this service
-        - "traefik.api.frontend.rule=Host:matrixexplorer.staging.team215.sanger.ac.uk,matrixexplorer.eta-staging.team215.sanger.ac.uk"
+        - "traefik.api.frontend.rule=Host:matrixexplorer.staging.team215.sanger.ac.uk,matrixexplorer.theta-staging.team215.sanger.ac.uk"
         - "traefik.api.port=8080"
         - "traefik.docker.network=traefik_net"
         - "traefik.frontend.entryPoints=http"
