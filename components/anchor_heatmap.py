@@ -52,8 +52,8 @@ def layout(display_opt,url):
             synergy_count_per_combi_df = df.loc[(df['library_id'] == lib_drug_id) & (df['anchor_id'] == anc_drug_id) & (df['synergy'] == 1)]
             total_count_per_combi_df = df.loc[(df['library_id'] == lib_drug_id) & (df['anchor_id'] == anc_drug_id)]
 
-            synergy_count_per_combi = synergy_count_per_combi_df.size
-            total_count_per_combi = total_count_per_combi_df.size
+            synergy_count_per_combi = synergy_count_per_combi_df['cell_line_name'].size
+            total_count_per_combi = total_count_per_combi_df['cell_line_name'].size
 
             if (total_count_per_combi > 0):
                 if(display_opt == 'count'):
@@ -66,7 +66,7 @@ def layout(display_opt,url):
                 synergy_counts.append(None)
 
         synergy_counts_list.append(synergy_counts)
-
+        print(synergy_counts_list)
     # fig = px.imshow(synergy_counts_list,
     #                 # labels=dict(x="Anchor", y="Library", color="#synergistic cell lines",
     #                 #             color_continuous_scale="sunset"),
