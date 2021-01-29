@@ -35,7 +35,7 @@ def layout():
                                   multi=True
                               )
                           ]))
-                          ]
+                    ]
                 ),
         dbc.Col(
             width=6,
