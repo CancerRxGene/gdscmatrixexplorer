@@ -34,14 +34,12 @@ def layout(display_opt,url):
     for l in lib_drugs:
         l_drug = session.query(Drug).get(l)
         lib_names.append(l_drug.name)
-    print(lib_names)
 
     # create list of anchor names
     anchor_names = []
     for ac in anchor_drugs:
         an_drug = session.query(Drug).get(ac)
         anchor_names.append(an_drug.name)
-    print(anchor_names)
 
     synergy_counts_list = []
 
@@ -66,7 +64,7 @@ def layout(display_opt,url):
                 synergy_counts.append(None)
 
         synergy_counts_list.append(synergy_counts)
-        print(synergy_counts_list)
+
     # fig = px.imshow(synergy_counts_list,
     #                 # labels=dict(x="Anchor", y="Library", color="#synergistic cell lines",
     #                 #             color_continuous_scale="sunset"),
