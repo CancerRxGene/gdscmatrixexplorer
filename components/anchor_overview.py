@@ -15,81 +15,82 @@ from models import AnchorCombi
 def layout(combination):
     anc_df = get_anc_df(combination)
 
-    return html.Div(children=[
-        dbc.Row(
-            dbc.Col(width=12, children=[
-                html.Div(
+    return html.Div(children=[  #html l1
+        dbc.Row([   #row l1
+            dbc.Col(width=12, children=[   #col l1
+                html.Div(className="bg-white pt-3 px-4 pb-3 mb-3 border shadow-sm",children=[  #html l2
                     html.H3("Detailed overview of drug responses"),
                     html.Hr(),
-            )]
-        )),
-         dbc.Row([
-            dbc.Col(width=6,children=[
-                dcc.Loading(className='gdsc-spinner', children=
-                    dcc.Graph(
-                        id='box1',
-                        figure= generate_vialibity_boxplot(anc_df,'low')
-                    )
-                )
-            ]),
 
-            dbc.Col(width=5, children=[
-                dcc.Loading(className='gdsc-spinner', children=
-                dcc.Graph(
-                        id='box2',
-                        figure = generate_ic50_boxplot(anc_df,'low')
-                    )
-                )
-            ]),
-             dbc.Col(width=4, children=[
-                 dcc.Loading(className='gdsc-spinner', children=
-                 dcc.Graph(
-                     id='box3',
-                     figure=generate_delta_emax_boxplot(anc_df, 'low')
-                 )
+                    dbc.Row([  #row l21
+                        dbc.Col(width=6,children=[
+                            dcc.Loading(className='gdsc-spinner', children=
+                                dcc.Graph(
+                                    id='box1',
+                                    figure= generate_vialibity_boxplot(anc_df,'low')
+                                )
+                            )
+                        ]),
+
+                        dbc.Col(width=5, children=[
+                            dcc.Loading(className='gdsc-spinner', children=
+                            dcc.Graph(
+                                    id='box2',
+                                    figure = generate_ic50_boxplot(anc_df,'low')
+                                )
+                            )
+                        ]),
+                        dbc.Col(width=4, children=[
+                             dcc.Loading(className='gdsc-spinner', children=
+                             dcc.Graph(
+                                 id='box3',
+                                 figure=generate_delta_emax_boxplot(anc_df, 'low')
                              )
-             ]),
-             dbc.Col(width=4, children=[
-                 dcc.Loading(className='gdsc-spinner', children=
-                 dcc.Graph(
-                     id='box4',
-                     figure=generate_delta_ic50_boxplot(anc_df, 'low')
-                 )
+                                         )
+                         ]),
+                        dbc.Col(width=4, children=[
+                             dcc.Loading(className='gdsc-spinner', children=
+                             dcc.Graph(
+                                 id='box4',
+                                 figure=generate_delta_ic50_boxplot(anc_df, 'low')
                              )
-             ])
-             ]
-         ),
-        dbc.Row([
-            dbc.Col(width=6, children=[
-                dcc.Loading(className='gdsc-spinner', children=
-                dcc.Graph(
-                    id='box5',
-                    figure=generate_vialibity_boxplot(anc_df,'high')
-                ))
-            ]),
-            dbc.Col(width=5, children=[
-                dcc.Loading(className='gdsc-spinner', children=
-                dcc.Graph(
-                    id='box6',
-                    figure=generate_ic50_boxplot(anc_df, 'high')
-                ))
-            ]),
-            dbc.Col(width=4, children=[
-                dcc.Loading(className='gdsc-spinner', children=
-                dcc.Graph(
-                    id='box7',
-                    figure=generate_delta_emax_boxplot(anc_df, 'high')
-                ))
-            ]),
-            dbc.Col(width=4, children=[
-                dcc.Loading(className='gdsc-spinner', children=
-                dcc.Graph(
-                    id='box8',
-                    figure=generate_delta_ic50_boxplot(anc_df, 'high')
-                ))
-            ]),
-        ]),
-    ])
+                                         )
+                         ])
+                    ]),  #row l21
+                    dbc.Row([  #row l22
+                        dbc.Col(width=6, children=[
+                            dcc.Loading(className='gdsc-spinner', children=
+                            dcc.Graph(
+                                id='box5',
+                                figure=generate_vialibity_boxplot(anc_df,'high')
+                            ))
+                        ]),
+                        dbc.Col(width=5, children=[
+                            dcc.Loading(className='gdsc-spinner', children=
+                            dcc.Graph(
+                                id='box6',
+                                figure=generate_ic50_boxplot(anc_df, 'high')
+                            ))
+                        ]),
+                        dbc.Col(width=4, children=[
+                            dcc.Loading(className='gdsc-spinner', children=
+                            dcc.Graph(
+                                id='box7',
+                                figure=generate_delta_emax_boxplot(anc_df, 'high')
+                            ))
+                        ]),
+                        dbc.Col(width=4, children=[
+                            dcc.Loading(className='gdsc-spinner', children=
+                            dcc.Graph(
+                                id='box8',
+                                figure=generate_delta_ic50_boxplot(anc_df, 'high')
+                            ))
+                        ]),
+                    ]),  #row l22
+                ]) #html l2
+            ])  # col l1
+        ])  #row l1
+    ])  #html l1
 
 def generate_vialibity_boxplot(anc_df,anc_conc_type):
     anchor_conc = anc_df['anchor_conc'].drop_duplicates().sort_values()

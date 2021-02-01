@@ -122,6 +122,49 @@ well_metrics = {
          'value': "bliss_excess"},
 }
 
+anchor_metrics = {
+    'delta_ic50':
+        {
+            'label':"Delta IC50",
+            'value':"delta_ic50"
+        },
+    'delta_emax':
+        {
+            'label':"Delta Emax",
+            'value':"delta_emax"
+        },
+    'combo_emax':
+        {
+            'label':"Combo Emax",
+            'value':"combo_emax"
+        },
+    'lib_ic50':
+        {
+            'label':"Library IC50",
+            'value':"lib_ic50"
+        },
+    'lib_emax':
+        {
+            'label':"Library Emax",
+            'value':"lib_emax"
+        },
+    'anchor_viability':
+        {
+            'label':"Anchor Viability",
+            'value':"anchor_viability"
+        },
+    'bliss_ic50':
+        {
+            'label':"Bliss IC50",
+            'value':"bliss_ic50"
+        },
+    'bliss_emax':
+        {
+            'label':"Bliss Emax",
+            'value':"bliss_emax"
+        },
+
+}
 
 plot_colors = ["rgb(215,150,209)", "rgb(164,250,201)", "rgb(245,167,221)",
                "rgb(124,191,134)", "rgb(220,173,241)", "rgb(168,199,127)",
