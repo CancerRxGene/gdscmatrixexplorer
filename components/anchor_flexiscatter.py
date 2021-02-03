@@ -33,7 +33,11 @@ def layout(tissue,cancertype,library,anchor,xaxis,yaxis,url,df):
     if(anchor):
         filtered_df = filtered_df[filtered_df.anchor_id == anchor]
 
-    if（tissue
+    # if(tissue):
+    #     filtered_df = filtered_df[filtered_df.tissue ==  tissue ]
+    # if(cancertype):
+    #     filtered_df = filtered_df[filtered_df.cancer_type ==  cancertype ]
+
     delta_ic50 = filtered_df['synergy_delta_xmid']
     delta_emax = filtered_df['synergy_delta_emax']
     print(filtered_df)

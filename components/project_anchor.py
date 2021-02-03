@@ -23,10 +23,6 @@ def layout(project):
     lib_drugs = filtered_df['library_id'].drop_duplicates()
     anchor_drugs = filtered_df['anchor_id'].drop_duplicates()
 
-    first_lib = lib_drugs[0]
-    first_anchor = anchor_drugs[0]
-    print(first_lib)
-    print(first_anchor)
     # create list of lib names
     lib_names = {}
     for l in lib_drugs:
@@ -102,7 +98,7 @@ def layout(project):
                                                                 id='tissue',
                                                             #    value = tissues.iloc[0],
                                                                 className='flex-grow-1',
-                                                                multi=True
+                                                             #   multi=True
                                                             )
                                                         ])
                                                     ),
@@ -117,7 +113,7 @@ def layout(project):
                                                                 id='cancertype',
                                                                 #value = cancer_types.iloc[0],
                                                                 className='flex-grow-1',
-                                                                multi=True
+                                                              #  multi=True
                                                             )
                                                         ])
                                                     )
@@ -138,7 +134,7 @@ def layout(project):
                                                                 id='anchor',
                                                                 #value = first_anchor,
                                                                 className='flex-grow-1',
-                                                                multi=True
+                                                                #multi=True
                                                             )
                                                         ])
                                                     ),
@@ -154,7 +150,7 @@ def layout(project):
                                                                 id='library',
                                                                 #value = first_lib,
                                                                 className='flex-grow-1',
-                                                                multi=True
+                                                               # multi=True
                                                             )
                                                         ])
                                                     ),
