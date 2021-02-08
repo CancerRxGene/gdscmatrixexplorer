@@ -8,16 +8,17 @@ import dash_html_components as html
 import pandas as pd
 import plotly.graph_objs as go
 import sqlalchemy as sa
-
+from models import Project
 import plotly.express as px
 from db import session
 from models import Drug, AnchorSynergy
 from utils import get_project_from_url
 
-def layout(display_opt,url):
+def layout(display_opt,project_id):
     try:
-        project = get_project_from_url(url)
-        project_id = project.id
+        # project = get_project_from_url(url)
+        # project_id = project.id
+        project = session.query(Project).get(project_id)
 
     except sa.orm.exc.NoResultFound:
         return html.Div("Project not found")

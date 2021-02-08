@@ -8,11 +8,15 @@ from db import session
 import pandas as pd
 from models import Drug, AnchorCombi, Project, Model
 from components.anchor_heatmap import layout as anchor_heatmap
-from components.anchor_flexiscatter import layout as anchor_flexiscatter
+from components.anchor_flexiscatter import cached_update_scatter
 from components.breadcrumbs import breadcrumb_generator as crumbs
 from utils import get_all_tissues, get_all_cancer_types, anchor_metrics
 
-colour_by = [ 'Tissue', 'Cancer Type', 'Combination', 'Anchhor', 'Library']
+colour_by = {
+    'Tissue': 'tissue',
+    'Cancer Type': 'cancer_type',
+}
+# 'Tissue', 'Cancer Type', 'Combination', 'Anchhor', 'Library']
 # get the data frame
 anchor_combi = session.query(AnchorCombi.project_id,AnchorCombi.library_id,
                              AnchorCombi.anchor_id, AnchorCombi.anchor_viability,
@@ -117,7 +121,7 @@ def layout(project):
                                                     dbc.Form(
                                                       #  inline=True,
                                                         children=dbc.FormGroup([
-                                                            dbc.Label('Cancer type', html_for='cancertype', className='mr-2'),
+                                                            dbc.Label('Cancer type', className="w-25 justify-content-start"),
                                                             dcc.Dropdown(
                                                                 options=[
                                                                     {'label': c, 'value': c} for c in cancer_types
@@ -242,12 +246,13 @@ def layout(project):
                                                                       className='mr-2'),
                                                             dcc.Dropdown(
                                                                 options=[
-                                                                    {'label': c, 'value': c} for c in
-                                                                    get_all_cancer_types()
+                                                                    {'label': c, 'value': colour_by[c]} for c in
+                                                                      colour_by
                                                                 ],
                                                                 id='color',
+                                                                value='tissue',
                                                                 className='flex-grow-1',
-                                                                multi=True
+                                                               # multi=True
                                                             )
                                                         ])
                                                     )
@@ -295,15 +300,16 @@ def layout(project):
                     ]) # 3 col
                     ###
 
-                ]) #1 row
+                ]), #1 row
+        html.Div(className="d-none", id='project-id', children=project.id)
     ] #return
 
 
 @app.callback(
     dash.dependencies.Output("synergy_heatmap", "figure"),
-    # dash.dependencies.Output("synergy_heatmap", "children"),
-    [dash.dependencies.Input("display_opt", "value")],
-    [dash.dependencies.State("url", "pathname")])
+    [dash.dependencies.Input("display_opt", "value"),
+     dash.dependencies.Input('project-id', 'children')])
+    #[dash.dependencies.State("url", "pathname")])
 def load_heatmap(display_opt, url):
     return anchor_heatmap(display_opt,url)
 
@@ -313,13 +319,13 @@ def load_heatmap(display_opt, url):
     dash.dependencies.Input('cancertype','value'),
     dash.dependencies.Input('library','value'),
     dash.dependencies.Input('anchor','value'),
-     dash.dependencies.Input('combination','value'),
+    dash.dependencies.Input('combination','value'),
+    dash.dependencies.Input('color', 'value'),
     dash.dependencies.Input('xaxis','value'),
-    dash.dependencies.Input('yaxis','value')],
-    # dash.dependencies.Input('project-id', 'children')]
-    [dash.dependencies.State("url", "pathname")]
+    dash.dependencies.Input('yaxis','value'),
+    dash.dependencies.Input('project-id', 'children')]
+   # [dash.dependencies.State("url", "pathname")]
 )
-def load_flexiscatter(tissue,cancertype,library,anchor,combination,xaxis,yaxis,url):
-    return anchor_flexiscatter(tissue,cancertype,library,anchor,combination,xaxis,yaxis,url,df)
-
+def load_flexiscatter(tissue,cancertype,library,anchor,combination,color,xaxis,yaxis,project_id):
+    return cached_update_scatter(tissue,cancertype,library,anchor,combination,color,xaxis,yaxis,project_id)
 
