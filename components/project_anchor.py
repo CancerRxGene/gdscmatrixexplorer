@@ -6,7 +6,7 @@ import dash_html_components as html
 from app import app
 from db import session
 import pandas as pd
-from models import Drug, AnchorCombi, Project
+from models import Drug, AnchorCombi, Project, Model
 from components.anchor_heatmap import layout as anchor_heatmap
 from components.anchor_flexiscatter import layout as anchor_flexiscatter
 from components.breadcrumbs import breadcrumb_generator as crumbs
@@ -14,7 +14,20 @@ from utils import get_all_tissues, get_all_cancer_types, anchor_metrics
 
 colour_by = [ 'Tissue', 'Cancer Type', 'Combination', 'Anchhor', 'Library']
 # get the data frame
-anchor_combi = session.query(AnchorCombi)
+anchor_combi = session.query(AnchorCombi.project_id,AnchorCombi.library_id,
+                             AnchorCombi.anchor_id, AnchorCombi.anchor_viability,
+                             AnchorCombi.library_emax,AnchorCombi.library_xmid,
+                             AnchorCombi.synergy_xmid,AnchorCombi.synergy_obs_emax,
+                             AnchorCombi.synergy_exp_emax,
+                             AnchorCombi.synergy_delta_xmid, AnchorCombi.synergy_delta_emax,
+                             AnchorCombi.tissue, AnchorCombi.cancer_type,
+                             AnchorCombi.cell_line_name,
+                             AnchorCombi.library_name,
+                             AnchorCombi.anchor_name,
+                             AnchorCombi.library_target,
+                             AnchorCombi.anchor_target
+                             )
+
 df = pd.read_sql(anchor_combi.statement,session.bind)
 
 def layout(project):
@@ -96,7 +109,6 @@ def layout(project):
                                                                     {'label': c, 'value': c} for c in tissues
                                                                 ],
                                                                 id='tissue',
-                                                            #    value = tissues.iloc[0],
                                                                 className='flex-grow-1',
                                                              #   multi=True
                                                             )
@@ -111,7 +123,6 @@ def layout(project):
                                                                     {'label': c, 'value': c} for c in cancer_types
                                                                 ],
                                                                 id='cancertype',
-                                                                #value = cancer_types.iloc[0],
                                                                 className='flex-grow-1',
                                                               #  multi=True
                                                             )
@@ -132,7 +143,6 @@ def layout(project):
                                                                     {'label': c, 'value': anchor_names[c]} for c in anchor_names.keys()
                                                                 ],
                                                                 id='anchor',
-                                                                #value = first_anchor,
                                                                 className='flex-grow-1',
                                                                 #multi=True
                                                             )
@@ -148,7 +158,6 @@ def layout(project):
                                                                     {'label': c, 'value': lib_names[c]} for c in lib_names.keys()
                                                                 ],
                                                                 id='library',
-                                                                #value = first_lib,
                                                                 className='flex-grow-1',
                                                                # multi=True
                                                             )
@@ -162,10 +171,12 @@ def layout(project):
                                                                       className='mr-2'),
                                                             dcc.Dropdown(
                                                                 options=[
+                                                                    {  'label': f"{c.lib1.name} + {c.lib2.name}",
+                                                                        'value': f"{c.lib1_id} + {c.lib2_id}" } for c in project.combinations
                                                                 ],
                                                                 id='combination',
                                                                 className='flex-grow-1',
-                                                                multi=True
+                                                                #multi=True
                                                             )
                                                         ])
                                                     )
@@ -174,7 +185,7 @@ def layout(project):
                                         ]),
                                         dbc.Row([
                                             dbc.Col(
-                                                ###                                                    width=6,
+                                                    width=6,
                                                     className="mt-2 mb-4",
                                                     children=[
                                                         dbc.Form(
@@ -188,6 +199,7 @@ def layout(project):
                                                                            anchor_metrics
                                                                     ],
                                                                     id='xaxis',
+                                                                    value = 'synergy_delta_xmid',
                                                                     className='flex-grow-1'
                                                                 )
                                                             ])
@@ -210,6 +222,7 @@ def layout(project):
                                                                         anchor_metrics
                                                                 ],
                                                                 id='yaxis',
+                                                                value = 'synergy_delta_emax',
                                                                 className='flex-grow-1'
 
                                                             )
@@ -300,12 +313,13 @@ def load_heatmap(display_opt, url):
     dash.dependencies.Input('cancertype','value'),
     dash.dependencies.Input('library','value'),
     dash.dependencies.Input('anchor','value'),
+     dash.dependencies.Input('combination','value'),
     dash.dependencies.Input('xaxis','value'),
     dash.dependencies.Input('yaxis','value')],
     # dash.dependencies.Input('project-id', 'children')]
     [dash.dependencies.State("url", "pathname")]
 )
-def load_flexiscatter(tissue,cancertype,library,anchor,xaxis,yaxis,url):
-    return anchor_flexiscatter(tissue,cancertype,library,anchor,xaxis,yaxis,url,df)
+def load_flexiscatter(tissue,cancertype,library,anchor,combination,xaxis,yaxis,url):
+    return anchor_flexiscatter(tissue,cancertype,library,anchor,combination,xaxis,yaxis,url,df)
 
 

@@ -123,45 +123,45 @@ well_metrics = {
 }
 
 anchor_metrics = {
-    'delta_ic50':
+    'synergy_delta_xmid':
         {
             'label':"Delta IC50",
-            'value':"delta_ic50"
+            'value':"synergy_delta_xmid"
         },
-    'delta_emax':
+    'synergy_delta_emax':
         {
             'label':"Delta Emax",
-            'value':"delta_emax"
+            'value':"synergy_delta_emax"
         },
-    'combo_emax':
+    'synergy_obs_emax':
         {
             'label':"Combo Emax",
-            'value':"combo_emax"
+            'value':"synergy_obs_emax"
         },
-    'lib_ic50':
+    'library_xmid':
         {
             'label':"Library IC50",
-            'value':"lib_ic50"
+            'value':"library_xmid"
         },
-    'lib_emax':
+    'library_emax':
         {
             'label':"Library Emax",
-            'value':"lib_emax"
+            'value':"library_emax"
         },
     'anchor_viability':
         {
             'label':"Anchor Viability",
             'value':"anchor_viability"
         },
-    'bliss_ic50':
+    'synergy_exp_xmid':
         {
             'label':"Bliss IC50",
-            'value':"bliss_ic50"
+            'value':"synergy_exp_xmid"
         },
-    'bliss_emax':
+    'synergy_exp_emax':
         {
             'label':"Bliss Emax",
-            'value':"bliss_emax"
+            'value':"synergy_exp_emax"
         },
 
 }
@@ -421,3 +421,11 @@ def add_label_vars(plot_data):
     return plot_data
 
 float_formatter = lambda x: f"{x:.3e}"
+
+def anchor_hover_label(fig_data):
+    return [anchor_hover_from_df(a) for a in fig_data.itertuples()]
+
+def anchor_hover_from_df(a):
+    return f"{a.library_name}({a.library_target}) - {a.anchor_name}({a.anchor_target}) <br />"\
+           f"Cell line: {a.cell_line_name} <br />"\
+           f"Tissue: {a.tissue}"

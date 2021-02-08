@@ -191,11 +191,16 @@ def get_correlation(summary, x_axis_field, y_axis_field):
 
 def get_scatter(summary, x_axis_field, y_axis_field, color_field):
     color_values = {}
+    print(color_field)
     if color_field != 'default':
         for i, v in enumerate(summary[color_field].unique()):
+            print(i)
+            print(v)
             color_values[v] = plot_colors[i % len(plot_colors)]
 
+    print(color_values)
     fig_data = summary
+
     return {
         'data': [
             go.Scattergl(
