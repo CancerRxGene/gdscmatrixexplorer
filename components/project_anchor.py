@@ -6,7 +6,7 @@ import dash_html_components as html
 from app import app
 from db import session
 import pandas as pd
-from models import Drug, AnchorCombi, Project, Model
+from models import Drug, AnchorCombi, Project, Model, Combination
 from components.anchor_heatmap import layout as anchor_heatmap
 from components.anchor_flexiscatter import cached_update_scatter
 from components.breadcrumbs import breadcrumb_generator as crumbs
@@ -16,29 +16,19 @@ colour_by = {
     'Tissue': 'tissue',
     'Cancer Type': 'cancer_type',
 }
-# 'Tissue', 'Cancer Type', 'Combination', 'Anchhor', 'Library']
-# get the data frame
-anchor_combi = session.query(AnchorCombi.project_id,AnchorCombi.library_id,
-                             AnchorCombi.anchor_id, AnchorCombi.anchor_viability,
-                             AnchorCombi.library_emax,AnchorCombi.library_xmid,
-                             AnchorCombi.synergy_xmid,AnchorCombi.synergy_obs_emax,
-                             AnchorCombi.synergy_exp_emax,
-                             AnchorCombi.synergy_delta_xmid, AnchorCombi.synergy_delta_emax,
-                             AnchorCombi.tissue, AnchorCombi.cancer_type,
-                             AnchorCombi.cell_line_name,
-                             AnchorCombi.library_name,
-                             AnchorCombi.anchor_name,
-                             AnchorCombi.library_target,
-                             AnchorCombi.anchor_target
-                             )
-
-df = pd.read_sql(anchor_combi.statement,session.bind)
 
 def layout(project):
+    tissue_query = session.query(AnchorCombi.tissue.distinct()).filter(AnchorCombi.project_id == project.id)
+    tissue_df = pd.read_sql(tissue_query.statement,session.bind)
 
-    filtered_df = df[(df.project_id == project.id)]
-    lib_drugs = filtered_df['library_id'].drop_duplicates()
-    anchor_drugs = filtered_df['anchor_id'].drop_duplicates()
+    ct_query = session.query(AnchorCombi.cancer_type.distinct()).filter(AnchorCombi.project_id == project.id)
+    ct_df = pd.read_sql(ct_query.statement,session.bind)
+
+    drugs_query = session.query(Combination).filter(Combination.project_id == project.id).distinct()
+    drugs_df = pd.read_sql(drugs_query.statement, session.bind)
+
+    lib_drugs = drugs_df['lib1_id']
+    anchor_drugs = drugs_df['lib2_id']
 
     # create list of lib names
     lib_names = {}
@@ -52,9 +42,9 @@ def layout(project):
         an_drug = session.query(Drug).get(ac)
         anchor_names[an_drug.name] = ac
 
-
-    cancer_types = filtered_df['cancer_type'].drop_duplicates().sort_values()
-    tissues = filtered_df['tissue'].drop_duplicates().sort_values()
+    #
+    # cancer_types = filtered_df['cancer_type'].drop_duplicates().sort_values()
+    # tissues = filtered_df['tissue'].drop_duplicates().sort_values()
 
     return [
          crumbs([("Home", "/"), (project.name, "/" + project.slug)]),
@@ -110,7 +100,7 @@ def layout(project):
                                                             dbc.Label('Tissue', html_for='tissue', className='mr-2'),
                                                             dcc.Dropdown(
                                                                 options=[
-                                                                    {'label': c, 'value': c} for c in tissues
+                                                                     {'label': c[0], 'value': c[0]} for c in tissue_df.values
                                                                 ],
                                                                 id='tissue',
                                                                 className='flex-grow-1',
@@ -124,7 +114,7 @@ def layout(project):
                                                             dbc.Label('Cancer type', className="w-25 justify-content-start"),
                                                             dcc.Dropdown(
                                                                 options=[
-                                                                    {'label': c, 'value': c} for c in cancer_types
+                                                                    {'label': c[0], 'value': c[0]} for c in ct_df.values
                                                                 ],
                                                                 id='cancertype',
                                                                 className='flex-grow-1',
@@ -315,6 +305,7 @@ def load_heatmap(display_opt, url):
 
 @app.callback(
     dash.dependencies.Output('flexiscatter',"figure"),
+     #dash.dependencies.Output('cancertype',"options")],
     [dash.dependencies.Input('tissue','value'),
     dash.dependencies.Input('cancertype','value'),
     dash.dependencies.Input('library','value'),
@@ -324,7 +315,6 @@ def load_heatmap(display_opt, url):
     dash.dependencies.Input('xaxis','value'),
     dash.dependencies.Input('yaxis','value'),
     dash.dependencies.Input('project-id', 'children')]
-   # [dash.dependencies.State("url", "pathname")]
 )
 def load_flexiscatter(tissue,cancertype,library,anchor,combination,color,xaxis,yaxis,project_id):
     return cached_update_scatter(tissue,cancertype,library,anchor,combination,color,xaxis,yaxis,project_id)

@@ -5,10 +5,10 @@ import sqlalchemy as sa
 import plotly.graph_objs as go
 import pandas as pd
 from models import Drug, AnchorCombi, Project, Model
-from utils import anchor_metrics
+from utils import anchor_metrics, get_all_cancer_types
 from utils import plot_colors, anchor_hover_label
 
-@lru_cache()
+@lru_cache(maxsize=1000)
 def cached_update_scatter(tissue,cancertype,library,anchor,combintation,color,xaxis,yaxis, project_id):
     # get the data frame
     anchor_combi = session.query(AnchorCombi.project_id, AnchorCombi.library_id,
@@ -23,10 +23,10 @@ def cached_update_scatter(tissue,cancertype,library,anchor,combintation,color,xa
                                  AnchorCombi.anchor_name,
                                  AnchorCombi.library_target,
                                  AnchorCombi.anchor_target
-                                 )
+                                 ).filter(AnchorCombi.project_id == int(project_id))
 
-    df = pd.read_sql(anchor_combi.statement, session.bind)
-    filtered_df = df[(df.project_id == project_id)]
+    filtered_df = pd.read_sql(anchor_combi.statement, session.bind)
+    #filtered_df = df[(df.project_id == project_id)]
 
     if (combintation):
         drug = combintation.split(" + ")
@@ -44,7 +44,7 @@ def cached_update_scatter(tissue,cancertype,library,anchor,combintation,color,xa
         filtered_df = filtered_df[filtered_df.tissue == tissue]
     if (cancertype):
         filtered_df = filtered_df[filtered_df.cancer_type == cancertype]
-
+    #
     # if (tissue):
     #     cancer_type_options = [
     #         ct[0]
