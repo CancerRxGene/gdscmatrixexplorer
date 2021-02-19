@@ -110,7 +110,15 @@ def generate_vialibity_boxplot(anc_df,anc_conc_type):
     final_df = anc_via_df.append(lib_emax_df).append(bliss_emax_df).append(combo_emax_df)
 
     fig = px.strip(final_df, x='type', y='Viability %', title= title,
-                   labels= {'type':' '})
+                   labels= {'type':' '},
+                  # color = "cell_line_name",
+                   hover_data=[
+                       #"type", "Viability %",
+                       "cell_line_name"
+                      # , "tissue", "cancer_type"
+                   ],
+                   hover_name = "cell_line_name"
+     )
     # fig = px.box(final_df, x='type', y='Viability %', title=title,points="all",
     #                hover_data=["type", "Viability %", "cell_line_name"])
 
@@ -131,7 +139,11 @@ def generate_ic50_boxplot(anc_df,anc_conc_type):
     title = 'Anchor ' + anc_conc_type
     final_df = lib_ic50_df.append(combo_ic50_df)
 
-    fig = px.strip(final_df, x='type', y='Norm. drug conc.', title = ' ', labels= {'type':' '})
+    fig = px.strip(final_df, x='type', y='Norm. drug conc.',
+                   title = ' ', labels= {'type':' '},
+                   hover_data=["type", "Norm. drug conc.", "cell_line_name"],
+                   hover_name="cell_line_name"
+                   )
     # fig = px.box(final_df, x='type', y='Norm. drug conc', title=title, points="all")
 
     return fig
@@ -147,7 +159,11 @@ def generate_delta_emax_boxplot(anc_df,anc_conc_type):
     anc_df_per_conc = anc_df.loc[anc_df['anchor_conc'] == conc]
 
     delta_emax_df = get_delta_emax_df(anc_df_per_conc)
-    fig = px.strip(delta_emax_df,x='type',y='Delta Viability (%)',title=' ', labels= {'type':' '})
+    fig = px.strip(delta_emax_df,x='type',y='Delta Viability (%)',
+                   title=' ', labels= {'type':' '},
+                   hover_data=["type", "Delta Viability (%)", "cell_line_name"],
+                   hover_name="cell_line_name"
+                   )
     return fig
 
 def generate_delta_ic50_boxplot(anc_df, anc_conc_type):
@@ -161,33 +177,41 @@ def generate_delta_ic50_boxplot(anc_df, anc_conc_type):
     anc_df_per_conc = anc_df.loc[anc_df['anchor_conc'] == conc]
 
     delta_emax_df = get_delta_ic50_df(anc_df_per_conc)
-    fig = px.strip(delta_emax_df, x='type', y='Delta Norm. drug conc.', title=' ', labels= {'type':' '})
+    fig = px.strip(delta_emax_df, x='type', y='Delta Norm. drug conc.',
+                   title=' ', labels= {'type':' '},
+                   hover_data=["type", "Delta Norm. drug conc.", "cell_line_name"],
+                   hover_name="cell_line_name"
+                   )
     return fig
 
 def get_emax_df(df,type,col_name):
     #type_emax_df = df[col_name].to_frame()
-    type_emax_df = df[[col_name,'cell_line_name']]
+    type_emax_df = df[[col_name,'cell_line_name','cancer_type','tissue']]
 
     type_emax_df[col_name].update(type_emax_df[col_name] * 100)
-    type_emax_df['type'] = type
+    type_emax_df['type'] = type.replace('_',' ')
+
     type_emax_df = type_emax_df.rename(columns = { col_name: 'Viability %'})
     return type_emax_df
 
 def get_ic50_df(df,type,col_name):
-    type_ic50_df = df[col_name].to_frame()
-    type_ic50_df['type'] = type
+    #type_ic50_df = df[col_name].to_frame()
+    type_ic50_df = df[[col_name, 'cell_line_name', 'cancer_type', 'tissue']]
+    type_ic50_df['type'] = type.replace('_',' ')
     type_ic50_df = type_ic50_df.rename(columns = { col_name: 'Norm. drug conc.'})
     return type_ic50_df
 
 def get_delta_ic50_df(df):
-    delta_ic50_df = df['synergy_delta_xmid'].to_frame()
-    delta_ic50_df['type'] = 'Delta_IC50'
+    #delta_ic50_df = df['synergy_delta_xmid'].to_frame()
+    delta_ic50_df = df[['synergy_delta_xmid', 'cell_line_name', 'cancer_type', 'tissue']]
+    delta_ic50_df['type'] = 'Delta IC50'
     delta_ic50_df = delta_ic50_df.rename(columns = { 'synergy_delta_xmid':'Delta Norm. drug conc.' })
     return delta_ic50_df
 
 def get_delta_emax_df(df):
-    delta_emax_df = df['synergy_delta_emax'].to_frame()
-    delta_emax_df['type'] = 'Delta_Emax'
+    #delta_emax_df = df['synergy_delta_emax'].to_frame()
+    delta_emax_df = df[['synergy_delta_emax', 'cell_line_name', 'cancer_type', 'tissue']]
+    delta_emax_df['type'] = 'Delta Emax'
     delta_emax_df['synergy_delta_emax'].update(delta_emax_df['synergy_delta_emax'] * 100)
     delta_emax_df = delta_emax_df.rename(columns = { 'synergy_delta_emax' : 'Delta Viability (%)'})
     return delta_emax_df

@@ -1,11 +1,9 @@
 from functools import lru_cache
 from db import session
-import dash_html_components as html
-import sqlalchemy as sa
 import plotly.graph_objs as go
 import pandas as pd
-from models import Drug, AnchorCombi, Project, Model
-from utils import anchor_metrics, get_all_cancer_types
+from models import AnchorCombi
+from utils import anchor_metrics
 from utils import plot_colors, anchor_hover_label
 
 @lru_cache(maxsize=1000)
@@ -25,8 +23,9 @@ def cached_update_scatter(tissue,cancertype,library,anchor,combintation,color,xa
                                  AnchorCombi.anchor_target
                                  ).filter(AnchorCombi.project_id == int(project_id))
 
+    #anchor_combi = session.query(AnchorCombi).filter(AnchorCombi.project_id == int(project_id))
+
     filtered_df = pd.read_sql(anchor_combi.statement, session.bind)
-    #filtered_df = df[(df.project_id == project_id)]
 
     if (combintation):
         drug = combintation.split(" + ")
