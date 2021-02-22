@@ -2,9 +2,9 @@ from functools import lru_cache
 from db import session
 import plotly.graph_objs as go
 import pandas as pd
-from models import AnchorCombi
+from models import AnchorCombi, Model
 from utils import anchor_metrics
-from utils import plot_colors, anchor_hover_label
+from utils import plot_colors, anchor_hover_label,get_all_cancer_types
 
 @lru_cache(maxsize=1000)
 def cached_update_scatter(tissue,cancertype,library,anchor,combintation,color,xaxis,yaxis, project_id):
@@ -45,22 +45,24 @@ def cached_update_scatter(tissue,cancertype,library,anchor,combintation,color,xa
         filtered_df = filtered_df[filtered_df.tissue.isin(tissue)]
     if (cancertype):
         filtered_df = filtered_df[filtered_df.cancer_type.isin(cancertype)]
-    #
+
     # if (tissue):
+    #     print(tissue)
     #     cancer_type_options = [
     #         ct[0]
     #         for ct in session.query(Model.cancer_type)
-    #            # .filter(Model.tissue.in_(tissues))\
-    #             .filter(Model.tissue == tissue) \
+    #             .filter(Model.tissue.in_(tissue))\
+    #            # .filter(Model.tissue == tissue) \
     #             .distinct()\
     #             .all()]
     # else:
     #     cancer_type_options = get_all_cancer_types()
     #
     # ct_options = [{'label': c, 'value': c} for c in sorted(cancer_type_options)]
+    # print(ct_options)
 
     return layout(filtered_df,color,xaxis,yaxis)
-             # ct_options)
+   #           ct_options)
 
 
 def layout(filtered_df,color,xaxis,yaxis):

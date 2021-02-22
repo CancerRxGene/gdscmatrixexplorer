@@ -75,6 +75,7 @@ def layout(url):
             html.Div(className="d-none", id='project-id', children=project.id)
         ]
     else:
+        print(project.name)
         return project_anchor(project)
 
 @app.callback(

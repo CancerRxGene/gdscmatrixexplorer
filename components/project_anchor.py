@@ -17,30 +17,7 @@ colour_by = {
     'Cancer Type': 'cancer_type',
 }
 
-# get the data frame
-# anchor_combi = session.query(AnchorCombi.project_id, AnchorCombi.library_id,
-#                              AnchorCombi.anchor_id, AnchorCombi.anchor_viability,
-#                              AnchorCombi.library_emax, AnchorCombi.library_xmid,
-#                              AnchorCombi.synergy_xmid, AnchorCombi.synergy_obs_emax,
-#                              AnchorCombi.synergy_exp_emax,
-#                              AnchorCombi.synergy_delta_xmid, AnchorCombi.synergy_delta_emax,
-#                              AnchorCombi.tissue, AnchorCombi.cancer_type,
-#                              AnchorCombi.cell_line_name,
-#                              AnchorCombi.library_name,
-#                              AnchorCombi.anchor_name,
-#                              AnchorCombi.library_target,
-#                              AnchorCombi.anchor_target
-#                              )
-# df = pd.read_sql(anchor_combi.statement, session.bind)
-
 def layout(project):
-    # filtered_df = df[(df.project_id == project.id)]
-    # lib_drugs = filtered_df['library_id'].drop_duplicates()
-    # anchor_drugs = filtered_df['anchor_id'].drop_duplicates()
-
-    # cancer_types = filtered_df['cancer_type'].drop_duplicates().sort_values()
-    # tissues = filtered_df['tissue'].drop_duplicates().sort_values()
-
     df_query = session.query(AnchorCombi).filter(AnchorCombi.project_id ==  project.id)
     df = pd.read_sql(df_query.statement, session.bind)
     cancer_types = df['cancer_type'].drop_duplicates().sort_values()
@@ -57,22 +34,6 @@ def layout(project):
     synergy_count = synergy['cell_line_name'].size
 
     synergy_frequency = round(synergy_count/total_count * 100, 2)
-
-
-    # tissue_query = session.query(AnchorCombi.tissue.distinct()).filter(AnchorCombi.project_id == project.id)
-    # tissue_df = pd.read_sql(tissue_query.statement,session.bind)
-    #
-    #
-    # ct_query = session.query(AnchorCombi.cancer_type.distinct()).filter(AnchorCombi.project_id == project.id)
-    # ct_df = pd.read_sql(ct_query.statement,session.bind)
-
-
-
-    # drugs_query = session.query(Combination).filter(Combination.project_id == project.id).distinct()
-    # drugs_df = pd.read_sql(drugs_query.statement, session.bind)
-    #
-    # lib_drugs = drugs_df['lib1_id'].drop_duplicates()
-    # anchor_drugs = drugs_df['lib2_id'].drop_duplicates()
 
     # create list of lib names
     lib_names = {}
@@ -196,7 +157,6 @@ def layout(project):
                                                                 dbc.Label('Tissue', html_for='tissue', className='mr-2'),
                                                                 dcc.Dropdown(
                                                                     options=[
-                                                                         #{'label': c[0], 'value': c[0]} for c in tissue_df.values
                                                                         {'label': c, 'value': c} for c in tissues
                                                                     ],
                                                                     id='tissue',
@@ -211,11 +171,10 @@ def layout(project):
                                                                 dbc.Label('Cancer type', className="w-25 justify-content-start"),
                                                                 dcc.Dropdown(
                                                                     options=[
-                                                                        #{'label': c[0], 'value': c[0]} for c in ct_df.values
                                                                         {'label': c, 'value': c} for c in cancer_types
 
                                                                     ],
-                                                                    id='cancertype',
+                                                                    id='cancertype-select',
                                                                     className='flex-grow-1',
                                                                     multi=True
                                                                 )
@@ -398,15 +357,14 @@ def layout(project):
     dash.dependencies.Output("synergy_heatmap", "figure"),
     [dash.dependencies.Input("display_opt", "value"),
      dash.dependencies.Input('project-id', 'children')])
-    #[dash.dependencies.State("url", "pathname")])
 def load_heatmap(display_opt, url):
     return anchor_heatmap(display_opt,url)
 
 @app.callback(
-    dash.dependencies.Output('flexiscatter',"figure"),
-     #dash.dependencies.Output('cancertype',"options")],
+    dash.dependencies.Output('flexiscatter','figure'),
+    # dash.dependencies.Output('cancertype-select','options')],
     [dash.dependencies.Input('tissue','value'),
-    dash.dependencies.Input('cancertype','value'),
+    dash.dependencies.Input('cancertype-select','value'),
     dash.dependencies.Input('library','value'),
     dash.dependencies.Input('anchor','value'),
     dash.dependencies.Input('combination','value'),
