@@ -28,21 +28,23 @@ def cached_update_scatter(tissue,cancertype,library,anchor,combintation,color,xa
     filtered_df = pd.read_sql(anchor_combi.statement, session.bind)
 
     if (combintation):
-        drug = combintation.split(" + ")
-        lib_id = int(drug[0])
-        anchor_id = int(drug[1])
-        filtered_df = filtered_df[(filtered_df.library_id == lib_id) & (filtered_df.anchor_id == anchor_id)]
+        # add a new column in the dataframe
+        new_column = [str(l)+" + "+str(a) for l, a in zip(filtered_df['library_id'].tolist(), filtered_df['anchor_id'].tolist())]
+        filtered_df['combination'] = new_column
+
+        #filter using new column
+        filtered_df = filtered_df[filtered_df.combination.isin(combintation)]
 
     else:
         if (library):
-            filtered_df = filtered_df[filtered_df.library_id == library]
+            filtered_df = filtered_df[filtered_df.library_id.isin(library)]
         if (anchor):
-            filtered_df = filtered_df[filtered_df.anchor_id == anchor]
+            filtered_df = filtered_df[filtered_df.anchor_id.isin(anchor)]
 
     if (tissue):
-        filtered_df = filtered_df[filtered_df.tissue == tissue]
+        filtered_df = filtered_df[filtered_df.tissue.isin(tissue)]
     if (cancertype):
-        filtered_df = filtered_df[filtered_df.cancer_type == cancertype]
+        filtered_df = filtered_df[filtered_df.cancer_type.isin(cancertype)]
     #
     # if (tissue):
     #     cancer_type_options = [

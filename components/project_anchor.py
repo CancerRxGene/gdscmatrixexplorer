@@ -133,7 +133,7 @@ def layout(project):
                                                     html.Tr([
 
                                                         html.Td(html.Strong("Overall frequency of synergy")),
-                                                        html.Td(synergy_frequency),
+                                                        html.Td(str(synergy_frequency) + "%"),
 
                                                     ]),
                                                 ])
@@ -201,7 +201,7 @@ def layout(project):
                                                                     ],
                                                                     id='tissue',
                                                                     className='flex-grow-1',
-                                                                 #   multi=True
+                                                                    multi=True
                                                                 )
                                                             ])
                                                         ),
@@ -217,7 +217,7 @@ def layout(project):
                                                                     ],
                                                                     id='cancertype',
                                                                     className='flex-grow-1',
-                                                                  #  multi=True
+                                                                    multi=True
                                                                 )
                                                             ])
                                                         )
@@ -237,7 +237,7 @@ def layout(project):
                                                                     ],
                                                                     id='anchor',
                                                                     className='flex-grow-1',
-                                                                    #multi=True
+                                                                    multi=True
                                                                 )
                                                             ])
                                                         ),
@@ -252,7 +252,7 @@ def layout(project):
                                                                     ],
                                                                     id='library',
                                                                     className='flex-grow-1',
-                                                                   # multi=True
+                                                                    multi=True
                                                                 )
                                                             ])
                                                         ),
@@ -269,7 +269,7 @@ def layout(project):
                                                                     ],
                                                                     id='combination',
                                                                     className='flex-grow-1',
-                                                                    #multi=True
+                                                                    multi=True
                                                                 )
                                                             ])
                                                         )
@@ -341,7 +341,7 @@ def layout(project):
                                                                     id='color',
                                                                     value='tissue',
                                                                     className='flex-grow-1',
-                                                                   # multi=True
+
                                                                 )
                                                             ])
                                                         )
@@ -416,5 +416,15 @@ def load_heatmap(display_opt, url):
     dash.dependencies.Input('project-id', 'children')]
 )
 def load_flexiscatter(tissue,cancertype,library,anchor,combination,color,xaxis,yaxis,project_id):
+    if isinstance(tissue, list):
+        tissue = tuple(tissue)
+    if isinstance(cancertype, list):
+        cancertype = tuple(cancertype)
+    if isinstance(library, list):
+        library = tuple(library)
+    if isinstance(anchor, list):
+        anchor = tuple(anchor)
+    if isinstance(combination, list):
+        combination = tuple(combination)
     return cached_update_scatter(tissue,cancertype,library,anchor,combination,color,xaxis,yaxis,project_id)
 

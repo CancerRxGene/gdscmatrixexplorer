@@ -27,7 +27,7 @@ def layout(url):
         return html.Div([
             crumbs([("Home", "/"), (combination.project.name, f"/project/{combination.project.slug}"),
                     (f"{combination.lib1.name} + {combination.lib2.name}",)]),
-            anchor_intro(combination),
+            anchor_intro(project,combination),
             anchor_overview_plot(combination)
         ])
 
