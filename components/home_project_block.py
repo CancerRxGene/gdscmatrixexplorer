@@ -17,3 +17,10 @@ def project_block(project):
         ),
         width=3
     )
+
+def project_card(projects,type):
+    return dbc.Row(className='mt-5',
+                children=
+                  [dbc.Col(width=12, children=
+                      html.H3(f"{type}", className='mt-5 mb-3'))] +
+                         [project_block(p) for p in projects])
