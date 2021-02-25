@@ -11,8 +11,8 @@ def layout(project,combination):
                 dbc.Col(width=12, children=[
                     html.H3(project.name),
                     html.H1([
-                        html.Strong(f"{combination.lib1.name}"), " + ",
-                        html.Strong(f"{combination.lib2.name}")
+                        html.Strong(f"{combination.lib2.name}"), " + ",
+                        html.Strong(f"{combination.lib1.name}")
                     ]),
                    # html.P("Combination Report", className='lead')
                 ])
@@ -26,21 +26,9 @@ def layout(project,combination):
                                 dbc.Row([
                                     dbc.Col(width=6, children=[
                                         html.Tr([
-                                            html.Td(html.Strong("Name")),
-                                            html.Td(combination.lib1.name)
-                                        ]),
-                                        html.Tr([
-                                            html.Td(html.Strong("Target")),
-                                            html.Td(combination.lib1.target)
-                                        ]),
+                                            html.Td(html.Strong("Anchor"))
 
-                                        html.Tr([
-                                            html.Td(html.Strong("Max. conc.")),
-                                            # html.Td(f"{lib1_maxc} µM")
-                                        ])
-                                        ]
-                                    ),
-                                    dbc.Col(width=6, children=[
+                                        ]),
                                         html.Tr([
                                             html.Td(html.Strong("Name")),
                                             html.Td(combination.lib2.name)
@@ -48,6 +36,26 @@ def layout(project,combination):
                                         html.Tr([
                                             html.Td(html.Strong("Target")),
                                             html.Td(combination.lib2.target)
+                                        ]),
+
+                                        html.Tr([
+                                            html.Td(html.Strong("Max. conc.")),
+                                            # html.Td(f"{lib2_maxc} µM")
+                                        ])
+                                        ]
+                                    ),
+                                    dbc.Col(width=6, children=[
+                                        html.Tr([
+                                            html.Td(html.Strong("Library"))
+
+                                        ]),
+                                        html.Tr([
+                                            html.Td(html.Strong("Name")),
+                                            html.Td(combination.lib1.name)
+                                        ]),
+                                        html.Tr([
+                                            html.Td(html.Strong("Target")),
+                                            html.Td(combination.lib1.target)
                                         ]),
 
                                         html.Tr([

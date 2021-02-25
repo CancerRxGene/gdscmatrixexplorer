@@ -35,13 +35,13 @@ def layout(project):
 
     synergy_frequency = round(synergy_count/total_count * 100, 2)
 
-    # create list of lib names
+    # create lib names dictionary
     lib_names = {}
     for l in lib_drugs:
         l_drug = session.query(Drug).get(l)
         lib_names[l_drug.name] = l
 
-    # create list of anchor names
+    # create anchor names dictionary
     anchor_names = {}
     for ac in anchor_drugs:
         an_drug = session.query(Drug).get(ac)
@@ -223,8 +223,8 @@ def layout(project):
                                                                           className='mr-2'),
                                                                 dcc.Dropdown(
                                                                     options=[
-                                                                        {  'label': f"{c.lib1.name} + {c.lib2.name}",
-                                                                            'value': f"{c.lib1_id} + {c.lib2_id}" } for c in project.combinations
+                                                                        { 'label': f" {c.lib2.name} + {c.lib1.name}",
+                                                                            'value': f"{c.lib2_id} + {c.lib1_id}"} for c in project.combinations
                                                                     ],
                                                                     id='combination',
                                                                     className='flex-grow-1',
@@ -338,9 +338,9 @@ def layout(project):
                                         action=True,
                                         children=[
                                             dbc.ListGroupItemHeading(
-                                                f"{c.lib1.name} + {c.lib2.name}"),
+                                                f"{c.lib2.name} + {c.lib1.name}"),
                                             dbc.ListGroupItemText(
-                                                f"{c.lib1.target} + {c.lib2.target}")
+                                                f"{c.lib2.target} + {c.lib1.target}")
                                         ]
                                     ) for c in project.combinations
                                 ]) #listgroup

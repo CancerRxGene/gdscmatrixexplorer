@@ -29,7 +29,9 @@ def cached_update_scatter(tissue,cancertype,library,anchor,combintation,color,xa
 
     if (combintation):
         # add a new column in the dataframe
-        new_column = [str(l)+" + "+str(a) for l, a in zip(filtered_df['library_id'].tolist(), filtered_df['anchor_id'].tolist())]
+        #new_column = [str(l)+" + "+str(a) for l, a in zip(filtered_df['library_id'].tolist(), filtered_df['anchor_id'].tolist())]
+        new_column = [str(a) + " + " + str(l) for a, l in
+                      zip(filtered_df['anchor_id'].tolist(), filtered_df['library_id'].tolist())]
         filtered_df['combination'] = new_column
 
         #filter using new column

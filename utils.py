@@ -426,7 +426,7 @@ def anchor_hover_label(fig_data):
     return [anchor_hover_from_df(a) for a in fig_data.itertuples()]
 
 def anchor_hover_from_df(a):
-    return f"{a.library_name}({a.library_target}) - {a.anchor_name}({a.anchor_target}) <br />"\
+    return f"{a.anchor_name}({a.anchor_target}) - {a.library_name}({a.library_target}) <br />"\
            f"Cell line: {a.cell_line_name} <br />"\
            f"Tissue: {a.tissue} <br />"\
            f"Cancer Type: {a.cancer_type}"

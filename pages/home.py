@@ -16,8 +16,9 @@ def layout(*args, **kwargs):
         html.H1("Genomics of Drug Sensitivity in Cancer", className='display-4 text-center'),
         html.P("Drug Combination Matrix Explorer", className="lead text-center"),
         html.P("An interactive tool for the interpretation of bitherapy data generated at the Wellcome Sanger Institute.", className='text-center post-lead'),
-        project_card(matrix_projects,"Matrix projects"),
-        project_card(anchor_projects,'Anchor projects')
+        project_card(anchor_projects, 'Anchor projects'),
+        project_card(matrix_projects,"Matrix projects")
+
 
         # dbc.Row(className='mt-5',
         #         children=[dbc.Col(width=12, children=html.H3("Screening Projects", className='mt-5 mb-3'))] +

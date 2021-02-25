@@ -68,7 +68,7 @@ def dropdown_handler(pathname):
                         generate_navitem("Home", "/", "home", page_type),
                         dbc.DropdownMenu(
                             children=
-                            [dbc.DropdownMenuItem(f"{p.name}",
+                            [dbc.DropdownMenuItem(f"{p.name} ({p.combination_type})",
                                                   href=f"/project/{p.slug}")
                              for p in all_projects],
                             nav=True,
