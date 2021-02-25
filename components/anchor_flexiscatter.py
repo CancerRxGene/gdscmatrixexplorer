@@ -62,6 +62,9 @@ def cached_update_scatter(tissue,cancertype,library,anchor,combintation,color,xa
     #
     # ct_options = [{'label': c, 'value': c} for c in sorted(cancer_type_options)]
     # print(ct_options)
+    # add combo_id column to df for color by combination use
+    filtered_df['combo_id'] = filtered_df.project_id.astype(str) + "::" + filtered_df.anchor_id.astype(str) + "::" + filtered_df.library_id.astype(str)
+
 
     return layout(filtered_df,color,xaxis,yaxis)
    #           ct_options)

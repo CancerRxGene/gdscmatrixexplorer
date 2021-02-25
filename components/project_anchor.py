@@ -15,6 +15,7 @@ from utils import get_all_tissues, get_all_cancer_types, anchor_metrics
 colour_by = {
     'Tissue': 'tissue',
     'Cancer Type': 'cancer_type',
+    'Combination': 'combo_id'
 }
 
 def layout(project):
@@ -192,7 +193,7 @@ def layout(project):
                                                                 dbc.Label('Anchor', html_for='anchor', className='mr-2'),
                                                                 dcc.Dropdown(
                                                                     options=[
-                                                                        {'label': c, 'value': anchor_names[c]} for c in anchor_names.keys()
+                                                                        {'label': c, 'value': anchor_names[c]} for c in sorted(anchor_names.keys())
                                                                     ],
                                                                     id='anchor',
                                                                     className='flex-grow-1',
@@ -207,7 +208,7 @@ def layout(project):
                                                                           className='mr-2'),
                                                                 dcc.Dropdown(
                                                                     options=[
-                                                                        {'label': c, 'value': lib_names[c]} for c in lib_names.keys()
+                                                                        {'label': c, 'value': lib_names[c]} for c in sorted(lib_names.keys())
                                                                     ],
                                                                     id='library',
                                                                     className='flex-grow-1',
