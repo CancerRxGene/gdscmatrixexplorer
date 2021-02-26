@@ -76,6 +76,15 @@ def layout(filtered_df,color,xaxis,yaxis):
     x_title = anchor_metrics[xaxis]['label']
     y_title = anchor_metrics[yaxis]['label']
 
+    # Change viability metrics to a scale 0-100 %
+    viability_values = ['synergy_obs_emax','library_emax','anchor_viability']
+
+    if(xaxis in viability_values):
+        xaxis_data = xaxis_data.apply(lambda x: "{:.2%}".format(x))
+
+    if(yaxis in viability_values):
+        yaxis_data = yaxis_data.apply(lambda x: "{:.2%}".format(x))
+
     color_values = {}
 
     for i, v in enumerate(filtered_df[color].unique()):
@@ -92,13 +101,16 @@ def layout(filtered_df,color,xaxis,yaxis):
             },
         text=anchor_hover_label(filtered_df),
         opacity=0.7,
+
     ))
 
     fig.update_layout(
         xaxis={
                'title': x_title },
         yaxis={
-               'title': y_title}
+               'title': y_title},
+        height=800,
+        width=800,
     )
 
     return fig
