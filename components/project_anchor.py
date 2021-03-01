@@ -11,6 +11,7 @@ from components.anchor_heatmap import layout as anchor_heatmap
 from components.anchor_flexiscatter import cached_update_scatter
 from components.breadcrumbs import breadcrumb_generator as crumbs
 from utils import get_all_tissues, get_all_cancer_types, anchor_metrics
+from components.navigation.dropdowns import combo_links_from_project
 
 colour_by = {
     'Tissue': 'tissue',
@@ -48,9 +49,18 @@ def layout(project):
         an_drug = session.query(Drug).get(ac)
         anchor_names[an_drug.name] = ac
 
+    # sort combination
+    # combos = session.query(Combination).filter(Combination.project_id == project.id).all()
+    # sorted_combos = sorted(combos, key=lambda combos: combos.lib2.name)
+    # print(sorted_combos)
+    print(project.combinations)
+    combos = project.combinations
+    sorted_combos = sorted(combos, key=lambda combos: combos.lib2.name)
+
     return [
          crumbs([("Home", "/"), (project.name, "/" + project.slug)]),
-                dbc.Row([   #1
+                dbc.Row([ #1
+
                     dbc.Col(width=12, children=[   #2 col
                         dbc.Row([ # row l2
                             dbc.Col(children=[  #clo l2
@@ -320,6 +330,30 @@ def layout(project):
                             ]), #row
                     ]),  # 2 col
 
+                    ####
+                    dbc.Col(
+                        width=12,
+                        className='d-print-none align-self-stretch pb-3',
+                        children=
+                        html.Div(
+                            className="bg-white pt-3 px-4 pb-2 mb-3 border shadow-sm h-100",
+                            children=[
+                                html.H3(f"View combinations in {project.name} ( {project.combinations.count()} )", dbc.Badge(f" {project.combinations.count()} ",
+                                              color='info')),
+                                html.Hr(),
+                                dbc.Row(
+                                    className="pb-4",
+                                    children=dbc.Col(
+                                        width=12,
+                                        children=combo_links_from_project(project)
+                                    ),
+                                )
+                            ],
+                        )
+                    ),
+
+                    ####
+
                     ###
                     dbc.Col(width=3, children=[  #3 col
                         html.Div(
@@ -343,7 +377,8 @@ def layout(project):
                                             dbc.ListGroupItemText(
                                                 f"{c.lib2.target} + {c.lib1.target}")
                                         ]
-                                    ) for c in project.combinations
+                                  #  ) for c in project.combinations
+                                    ) for c in sorted_combos
                                 ]) #listgroup
                         ]) #html
                     ]) # 3 col

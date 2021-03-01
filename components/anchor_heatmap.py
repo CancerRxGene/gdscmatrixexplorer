@@ -74,16 +74,17 @@ def layout(display_opt,project_id):
                 ),
             layout = go.Layout(
                 xaxis={'type': 'category',
-                       'title': {"text": "Library",
-                                 "font": { "size": 30}
-                                }
+                       # 'title': {"text": "Library",
+                       #           "font": { "size": 20}
+                       #     }
+
                       },
                 width= 700,
                 height=600,
                 yaxis={'type': 'category',
-                       'title': {"text": "Anchor",
-                             "font": { "size": 30}
-                             }
+                       # 'title': {"text": "Anchor",
+                       #       "font": { "size": 20}
+                       #      }
                    },
             )
         )

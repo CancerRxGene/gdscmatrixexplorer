@@ -5,7 +5,7 @@ import pandas as pd
 
 from app import app
 from db import session
-from models import MatrixResult, Model
+from models import MatrixResult, Model, Project, Combination
 
 
 def generate_model_dropdown(model_list: pd.DataFrame,
@@ -28,6 +28,7 @@ def generate_model_dropdown(model_list: pd.DataFrame,
 
 
 def generate_combos_dropdown(combos: dict):
+    print(combos)
     return html.Div(
         className='mb-4',
         children=[
@@ -64,6 +65,26 @@ def model_links_from_combo(combination):
                                    max_tissue_width=50)
 
 
+def combo_links_from_project(project):
+    combos = session.query(Combination).filter(Combination.project_id == project.id).all()
+    sorted_combos = sorted(combos, key = lambda combos: combos.lib2.name)
+    print(sorted_combos)
+    return html.Div(
+        className='mb-4',
+        children=[
+            dcc.Location('project_combos-dropdown-url'),
+
+            dcc.Dropdown(
+                options=[
+                    {'label': f"{c.lib2.name} ({c.lib2.target}) + {c.lib1.name} ( {c.lib1.target})",
+                     'value':  f"{project.id}__{c.lib2.id}__{c.lib1.id}"}
+                    for c in sorted_combos
+                ],
+
+                id='project_dropdown-combos', className='mt-2')
+
+        ])
+
 def get_unique_models_from_matrices_query(matrices_query):
 
     return pd.read_sql(matrices_query.statement,
@@ -79,6 +100,7 @@ def combo_links_from_matrix(matrix):
         .filter(MatrixResult.model_id == matrix.model_id)\
         .order_by(MatrixResult.barcode.desc())\
         .all()
+    print(other_combos)
 
     dropdown_items = {f"{c.combination.lib1.name} + {c.combination.lib2.name}": f"{c.barcode}__{c.cmatrix}"
                       for c in other_combos if c not in matrix.all_replicates}
@@ -90,6 +112,10 @@ def url_from_dropdown_value(value):
     barcode, cmatrix = value.split('__')
     return f"/matrix/{barcode}/{cmatrix}"
 
+def url_for_combo(value):
+    project_id, anc_id, lib_id = value.split('__')
+    project = session.query(Project).get(project_id)
+    return f"/project/{project.slug}/combination/{lib_id}+{anc_id}"
 
 @app.callback(dash.dependencies.Output('models-dropdown-url', 'pathname'),
               [dash.dependencies.Input('dropdown-models', 'value')])
@@ -101,3 +127,11 @@ def dropdown_handler(dropdown_models_value):
               [dash.dependencies.Input('dropdown-combos', 'value')])
 def dropdown_handler(dropdown_combos_value):
     return url_from_dropdown_value(dropdown_combos_value)
+
+@app.callback(dash.dependencies.Output('project_combos-dropdown-url','pathname'),
+            [dash.dependencies.Input('project_dropdown-combos','value')])
+def dropdown_handler(dropdown_combos_value):
+    print(dropdown_combos_value)
+    url =  url_for_combo(dropdown_combos_value)
+    print(url)
+    return url

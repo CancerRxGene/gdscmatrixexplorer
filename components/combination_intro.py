@@ -5,7 +5,9 @@ from components.navigation.dropdowns import model_links_from_combo
 
 
 def layout(combination):
-
+    print(combination)
+    l = model_links_from_combo(combination)
+    print(l)
     single_agent_curves = combination.matrices[0].single_agent_curves
 
     if single_agent_curves[0].drug_id_lib == combination.lib1_id:
