@@ -73,11 +73,20 @@ def cached_update_scatter(tissue,cancertype,library,anchor,combintation,color,xa
 
 
 def layout(filtered_df,color,xaxis,yaxis):
-    # xaxis_data = filtered_df[xaxis]
-    # yaxis_data =  filtered_df[yaxis]
+    xaxis_data = filtered_df[xaxis]
+    yaxis_data =  filtered_df[yaxis]
     # print(xaxis_data)
     x_title = anchor_metrics[xaxis]['label']
     y_title = anchor_metrics[yaxis]['label']
+
+    # Change viability metrics to a scale 0-100 %
+    viability_values = ['synergy_obs_emax','library_emax','anchor_viability']
+
+    if(xaxis in viability_values):
+        filtered_df[xaxis] = filtered_df[xaxis].apply(lambda x: "{:.2%}".format(x))
+
+    if(yaxis in viability_values):
+        filtered_df[yaxis] = filtered_df[yaxis].apply(lambda x: "{:.2%}".format(x))
 
     color_values = {}
 
@@ -85,7 +94,6 @@ def layout(filtered_df,color,xaxis,yaxis):
         color_values[v] = plot_colors[i % len(plot_colors)]
 
     fig = go.Figure(
-
         #data=go.Scatter(
         data = px.scatter(
             filtered_df,
@@ -103,6 +111,19 @@ def layout(filtered_df,color,xaxis,yaxis):
         #     },
           #text=anchor_hover_label(filtered_df),
        # opacity=0.7,
+# =======
+#         data=go.Scatter(
+#         x = xaxis_data,
+#         y = yaxis_data,
+#         mode='markers',
+#         marker={
+#                 'size': 4,
+#                 'color': [color_values[x] for x in filtered_df[color]]
+#             },
+#         text=anchor_hover_label(filtered_df),
+#         opacity=0.7,
+#
+# >>>>>>> feature/wytest
     ))
 
     fig.update_layout(
