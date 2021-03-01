@@ -166,6 +166,21 @@ anchor_metrics = {
 
 }
 
+anchor_metrics_labels = {
+    "synergy_delta_xmid" : "Delta IC50",
+    "synergy_delta_emax" : "Delta Emax",
+    "synergy_obs_emax"   : "Combo Emax",
+    "library_xmid"       : "Library IC50",
+    "library_emax"       : "Library Emax",
+    "anchor_viability"   : "Anchor Viability",
+    "synergy_exp_xmid"   : "Bliss IC50",
+    "synergy_exp_emax"   : "Bliss Emax",
+    "tissue"             : "Tissue",
+    "cancer_type"        : "Cancer Type",
+    "cell_line_name"     : "Cell line name",
+    "combo_name"         : "Combination"
+}
+
 plot_colors = ["rgb(215,150,209)", "rgb(164,250,201)", "rgb(245,167,221)",
                "rgb(124,191,134)", "rgb(220,173,241)", "rgb(168,199,127)",
                "rgb(195,186,255)", "rgb(201,176,105)", "rgb(39,200,238)",
@@ -175,7 +190,10 @@ plot_colors = ["rgb(215,150,209)", "rgb(164,250,201)", "rgb(245,167,221)",
                "rgb(177,249,255)", "rgb(204,162,160)", "rgb(214,255,202)",
                "rgb(222,206,255)", "rgb(122,185,149)", "rgb(255,209,192)",
                "rgb(172,168,198)", "rgb(255,250,203)", "rgb(196,166,142)",
-               "rgb(197,237,225)", "rgb(170,175,138)", "rgb(255,235,208)"]
+               "rgb(197,237,225)", "rgb(170,175,138)", "rgb(255,235,208)",
+
+
+               ]
 
 synergy_colorscale = [
                 [0.0, 'rgb(0, 0, 255)'],

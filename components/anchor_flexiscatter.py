@@ -4,7 +4,7 @@ import plotly.graph_objs as go
 import plotly_express as px
 import pandas as pd
 from models import AnchorCombi, Model
-from utils import anchor_metrics
+from utils import anchor_metrics, anchor_metrics_labels
 from utils import plot_colors, anchor_hover_label,get_all_cancer_types
 
 @lru_cache(maxsize=1000)
@@ -92,15 +92,16 @@ def layout(filtered_df,color,xaxis,yaxis):
             x = xaxis,
             y = yaxis,
             color = color,
-            labels=dict(x=x_title, y=y_title),
-            hover_data=['tissue', 'cancer_type','cell_line_name']
+            labels= anchor_metrics_labels,
+            hover_data=['tissue', 'cancer_type','cell_line_name'],
+
            # x=[0, 1, 2, 3, 4], y=[0, 1, 4, 9, 16]
         # mode='markers',
         # marker={
         #         'size': 4,
         #         'color': [color_values[x] for x in filtered_df[color]]
         #     },
-       #text=anchor_hover_label(filtered_df),
+          #text=anchor_hover_label(filtered_df),
        # opacity=0.7,
     ))
 
