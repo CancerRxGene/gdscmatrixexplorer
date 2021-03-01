@@ -15,7 +15,7 @@ from utils import get_all_tissues, get_all_cancer_types, anchor_metrics
 colour_by = {
     'Tissue': 'tissue',
     'Cancer Type': 'cancer_type',
-    'Combination': 'combo_id'
+    'Combination': 'combo_name'
 }
 
 def layout(project):
@@ -51,7 +51,7 @@ def layout(project):
     return [
          crumbs([("Home", "/"), (project.name, "/" + project.slug)]),
                 dbc.Row([   #1
-                    dbc.Col(width=9, children=[   #2 col
+                    dbc.Col(width=12, children=[   #2 col
                         dbc.Row([ # row l2
                             dbc.Col(children=[  #clo l2
                                 html.Div(

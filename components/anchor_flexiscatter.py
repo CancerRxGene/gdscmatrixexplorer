@@ -1,6 +1,7 @@
 from functools import lru_cache
 from db import session
 import plotly.graph_objs as go
+import plotly_express as px
 import pandas as pd
 from models import AnchorCombi, Model
 from utils import anchor_metrics
@@ -32,6 +33,7 @@ def cached_update_scatter(tissue,cancertype,library,anchor,combintation,color,xa
         #new_column = [str(l)+" + "+str(a) for l, a in zip(filtered_df['library_id'].tolist(), filtered_df['anchor_id'].tolist())]
         new_column = [str(a) + " + " + str(l) for a, l in
                       zip(filtered_df['anchor_id'].tolist(), filtered_df['library_id'].tolist())]
+
         filtered_df['combination'] = new_column
 
         #filter using new column
@@ -63,16 +65,17 @@ def cached_update_scatter(tissue,cancertype,library,anchor,combintation,color,xa
     # ct_options = [{'label': c, 'value': c} for c in sorted(cancer_type_options)]
     # print(ct_options)
     # add combo_id column to df for color by combination use
-    filtered_df['combo_id'] = filtered_df.project_id.astype(str) + "::" + filtered_df.anchor_id.astype(str) + "::" + filtered_df.library_id.astype(str)
-
+    #filtered_df['combo_id'] = filtered_df.project_id.astype(str) + "::" + filtered_df.anchor_id.astype(str) + "::" + filtered_df.library_id.astype(str)
+    filtered_df['combo_name'] = filtered_df.anchor_name.astype(str) + " + " + filtered_df.library_name.astype(str)
 
     return layout(filtered_df,color,xaxis,yaxis)
    #           ct_options)
 
 
 def layout(filtered_df,color,xaxis,yaxis):
-    xaxis_data = filtered_df[xaxis]
-    yaxis_data =  filtered_df[yaxis]
+    # xaxis_data = filtered_df[xaxis]
+    # yaxis_data =  filtered_df[yaxis]
+    # print(xaxis_data)
     x_title = anchor_metrics[xaxis]['label']
     y_title = anchor_metrics[yaxis]['label']
 
@@ -82,23 +85,32 @@ def layout(filtered_df,color,xaxis,yaxis):
         color_values[v] = plot_colors[i % len(plot_colors)]
 
     fig = go.Figure(
-        data=go.Scatter(
-        x = xaxis_data,
-        y = yaxis_data,
-        mode='markers',
-        marker={
-                'size': 4,
-                'color': [color_values[x] for x in filtered_df[color]]
-            },
-        text=anchor_hover_label(filtered_df),
-        opacity=0.7,
+
+        #data=go.Scatter(
+        data = px.scatter(
+            filtered_df,
+            x = xaxis,
+            y = yaxis,
+            color = color,
+            labels=dict(x=x_title, y=y_title),
+            hover_data=['tissue', 'cancer_type','cell_line_name']
+           # x=[0, 1, 2, 3, 4], y=[0, 1, 4, 9, 16]
+        # mode='markers',
+        # marker={
+        #         'size': 4,
+        #         'color': [color_values[x] for x in filtered_df[color]]
+        #     },
+       #text=anchor_hover_label(filtered_df),
+       # opacity=0.7,
     ))
 
     fig.update_layout(
         xaxis={
                'title': x_title },
         yaxis={
-               'title': y_title}
+               'title': y_title},
+        height=800,
+        width=1000,
     )
 
     return fig
