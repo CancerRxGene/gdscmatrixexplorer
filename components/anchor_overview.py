@@ -18,7 +18,7 @@ def layout(combination):
     return html.Div(children=[  #html l1
         dbc.Row([   #row l1
             dbc.Col(width=12, children=[   #col l1
-                html.Div(className="bg-white pt-3 px-4 pb-3 mb-3 border shadow-sm",children=[  #html l2
+                html.Div(className="bg-white pt-3 px-4 pb-3 mb-3 border border-primary shadow-sm",children=[  #html l2
                     html.H3("Detailed overview of drug responses"),
                     html.Hr(),
 

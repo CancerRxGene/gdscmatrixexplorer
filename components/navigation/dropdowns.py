@@ -28,7 +28,6 @@ def generate_model_dropdown(model_list: pd.DataFrame,
 
 
 def generate_combos_dropdown(combos: dict):
-    print(combos)
     return html.Div(
         className='mb-4',
         children=[

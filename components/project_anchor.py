@@ -54,13 +54,13 @@ def layout(project):
 
     return [
          crumbs([("Home", "/"), (project.name, "/" + project.slug)]),
-                dbc.Row([ #1
+                dbc.Row(className="mt-3 mb-3", children = [ #1
 
                     dbc.Col(width=12, children=[   #2 col
                         dbc.Row([ # row l2
                             dbc.Col(children=[  #clo l2
                                 html.Div(
-                                    className="bg-white pt-3 px-4 pb-2 mb-3 border border shadow-sm",
+                                    className="bg-white pt-3 px-4 pb-2 mb-3 border shadow-sm",
                                     children=[
                                         html.H3(f"{project.name}"),
                                         html.Hr(),
@@ -116,7 +116,7 @@ def layout(project):
                         dbc.Row([  # row l2
                                dbc.Col(children=[ #col l2
                                     html.Div(  #html l3
-                                        className="bg-white pt-3 px-4 pb-2 mb-3 border border shadow-sm",
+                                        className="bg-white pt-3 px-4 pb-2 mb-3 border border-primary shadow-sm",
                                         children=[
                                             html.H3("Synergy Heatmap"),
                                             html.Hr(),
@@ -148,7 +148,7 @@ def layout(project):
                                 dbc.Col(
                                         children=[
                                             html.Div(
-                                                className="bg-white pt-3 px-4 pb-2 mb-3 border border shadow-sm",
+                                                className="bg-white pt-3 px-4 pb-2 mb-3 border border-primary shadow-sm",
                                                 children=[
                                             html.H3("Flexiscatter"),
                                             html.Hr(),
@@ -331,7 +331,7 @@ def layout(project):
                         className='d-print-none align-self-stretch pb-3',
                         children=
                         html.Div(
-                            className="bg-white pt-3 px-4 pb-2 mb-3 border shadow-sm h-100",
+                            className="bg-white pt-3 px-4 pb-2 mb-3 border border-primary shadow-sm h-100",
                             children=[
                                 html.H3(f"View combinations in {project.name} ( {project.combinations.count()} )", dbc.Badge(f" {project.combinations.count()} ",
                                               color='info')),
