@@ -79,13 +79,15 @@ def layout(display_opt,project_id):
                        #     }
 
                       },
-                width= 700,
-                height=600,
+                width= 1000,
+                height=800,
                 yaxis={'type': 'category',
                        # 'title': {"text": "Anchor",
                        #       "font": { "size": 20}
                        #      }
                    },
+                margin=dict(t=100, b=50, l=200)
+
             )
         )
     else:
@@ -99,13 +101,14 @@ def layout(display_opt,project_id):
             ),
             layout=go.Layout(
                 xaxis={'type': 'category',
-                       'title': "Library"
+                      # 'title': "Library"
                        },
-                width=700,
-                height=600,
+                width=1000,
+                height=800,
                 yaxis={'type': 'category',
-                       'title': "Anchor"
+                      # 'title': "Anchor"
                        },
+                margin=dict(t=100, b=50, l=200)
             )
         )
     fig.update_xaxes(side="top")

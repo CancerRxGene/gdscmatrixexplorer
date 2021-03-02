@@ -49,11 +49,6 @@ def layout(project):
         an_drug = session.query(Drug).get(ac)
         anchor_names[an_drug.name] = ac
 
-    # sort combination
-    # combos = session.query(Combination).filter(Combination.project_id == project.id).all()
-    # sorted_combos = sorted(combos, key=lambda combos: combos.lib2.name)
-    # print(sorted_combos)
-    print(project.combinations)
     combos = project.combinations
     sorted_combos = sorted(combos, key=lambda combos: combos.lib2.name)
 
@@ -351,39 +346,6 @@ def layout(project):
                             ],
                         )
                     ),
-
-                    ####
-
-                    ###
-                    dbc.Col(width=3, children=[  #3 col
-                        html.Div(
-                            className="bg-white pt-3 pb-2 mb-3 border border-primary shadow-sm",
-                            children=[
-                                html.H3([
-                                    f"Combinations ",
-                                    dbc.Badge(f" {project.combinations.count()} ",
-                                              color='info')
-                                ], className="d-flex justify-content-between align-items-center px-3 mb-0"),
-
-                                html.Span(f"in {project.name}, sorted by target", className='small px-3'),
-
-                                dbc.ListGroup(className='combinations-list mt-2', flush=True, children=[
-                                    dbc.ListGroupItem(
-                                        href=c.url,
-                                        action=True,
-                                        children=[
-                                            dbc.ListGroupItemHeading(
-                                                f"{c.lib2.name} + {c.lib1.name}"),
-                                            dbc.ListGroupItemText(
-                                                f"{c.lib2.target} + {c.lib1.target}")
-                                        ]
-                                  #  ) for c in project.combinations
-                                    ) for c in sorted_combos
-                                ]) #listgroup
-                        ]) #html
-                    ]) # 3 col
-                    ###
-
                 ]), #1 row
         html.Div(className="d-none", id='project-id', children=project.id)
     ] #return
