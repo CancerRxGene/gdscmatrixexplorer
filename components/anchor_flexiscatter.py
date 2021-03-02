@@ -75,7 +75,7 @@ def cached_update_scatter(tissue,cancertype,library,anchor,combintation,color,xa
 def layout(filtered_df,color,xaxis,yaxis):
     xaxis_data = filtered_df[xaxis]
     yaxis_data =  filtered_df[yaxis]
-    # print(xaxis_data)
+
     x_title = anchor_metrics[xaxis]['label']
     y_title = anchor_metrics[yaxis]['label']
 
@@ -102,28 +102,6 @@ def layout(filtered_df,color,xaxis,yaxis):
             color = color,
             labels= anchor_metrics_labels,
             hover_data=['tissue', 'cancer_type','cell_line_name'],
-
-           # x=[0, 1, 2, 3, 4], y=[0, 1, 4, 9, 16]
-        # mode='markers',
-        # marker={
-        #         'size': 4,
-        #         'color': [color_values[x] for x in filtered_df[color]]
-        #     },
-          #text=anchor_hover_label(filtered_df),
-       # opacity=0.7,
-# =======
-#         data=go.Scatter(
-#         x = xaxis_data,
-#         y = yaxis_data,
-#         mode='markers',
-#         marker={
-#                 'size': 4,
-#                 'color': [color_values[x] for x in filtered_df[color]]
-#             },
-#         text=anchor_hover_label(filtered_df),
-#         opacity=0.7,
-#
-# >>>>>>> feature/wytest
     ))
 
     fig.update_layout(
