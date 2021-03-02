@@ -23,7 +23,7 @@ def layout(combination):
                     html.Hr(),
 
                     dbc.Row([  #row l21
-                        dbc.Col(width=6,children=[
+                        dbc.Col(width=8,children=[
                             dcc.Loading(className='gdsc-spinner', children=
                                 dcc.Graph(
                                     id='box1',
@@ -32,7 +32,16 @@ def layout(combination):
                             )
                         ]),
 
-                        dbc.Col(width=5, children=[
+                        dbc.Col(width=4, children=[
+                            dcc.Loading(className='gdsc-spinner', children=
+                            dcc.Graph(
+                                id='box3',
+                                figure=generate_delta_emax_boxplot(anc_df, 'low')
+                            )
+                                        )
+                        ]),
+
+                        dbc.Col(width=8, children=[
                             dcc.Loading(className='gdsc-spinner', children=
                             dcc.Graph(
                                     id='box2',
@@ -40,14 +49,7 @@ def layout(combination):
                                 )
                             )
                         ]),
-                        dbc.Col(width=4, children=[
-                             dcc.Loading(className='gdsc-spinner', children=
-                             dcc.Graph(
-                                 id='box3',
-                                 figure=generate_delta_emax_boxplot(anc_df, 'low')
-                             )
-                                         )
-                         ]),
+
                         dbc.Col(width=4, children=[
                              dcc.Loading(className='gdsc-spinner', children=
                              dcc.Graph(
@@ -58,25 +60,26 @@ def layout(combination):
                          ])
                     ]),  #row l21
                     dbc.Row([  #row l22
-                        dbc.Col(width=6, children=[
+                        dbc.Col(width=8, children=[
                             dcc.Loading(className='gdsc-spinner', children=
                             dcc.Graph(
                                 id='box5',
                                 figure=generate_vialibity_boxplot(anc_df,'high')
                             ))
                         ]),
-                        dbc.Col(width=5, children=[
-                            dcc.Loading(className='gdsc-spinner', children=
-                            dcc.Graph(
-                                id='box6',
-                                figure=generate_ic50_boxplot(anc_df, 'high')
-                            ))
-                        ]),
+
                         dbc.Col(width=4, children=[
                             dcc.Loading(className='gdsc-spinner', children=
                             dcc.Graph(
                                 id='box7',
                                 figure=generate_delta_emax_boxplot(anc_df, 'high')
+                            ))
+                        ]),
+                        dbc.Col(width=8, children=[
+                            dcc.Loading(className='gdsc-spinner', children=
+                            dcc.Graph(
+                                id='box6',
+                                figure=generate_ic50_boxplot(anc_df, 'high')
                             ))
                         ]),
                         dbc.Col(width=4, children=[
@@ -108,19 +111,24 @@ def generate_vialibity_boxplot(anc_df,anc_conc_type):
     combo_emax_df = get_emax_df(anc_df_per_conc,'Combo_Emax','synergy_obs_emax')
     title = 'Anchor '+ anc_conc_type
     final_df = anc_via_df.append(lib_emax_df).append(bliss_emax_df).append(combo_emax_df)
-
+    print(final_df)
     fig = px.strip(final_df, x='type', y='Viability %', title= title,
                    labels= {'type':' '},
-                  # color = "cell_line_name",
-                   hover_data=[
-                       #"type", "Viability %",
-                       "cell_line_name"
-                      # , "tissue", "cancer_type"
-                   ],
-                   hover_name = "cell_line_name"
+                   color = "type",
+                   # hover_data=[
+                   #     "type", "Viability %",
+                   #     "cell_line_name"
+                   #     , "tissue", "cancer_type"
+                   # ],
+                   hover_data={
+                       "type": False,
+                       "tissue": True
+                   },
+                   hover_name = "cell_line_name",
+
      )
-    # fig = px.box(final_df, x='type', y='Viability %', title=title,points="all",
-    #                hover_data=["type", "Viability %", "cell_line_name"])
+
+
 
     return fig
 
@@ -133,6 +141,7 @@ def generate_ic50_boxplot(anc_df,anc_conc_type):
         conc = anchor_conc[1]
 
     anc_df_per_conc = anc_df.loc[anc_df['anchor_conc'] == conc]
+    #print(anc_df_per_conc)
 
     lib_ic50_df = get_ic50_df(anc_df_per_conc, 'Lib_IC50', 'library_xmid')
     combo_ic50_df = get_ic50_df(anc_df_per_conc, 'Combo_IC50', 'synergy_xmid')
@@ -141,8 +150,9 @@ def generate_ic50_boxplot(anc_df,anc_conc_type):
 
     fig = px.strip(final_df, x='type', y='Norm. drug conc.',
                    title = ' ', labels= {'type':' '},
-                   hover_data=["type", "Norm. drug conc.", "cell_line_name"],
-                   hover_name="cell_line_name"
+                   color = 'type',
+                   hover_data=["type", "Norm. drug conc.", "cell_line_name", 'tissue'],
+                   hover_name= "cell_line_name"
                    )
     # fig = px.box(final_df, x='type', y='Norm. drug conc', title=title, points="all")
 
@@ -159,9 +169,10 @@ def generate_delta_emax_boxplot(anc_df,anc_conc_type):
     anc_df_per_conc = anc_df.loc[anc_df['anchor_conc'] == conc]
 
     delta_emax_df = get_delta_emax_df(anc_df_per_conc)
-    fig = px.strip(delta_emax_df,x='type',y='Delta Viability (%)',
+    fig = px.strip(delta_emax_df,x='type',y='Delta Viability %',
                    title=' ', labels= {'type':' '},
-                   hover_data=["type", "Delta Viability (%)", "cell_line_name"],
+                   #hover_data=["type", "Delta Viability %", "cell_line_name"],
+
                    hover_name="cell_line_name"
                    )
     return fig
@@ -213,7 +224,7 @@ def get_delta_emax_df(df):
     delta_emax_df = df[['synergy_delta_emax', 'cell_line_name', 'cancer_type', 'tissue']]
     delta_emax_df['type'] = 'Delta Emax'
     delta_emax_df['synergy_delta_emax'].update(delta_emax_df['synergy_delta_emax'] * 100)
-    delta_emax_df = delta_emax_df.rename(columns = { 'synergy_delta_emax' : 'Delta Viability (%)'})
+    delta_emax_df = delta_emax_df.rename(columns = { 'synergy_delta_emax' : 'Delta Viability %'})
     return delta_emax_df
 
 def get_anc_df(combination):

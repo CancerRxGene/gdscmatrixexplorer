@@ -84,9 +84,11 @@ def layout(filtered_df,color,xaxis,yaxis):
 
     if(xaxis in viability_values):
         filtered_df[xaxis] = filtered_df[xaxis].apply(lambda x: "{:.2%}".format(x))
+        x_title = x_title + " %"
 
     if(yaxis in viability_values):
         filtered_df[yaxis] = filtered_df[yaxis].apply(lambda x: "{:.2%}".format(x))
+        y_title = y_title + " %"
 
     color_values = {}
 
