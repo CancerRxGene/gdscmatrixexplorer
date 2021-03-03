@@ -98,10 +98,18 @@ def layout(combination):
 def generate_vialibity_boxplot(anc_df,anc_conc_type):
     anchor_conc = anc_df['anchor_conc'].drop_duplicates().sort_values()
 
-    if(anc_conc_type == 'low'):
-        conc = anchor_conc[0]
+    # find the low & high conc
+    anchor_low = anchor_conc[0]
+    anchor_high = anchor_conc[1]
+
+    if (anchor_conc[0] > anchor_conc[1]):
+        anchor_low = anchor_conc[1]
+        anchor_high = anchor_conc[0]
+
+    if (anc_conc_type == 'low'):
+        conc = anchor_low
     else:
-        conc = anchor_conc[1]
+        conc = anchor_high
 
     anc_df_per_conc = anc_df.loc[anc_df['anchor_conc'] == conc]
 
@@ -122,10 +130,18 @@ def generate_vialibity_boxplot(anc_df,anc_conc_type):
 def generate_ic50_boxplot(anc_df,anc_conc_type):
     anchor_conc = anc_df['anchor_conc'].drop_duplicates().sort_values()
 
+    # find the low & high conc
+    anchor_low = anchor_conc[0]
+    anchor_high = anchor_conc[1]
+
+    if (anchor_conc[0] > anchor_conc[1]):
+        anchor_low = anchor_conc[1]
+        anchor_high = anchor_conc[0]
+
     if (anc_conc_type == 'low'):
-        conc = anchor_conc[0]
+        conc = anchor_low
     else:
-        conc = anchor_conc[1]
+        conc = anchor_high
 
     anc_df_per_conc = anc_df.loc[anc_df['anchor_conc'] == conc]
 
@@ -144,10 +160,18 @@ def generate_ic50_boxplot(anc_df,anc_conc_type):
 def generate_delta_emax_boxplot(anc_df,anc_conc_type):
     anchor_conc = anc_df['anchor_conc'].drop_duplicates().sort_values()
 
-    if(anc_conc_type == 'low'):
-        conc = anchor_conc[0]
+    # find the low & high conc
+    anchor_low = anchor_conc[0]
+    anchor_high = anchor_conc[1]
+
+    if (anchor_conc[0] > anchor_conc[1]):
+        anchor_low = anchor_conc[1]
+        anchor_high = anchor_conc[0]
+
+    if (anc_conc_type == 'low'):
+        conc = anchor_low
     else:
-        conc = anchor_conc[1]
+        conc = anchor_high
 
     anc_df_per_conc = anc_df.loc[anc_df['anchor_conc'] == conc]
 
@@ -161,10 +185,18 @@ def generate_delta_emax_boxplot(anc_df,anc_conc_type):
 def generate_delta_ic50_boxplot(anc_df, anc_conc_type):
     anchor_conc = anc_df['anchor_conc'].drop_duplicates().sort_values()
 
+    # find the low & high conc
+    anchor_low = anchor_conc[0]
+    anchor_high = anchor_conc[1]
+
+    if (anchor_conc[0] > anchor_conc[1]):
+        anchor_low = anchor_conc[1]
+        anchor_high = anchor_conc[0]
+
     if (anc_conc_type == 'low'):
-        conc = anchor_conc[0]
+        conc = anchor_low
     else:
-        conc = anchor_conc[1]
+        conc = anchor_high
 
     anc_df_per_conc = anc_df.loc[anc_df['anchor_conc'] == conc]
 

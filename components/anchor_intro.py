@@ -13,6 +13,15 @@ def layout(project,combination):
 
     df = pd.read_sql(query.statement, session.bind)
     anchor_conc = df['anchor_conc'].drop_duplicates().sort_values()
+
+    # find the low & high conc
+    anchor_low = anchor_conc[0]
+    anchor_high = anchor_conc[1]
+
+    if(anchor_conc[0] > anchor_conc[1]):
+        anchor_low = anchor_conc[1]
+        anchor_high = anchor_conc[0]
+
     maxc = df['maxc'].drop_duplicates().sort_values()
 
     return html.Div(
@@ -55,11 +64,11 @@ def layout(project,combination):
 
                                             html.Tr([
                                                 html.Td(html.Strong("Low conc.")),
-                                                html.Td(f"{anchor_conc[1]} µM")
+                                                html.Td(f"{anchor_low} µM")
                                             ]),
                                             html.Tr([
                                                 html.Td(html.Strong("High conc.")),
-                                                html.Td(f"{anchor_conc[0]} µM")
+                                                html.Td(f"{anchor_high} µM")
                                             ])
                                         ])
                                     ]),
