@@ -55,11 +55,11 @@ def layout(project,combination):
 
                                             html.Tr([
                                                 html.Td(html.Strong("Low conc.")),
-                                                html.Td(f"{anchor_conc[0]} µM")
+                                                html.Td(f"{anchor_conc[1]} µM")
                                             ]),
                                             html.Tr([
                                                 html.Td(html.Strong("High conc.")),
-                                                html.Td(f"{anchor_conc[1]} µM")
+                                                html.Td(f"{anchor_conc[0]} µM")
                                             ])
                                         ])
                                     ]),
