@@ -111,7 +111,7 @@ def layout(filtered_df,color,xaxis,yaxis):
                'title': x_title },
         yaxis={
                'title': y_title},
-        height=800,
+        height=900,
         width=1000,
     )
 
