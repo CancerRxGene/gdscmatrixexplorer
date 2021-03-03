@@ -67,7 +67,7 @@ def model_links_from_combo(combination):
 def combo_links_from_project(project):
     combos = session.query(Combination).filter(Combination.project_id == project.id).all()
     sorted_combos = sorted(combos, key = lambda combos: combos.lib2.name)
-    print(sorted_combos)
+
     return html.Div(
         className='mb-4',
         children=[
@@ -130,7 +130,5 @@ def dropdown_handler(dropdown_combos_value):
 @app.callback(dash.dependencies.Output('project_combos-dropdown-url','pathname'),
             [dash.dependencies.Input('project_dropdown-combos','value')])
 def dropdown_handler(dropdown_combos_value):
-    print(dropdown_combos_value)
-    url =  url_for_combo(dropdown_combos_value)
-    print(url)
-    return url
+    return url_for_combo(dropdown_combos_value)
+

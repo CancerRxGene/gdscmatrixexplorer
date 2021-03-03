@@ -230,7 +230,7 @@ def layout(project):
                                                                 dcc.Dropdown(
                                                                     options=[
                                                                         { 'label': f" {c.lib2.name} + {c.lib1.name}",
-                                                                            'value': f"{c.lib2_id} + {c.lib1_id}"} for c in project.combinations
+                                                                            'value': f"{c.lib2_id} + {c.lib1_id}"} for c in sorted_combos
                                                                     ],
                                                                     id='combination',
                                                                     className='flex-grow-1',
