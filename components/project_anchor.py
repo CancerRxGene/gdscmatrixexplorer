@@ -49,8 +49,8 @@ def layout(project):
         an_drug = session.query(Drug).get(ac)
         anchor_names[an_drug.name] = ac
 
-    combos = project.combinations
-    sorted_combos = sorted(combos, key=lambda combos: combos.lib2.name)
+    # combos = project.combinations
+    # sorted_combos = sorted(combos, key=lambda combos: combos.lib2.name)
 
     return [
          crumbs([("Home", "/"), (project.name, "/" + project.slug)]),
