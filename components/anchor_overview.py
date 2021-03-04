@@ -23,7 +23,7 @@ def layout(combination):
                     html.Hr(),
 
                     dbc.Row([  #row l21
-                        dbc.Col(width=8,children=[
+                        dbc.Col(width=4,children=[
                             dcc.Loading(className='gdsc-spinner', children=
                                 dcc.Graph(
                                     id='box1',
@@ -32,7 +32,7 @@ def layout(combination):
                             )
                         ]),
 
-                        dbc.Col(width=4, children=[
+                        dbc.Col(width=2, children=[
                             dcc.Loading(className='gdsc-spinner', children=
                             dcc.Graph(
                                 id='box3',
@@ -41,7 +41,7 @@ def layout(combination):
                                         )
                         ]),
 
-                        dbc.Col(width=8, children=[
+                        dbc.Col(width=3, children=[
                             dcc.Loading(className='gdsc-spinner', children=
                             dcc.Graph(
                                     id='box2',
@@ -50,7 +50,7 @@ def layout(combination):
                             )
                         ]),
 
-                        dbc.Col(width=4, children=[
+                        dbc.Col(width=2, children=[
                              dcc.Loading(className='gdsc-spinner', children=
                              dcc.Graph(
                                  id='box4',
@@ -60,7 +60,7 @@ def layout(combination):
                          ])
                     ]),  #row l21
                     dbc.Row([  #row l22
-                        dbc.Col(width=8, children=[
+                        dbc.Col(width=4, children=[
                             dcc.Loading(className='gdsc-spinner', children=
                             dcc.Graph(
                                 id='box5',
@@ -68,21 +68,21 @@ def layout(combination):
                             ))
                         ]),
 
-                        dbc.Col(width=4, children=[
+                        dbc.Col(width=2, children=[
                             dcc.Loading(className='gdsc-spinner', children=
                             dcc.Graph(
                                 id='box7',
                                 figure=generate_delta_emax_boxplot(anc_df, 'high')
                             ))
                         ]),
-                        dbc.Col(width=8, children=[
+                        dbc.Col(width=3, children=[
                             dcc.Loading(className='gdsc-spinner', children=
                             dcc.Graph(
                                 id='box6',
                                 figure=generate_ic50_boxplot(anc_df, 'high')
                             ))
                         ]),
-                        dbc.Col(width=4, children=[
+                        dbc.Col(width=2, children=[
                             dcc.Loading(className='gdsc-spinner', children=
                             dcc.Graph(
                                 id='box8',
@@ -122,8 +122,10 @@ def generate_vialibity_boxplot(anc_df,anc_conc_type):
 
     fig = px.strip(final_df, x='type', y='Viability %', title= title,
                    labels= {'type':' '},
-                   color = "type",
+                  # color = "type",
                    hover_name = "hover_name",
+                   width=400,
+                   height=500
      )
     return fig
 
@@ -152,8 +154,10 @@ def generate_ic50_boxplot(anc_df,anc_conc_type):
 
     fig = px.strip(final_df, x='type', y='Norm. drug conc.',
                    title = ' ', labels= {'type':' '},
-                   color = 'type',
+                  # color = 'type',
                    hover_name= "hover_name",
+                   width=300,
+                   height=500
                    )
     return fig
 
@@ -178,7 +182,9 @@ def generate_delta_emax_boxplot(anc_df,anc_conc_type):
     delta_emax_df = get_delta_emax_df(anc_df_per_conc)
     fig = px.strip(delta_emax_df,x='type',y='Delta Viability %',
                    title=' ', labels= {'type':' '},
-                   hover_name="hover_name"
+                   hover_name="hover_name",
+                   width=250,
+                   height=500
                    )
     return fig
 
@@ -203,7 +209,9 @@ def generate_delta_ic50_boxplot(anc_df, anc_conc_type):
     delta_emax_df = get_delta_ic50_df(anc_df_per_conc)
     fig = px.strip(delta_emax_df, x='type', y='Delta Norm. drug conc.',
                    title=' ', labels= {'type':' '},
-                   hover_name="hover_name"
+                   hover_name="hover_name",
+                   width=250,
+                   height=500
                    )
     return fig
 
