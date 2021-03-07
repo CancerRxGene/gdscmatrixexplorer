@@ -2,7 +2,7 @@ import dash
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
-
+import dash_table
 from app import app
 from db import session
 import pandas as pd
@@ -51,6 +51,15 @@ def layout(project):
 
     combos = project.combinations
     sorted_combos = sorted(combos, key=lambda combos: combos.lib2.name)
+
+    table_query =  session.query(Combination).filter(Combination.project_id == project.id)
+    table_df = pd.read_sql(table_query.statement, session.bind)
+    #table_df['link'] = "<a href='www.sanger.ac.uk'>abc</a>"
+    #table_df = table_df.to_dict()
+    columns = [{"name": i, "id": i} for i in table_df.columns],
+    print(columns)
+    print(table_df)
+
 
     return [
          crumbs([("Home", "/"), (project.name, "/" + project.slug)]),
@@ -326,24 +335,54 @@ def layout(project):
                     ]),  # 2 col
 
                     ####
+                    # dbc.Col(
+                    #     width=12,
+                    #     className='d-print-none align-self-stretch pb-3',
+                    #     children=
+                    #     html.Div(
+                    #         className="bg-white pt-3 px-4 pb-2 mb-3 border border-primary shadow-sm h-100",
+                    #         children=[
+                    #             html.H3(f"View combinations in {project.name} ( {project.combinations.count()} )", dbc.Badge(f" {project.combinations.count()} ",
+                    #                           color='info')),
+                    #             html.Hr(),
+                    #             dbc.Row(
+                    #                 className="pb-4",
+                    #                 children=dbc.Col(
+                    #                     width=12,
+                    #                     children=combo_links_from_project(project)
+                    #                 ),
+                    #             )
+                    #         ],
+                    #     )
+                    # ),
                     dbc.Col(
                         width=12,
-                        className='d-print-none align-self-stretch pb-3',
+                        # className='d-print-none align-self-stretch pb-3',
                         children=
                         html.Div(
-                            className="bg-white pt-3 px-4 pb-2 mb-3 border border-primary shadow-sm h-100",
-                            children=[
-                                html.H3(f"View combinations in {project.name} ( {project.combinations.count()} )", dbc.Badge(f" {project.combinations.count()} ",
-                                              color='info')),
-                                html.Hr(),
-                                dbc.Row(
-                                    className="pb-4",
-                                    children=dbc.Col(
-                                        width=12,
-                                        children=combo_links_from_project(project)
-                                    ),
-                                )
-                            ],
+                            [
+                             dash_table.DataTable(
+                                    id='datatable-interactivity',
+                                    columns=[
+                                        {"name": i, "id": i, "deletable": True, "selectable": True} for i in table_df.columns
+                                    ],
+                                   data=table_df.to_dict('records'),
+                                   editable=False,
+                                   filter_action="native",
+                                   #filtering=True,
+
+                                    sort_action="native",
+                                    sort_mode="multi",
+                                    column_selectable="single",
+                                    row_selectable="multi",
+                                    row_deletable=True,
+                                    selected_columns=[],
+                                    selected_rows=[],
+                                     page_action="native",
+                                    page_current=0,
+                                    page_size=10,
+                                ),
+                            ]
                         )
                     ),
                 ]), #1 row
