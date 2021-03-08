@@ -54,11 +54,31 @@ def layout(project):
 
     table_query =  session.query(Combination).filter(Combination.project_id == project.id)
     table_df = pd.read_sql(table_query.statement, session.bind)
-    #table_df['link'] = "<a href='www.sanger.ac.uk'>abc</a>"
-    #table_df = table_df.to_dict()
-    columns = [{"name": i, "id": i} for i in table_df.columns],
-    print(columns)
-    print(table_df)
+    print(table_df.to_dict('records'))
+    print(type(table_df))
+    print(table_df.columns)
+
+    print("wawa-------------------")
+    for i in table_df.columns:
+        print(i)
+
+    my_table_df = []
+    for c in project.combinations:
+        my_table_df_dic = {}
+        my_table_df_dic['lib_name'] = c.lib1.name
+        my_table_df_dic['lib_target'] = c.lib1.target
+        my_table_df_dic['anc_name'] = c.lib2.name
+        my_table_df_dic['anc_target'] = c.lib2.target
+        my_table_df.append(my_table_df_dic)
+
+    print("-------------\n", my_table_df)
+
+    print("-----------------------")
+
+    for i in my_table_df[0].keys():
+        print(i)
+
+
 
 
     return [
@@ -147,7 +167,7 @@ def layout(project):
                                                 className='gdsc-spinner',
                                                 children = dcc.Graph(
                                                     id='synergy_heatmap',
-                                                    figure=[]
+                                                    #figure=[]
                                                 )
                                             )
                                     ])  # html l3
@@ -326,7 +346,7 @@ def layout(project):
                                                 className='gdsc-spinner',
                                                 children=dcc.Graph(
                                                     id='flexiscatter',
-                                                    figure=[]
+                                                   # figure=[]
                                                 )
                                              )
                                 ]) #html
@@ -363,26 +383,33 @@ def layout(project):
                             [
                              dash_table.DataTable(
                                     id='datatable-interactivity',
-                                    columns=[
-                                        {"name": i, "id": i, "deletable": True, "selectable": True} for i in table_df.columns
-                                    ],
-                                   data=table_df.to_dict('records'),
+                                    # columns=[
+                                    #     {"name": i, "id": i, "deletable": False, "selectable": True} for i in table_df.columns
+                                    # ],
+                                 columns=[
+                                     {"name": i, "id": i, "deletable": False, "selectable": True} for i in my_table_df[0].keys()
+                                 ],
+                                  # data=table_df.to_dict('records'),
+                                   data=my_table_df,
                                    editable=False,
                                    filter_action="native",
-                                   #filtering=True,
 
                                     sort_action="native",
                                     sort_mode="multi",
-                                    column_selectable="single",
-                                    row_selectable="multi",
-                                    row_deletable=True,
-                                    selected_columns=[],
-                                    selected_rows=[],
-                                     page_action="native",
+                                    # column_selectable="single",
+                                    # row_selectable="multi",
+                                    # row_deletable=True,
+                                    # selected_columns=[],
+                                    # selected_rows=[],
+                                    page_action="native",
                                     page_current=0,
-                                    page_size=10,
-                                ),
-                            ]
+                                    page_size=15,
+                                    # style_table={'height': 400,},
+                                    style_data={'width': '150px', 'minWidth': '150px',
+                                                'maxWidth': '150px','overflow': 'hidden',
+                                                'textOverflow': 'ellipsis'}
+                             ),
+                               ]
                         )
                     ),
                 ]), #1 row
