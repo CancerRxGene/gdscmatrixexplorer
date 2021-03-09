@@ -26,6 +26,7 @@ def layout(url):
             )
         ]
     if(project.combination_type == 'matrix'):
+        print(project.name)
         return [
             crumbs([("Home", "/"), (project.name, "/" + project.slug)]),
             dbc.Row(

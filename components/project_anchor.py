@@ -52,15 +52,15 @@ def layout(project):
     combos = project.combinations
     sorted_combos = sorted(combos, key=lambda combos: combos.lib2.name)
 
-    table_query =  session.query(Combination).filter(Combination.project_id == project.id)
-    table_df = pd.read_sql(table_query.statement, session.bind)
-    print(table_df.to_dict('records'))
-    print(type(table_df))
-    print(table_df.columns)
-
-    print("wawa-------------------")
-    for i in table_df.columns:
-        print(i)
+    # table_query =  session.query(Combination).filter(Combination.project_id == project.id)
+    # table_df = pd.read_sql(table_query.statement, session.bind)
+    # print(table_df.to_dict('records'))
+    # print(type(table_df))
+    # print(table_df.columns)
+    #
+    # print("wawa-------------------")
+    # for i in table_df.columns:
+    #     print(i)
 
     my_table_df = []
     for c in project.combinations:
@@ -71,13 +71,13 @@ def layout(project):
         my_table_df_dic['anc_target'] = c.lib2.target
         my_table_df.append(my_table_df_dic)
 
-    print("-------------\n", my_table_df)
-
-    print("-----------------------")
-
-    for i in my_table_df[0].keys():
-        print(i)
-
+    # print("-------------\n", my_table_df)
+    #
+    # print("-----------------------")
+    #
+    # for i in my_table_df[0].keys():
+    #     print(i)
+    #
 
 
 
@@ -380,7 +380,10 @@ def layout(project):
                         # className='d-print-none align-self-stretch pb-3',
                         children=
                         html.Div(
+                            className="bg-white pt-3 px-4 pb-2 mb-3 border border-primary shadow-sm",
+                            children=
                             [
+                            html.H3(f"View combinations in {project.name} ( {project.combinations.count()} )"),
                              dash_table.DataTable(
                                     id='datatable-interactivity',
                                     # columns=[
