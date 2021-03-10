@@ -52,16 +52,6 @@ def layout(project):
     combos = project.combinations
     sorted_combos = sorted(combos, key=lambda combos: combos.lib2.name)
 
-    # table_query =  session.query(Combination).filter(Combination.project_id == project.id)
-    # table_df = pd.read_sql(table_query.statement, session.bind)
-    # print(table_df.to_dict('records'))
-    # print(type(table_df))
-    # print(table_df.columns)
-    #
-    # print("wawa-------------------")
-    # for i in table_df.columns:
-    #     print(i)
-
     my_table_df = []
     for c in project.combinations:
         my_table_df_dic = {}
@@ -69,17 +59,24 @@ def layout(project):
         my_table_df_dic['lib_target'] = c.lib1.target
         my_table_df_dic['anc_name'] = c.lib2.name
         my_table_df_dic['anc_target'] = c.lib2.target
+        my_table_df_dic['link'] = '[View](pan-cancer/combination/' + str(c.lib1.id) + '+' + str(c.lib2.id)+')'
         my_table_df.append(my_table_df_dic)
 
-    # print("-------------\n", my_table_df)
-    #
-    # print("-----------------------")
-    #
-    # for i in my_table_df[0].keys():
-    #     print(i)
-    #
+    # columns = [
+    #               {"name": i, "id": i } for i in my_table_df[0].keys()
+    #           ]
+    # print(columns)
 
-
+    columns = [
+        {'name':'Lib name', 'id': 'lib_name'},
+        {'name': 'Lib target', 'id': 'lib_target'},
+        {'name': 'Anchor name', 'id': 'anc_name'},
+        {'name': 'Anchor target', 'id': 'anc_target'},
+        {'name':'Link','id':'link', 'presentation': 'markdown'}
+    ]
+    # columns.append({'name': 'Link', 'id':'Link','presentation':'markdown'})
+    print(columns)
+    print(my_table_df)
 
     return [
          crumbs([("Home", "/"), (project.name, "/" + project.slug)]),
@@ -389,9 +386,10 @@ def layout(project):
                                     # columns=[
                                     #     {"name": i, "id": i, "deletable": False, "selectable": True} for i in table_df.columns
                                     # ],
-                                 columns=[
-                                     {"name": i, "id": i, "deletable": False, "selectable": True} for i in my_table_df[0].keys()
-                                 ],
+                                 # columns=[
+                                 #     {"name": i, "id": i, "deletable": False, "selectable": True} for i in my_table_df[0].keys()
+                                 # ],
+                                 columns = columns,
                                   # data=table_df.to_dict('records'),
                                    data=my_table_df,
                                    editable=False,
@@ -407,6 +405,11 @@ def layout(project):
                                     page_action="native",
                                     page_current=0,
                                     page_size=15,
+                                    style_cell={'textAlign': 'center'},
+                                    style_header={
+                                     'backgroundColor': 'white',
+                                     'fontWeight': 'bold'
+                                   },
                                     # style_table={'height': 400,},
                                     style_data={'width': '150px', 'minWidth': '150px',
                                                 'maxWidth': '150px','overflow': 'hidden',
