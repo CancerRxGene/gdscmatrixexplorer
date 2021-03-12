@@ -6,12 +6,12 @@ import dash_table
 from app import app
 from db import session
 import pandas as pd
-from models import Drug, AnchorCombi, Project, Model, Combination, AnchorSynergy
+from models import Drug, AnchorCombi, AnchorSynergy
 from components.anchor_heatmap import layout as anchor_heatmap
 from components.anchor_flexiscatter import cached_update_scatter
 from components.breadcrumbs import breadcrumb_generator as crumbs
-from utils import get_all_tissues, get_all_cancer_types, anchor_metrics
-from components.navigation.dropdowns import combo_links_from_project
+from utils import anchor_metrics
+
 
 colour_by = {
     'Tissue': 'tissue',
@@ -57,26 +57,24 @@ def layout(project):
         my_table_df_dic = {}
         my_table_df_dic['lib_name'] = c.lib1.name
         my_table_df_dic['lib_target'] = c.lib1.target
+        my_table_df_dic['lib_pathway'] = c.lib1.pathway
         my_table_df_dic['anc_name'] = c.lib2.name
         my_table_df_dic['anc_target'] = c.lib2.target
-        my_table_df_dic['link'] = '[View](pan-cancer/combination/' + str(c.lib1.id) + '+' + str(c.lib2.id)+')'
+        my_table_df_dic['anc_pathway'] = c.lib2.pathway
+        my_table_df_dic['link'] = '['+ c.lib2.name + ' + ' + c.lib1.name + '](pan-cancer/combination/' + str(c.lib1.id) + '+' + str(c.lib2.id)+')'
         my_table_df.append(my_table_df_dic)
 
-    # columns = [
-    #               {"name": i, "id": i } for i in my_table_df[0].keys()
-    #           ]
-    # print(columns)
+    my_table_df = sorted(my_table_df, key=lambda k: k['anc_name'])
 
     columns = [
-        {'name':'Lib name', 'id': 'lib_name'},
-        {'name': 'Lib target', 'id': 'lib_target'},
         {'name': 'Anchor name', 'id': 'anc_name'},
         {'name': 'Anchor target', 'id': 'anc_target'},
+        {'name': 'Anchor pathway', 'id': 'anc_pathway'},
+        {'name': 'Lib name', 'id': 'lib_name'},
+        {'name': 'Lib target', 'id': 'lib_target'},
+        {'name': 'Lib pathway', 'id': 'lib_pathway'},
         {'name':'Link','id':'link', 'presentation': 'markdown'}
     ]
-    # columns.append({'name': 'Link', 'id':'Link','presentation':'markdown'})
-    print(columns)
-    print(my_table_df)
 
     return [
          crumbs([("Home", "/"), (project.name, "/" + project.slug)]),
@@ -382,40 +380,34 @@ def layout(project):
                             [
                             html.H3(f"View combinations in {project.name} ( {project.combinations.count()} )"),
                              dash_table.DataTable(
-                                    id='datatable-interactivity',
-                                    # columns=[
-                                    #     {"name": i, "id": i, "deletable": False, "selectable": True} for i in table_df.columns
-                                    # ],
-                                 # columns=[
-                                 #     {"name": i, "id": i, "deletable": False, "selectable": True} for i in my_table_df[0].keys()
-                                 # ],
-                                 columns = columns,
-                                  # data=table_df.to_dict('records'),
+                                   id='datatable-interactivity',
+                                   columns = columns,
                                    data=my_table_df,
-                                   editable=False,
+
                                    filter_action="native",
 
-                                    sort_action="native",
-                                    sort_mode="multi",
-                                    # column_selectable="single",
-                                    # row_selectable="multi",
-                                    # row_deletable=True,
-                                    # selected_columns=[],
-                                    # selected_rows=[],
-                                    page_action="native",
-                                    page_current=0,
-                                    page_size=15,
-                                    style_cell={'textAlign': 'center'},
-                                    style_header={
-                                     'backgroundColor': 'white',
-                                     'fontWeight': 'bold'
+                                   sort_action="native",
+                                   sort_mode="multi",
+
+                                   page_action="native",
+                                   page_current=0,
+                                   page_size=10,
+                                   style_cell={'textAlign': 'center'},
+                                   style_header={
+                                     'backgroundColor': 'rgb(230, 230, 230)',
+                                     'fontWeight': 'bold',
+
                                    },
-                                    # style_table={'height': 400,},
-                                    style_data={'width': '150px', 'minWidth': '150px',
-                                                'maxWidth': '150px','overflow': 'hidden',
-                                                'textOverflow': 'ellipsis'}
+                                   style_data={'width': '80px', 'minWidth': '50px',
+                                               'maxWidth': '80px','overflow': 'hidden',
+                                                'textOverflow': 'ellipsis'},
+                                   style_cell_conditional=[
+                                     {'if': {'column_id': 'link'},
+                                      'width': '30px'
+                                      },
+                                      ]
                              ),
-                               ]
+                          ]
                         )
                     ),
                 ]), #1 row
