@@ -26,7 +26,6 @@ def layout(url):
             )
         ]
     if(project.combination_type == 'matrix'):
-        print(project.name)
         return [
             crumbs([("Home", "/"), (project.name, "/" + project.slug)]),
             dbc.Row(
@@ -76,7 +75,6 @@ def layout(url):
             html.Div(className="d-none", id='project-id', children=project.id)
         ]
     else:
-        print(project.name)
         return project_anchor(project)
 
 @app.callback(

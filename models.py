@@ -1,6 +1,6 @@
 import sqlalchemy as sa
 import numpy as np
-from sqlalchemy.ext.hybrid import hybrid_property
+#from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship
 from sqlalchemy_utils import generic_repr
 

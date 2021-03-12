@@ -14,8 +14,6 @@ from utils import url_parser
 
 user = os.getenv('MATRIXEXPLORER_USER')
 password = os.getenv('MATRIXEXPLORER_PASSWD')
-# user = ''
-# password = ''
 
 auth = dash_auth.BasicAuth(app, [[user, password]])
 

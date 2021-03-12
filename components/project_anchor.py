@@ -61,7 +61,7 @@ def layout(project):
         my_table_df_dic['anc_name'] = c.lib2.name
         my_table_df_dic['anc_target'] = c.lib2.target
         my_table_df_dic['anc_pathway'] = c.lib2.pathway
-        my_table_df_dic['link'] = '['+ c.lib2.name + ' + ' + c.lib1.name + '](pan-cancer/combination/' + str(c.lib1.id) + '+' + str(c.lib2.id)+')'
+        my_table_df_dic['link'] = '['+ c.lib2.name + ' + ' + c.lib1.name + '](' + project.slug + '/combination/' + str(c.lib1.id) + '+' + str(c.lib2.id)+')'
         my_table_df.append(my_table_df_dic)
 
     my_table_df = sorted(my_table_df, key=lambda k: k['anc_name'])
@@ -349,27 +349,6 @@ def layout(project):
                             ]), #row
                     ]),  # 2 col
 
-                    ####
-                    # dbc.Col(
-                    #     width=12,
-                    #     className='d-print-none align-self-stretch pb-3',
-                    #     children=
-                    #     html.Div(
-                    #         className="bg-white pt-3 px-4 pb-2 mb-3 border border-primary shadow-sm h-100",
-                    #         children=[
-                    #             html.H3(f"View combinations in {project.name} ( {project.combinations.count()} )", dbc.Badge(f" {project.combinations.count()} ",
-                    #                           color='info')),
-                    #             html.Hr(),
-                    #             dbc.Row(
-                    #                 className="pb-4",
-                    #                 children=dbc.Col(
-                    #                     width=12,
-                    #                     children=combo_links_from_project(project)
-                    #                 ),
-                    #             )
-                    #         ],
-                    #     )
-                    # ),
                     dbc.Col(
                         width=12,
                         # className='d-print-none align-self-stretch pb-3',

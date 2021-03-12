@@ -10,7 +10,6 @@ from utils import get_combination_from_url, get_project_from_url
 
 
 def layout(url):
-
     combination = get_combination_from_url(url)
     project = get_project_from_url(url)
 

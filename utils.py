@@ -323,7 +323,6 @@ def get_combination_from_url(url):
     search = re.search("/project/([a-zA-Z0-9\-]*)/combination/([0-9]*)\+([0-g]*)", url)
     if search:
         project_slug, drug1_id, drug2_id = search.groups()
-
     try:
         combination = session.query(models.Combination)\
             .join(models.Project)\
@@ -337,9 +336,6 @@ def get_combination_from_url(url):
         return html.Div("Multiple results found for this combination - cannot display")
 
     return combination
-#
-# def get_anchor_synergy_from_url(url):
-#     pass
 
 def get_combination_link(combination):
     text = f"{combination.lib1.name} + {combination.lib2.name}"

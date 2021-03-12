@@ -13,8 +13,7 @@ from utils import matrix_metrics, get_all_tissues, get_all_cancer_types, matrix_
 
 
 def layout():
-    print(list(matrix_metrics.values()))
-    print([{'label': c, 'value': c} for c in get_all_cancer_types()])
+
     return dbc.Row([
         dcc.Location('project-boxplot-url'),
         dbc.Col(width=6,

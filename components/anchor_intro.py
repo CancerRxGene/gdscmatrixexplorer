@@ -100,25 +100,7 @@ def layout(project,combination):
                                 ])
                      ])
                 ]),
-                # dbc.Col(
-                #     width=6,
-                #     className='d-print-none align-self-stretch pb-3',
-                #     children=
-                #     html.Div(
-                #         className="bg-white pt-3 px-4 pb-2 mb-3 border shadow-sm h-100",
-                #         children=[
-                #             html.H3("View combination in cell line"),
-                #             html.Hr(),
-                #             dbc.Row(
-                #                 className="pb-4",
-                #                 children=dbc.Col(
-                #                     width=12,
-                #                     children=[]
-                #                 ),
-                #             )
-                #         ],
-                #     )
-                # )
+
             ])
         ]
     )
