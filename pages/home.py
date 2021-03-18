@@ -4,7 +4,6 @@ from components.home_project_block import project_card
 from db import session
 from models import Project
 
-
 def layout(*args, **kwargs):
     matrix_projects = session.query(Project).filter(Project.combination_type == 'matrix').all()
     anchor_projects = session.query(Project).filter(Project.combination_type == 'anchor').all()

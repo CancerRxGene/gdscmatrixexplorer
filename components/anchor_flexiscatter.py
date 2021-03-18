@@ -113,6 +113,8 @@ def layout(filtered_df,color,xaxis,yaxis):
                'title': y_title},
         height=900,
         width=1000,
+        #plot_bgcolor='rgba(0,0,0,0)'
+        plot_bgcolor = 'rgb(233,233,233)'
     )
 
     return fig

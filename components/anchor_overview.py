@@ -157,7 +157,7 @@ def generate_ic50_boxplot(anc_df,anc_conc_type):
                   # color = 'type',
                    hover_name= "hover_name",
                    width=300,
-                   height=500
+                   height=500,
                    )
     return fig
 
