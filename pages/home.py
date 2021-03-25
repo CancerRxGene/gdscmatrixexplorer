@@ -7,7 +7,8 @@ from models import Project
 def layout(*args, **kwargs):
     matrix_projects = session.query(Project).filter(Project.combination_type == 'matrix').all()
     anchor_projects = session.query(Project).filter(Project.combination_type == 'anchor').all()
-
+    print(matrix_projects)
+    print(anchor_projects)
     return html.Div([
         dbc.Jumbotron(html.Img(src="assets/logo_2tone.svg"), className="d-flex justify-content-center"),
         html.H1("Genomics of Drug Sensitivity in Cancer", className='display-4 text-center'),

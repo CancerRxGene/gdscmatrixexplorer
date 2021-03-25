@@ -52,10 +52,10 @@ class Model(ToDictMixin, Base):
     cancer_type = sa.Column(sa.String)
     name = sa.orm.synonym(cell_line_name)
 
-
+#
 @generic_repr
 class Drug(ToDictMixin, Base):
-    __tablename__ = 'drugs'
+    __tablename__ = "drugs"
     id = sa.Column(sa.Integer, primary_key=True)
     name = sa.Column(sa.String)
     target = sa.Column(sa.String)
@@ -64,6 +64,9 @@ class Drug(ToDictMixin, Base):
 
     def get_name(self):
         return self.name
+
+    def __repr__(self):
+        return f"Drug(id={self.id})"
 
 @generic_repr
 class Combination(ToDictMixin, Base):
