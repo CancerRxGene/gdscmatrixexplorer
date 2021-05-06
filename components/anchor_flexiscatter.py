@@ -2,6 +2,8 @@ from functools import lru_cache
 from db import session
 import plotly.graph_objs as go
 import plotly_express as px
+import plotly.io as pio
+pio.templates.default = "plotly_white"
 import pandas as pd
 from models import AnchorCombi, Model
 from utils import anchor_metrics, anchor_metrics_labels
@@ -102,6 +104,7 @@ def layout(filtered_df,color,xaxis,yaxis):
             x = xaxis,
             y = yaxis,
             color = color,
+
             labels= anchor_metrics_labels,
             hover_data=['tissue', 'cancer_type','cell_line_name'],
     ))
@@ -113,8 +116,7 @@ def layout(filtered_df,color,xaxis,yaxis):
                'title': y_title},
         height=900,
         width=1000,
-        #plot_bgcolor='rgba(0,0,0,0)'
-        plot_bgcolor = 'rgb(233,233,233)'
+        # template="plotly_white",
     )
 
     return fig

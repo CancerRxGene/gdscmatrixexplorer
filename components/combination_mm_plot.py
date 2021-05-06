@@ -161,7 +161,8 @@ def generate_mm_scatter(project_metrics, plot_data, plot_metric, drug1_name, dru
         )
         ],
         'layout': {
-            'title': matrix_metrics[plot_metric]['description'],
+           # 'title': matrix_metrics[plot_metric]['description'],
+            'title': matrix_metrics[plot_metric]['label'],
             'xaxis': {'title': f"{drug1_name} IC50 log µM"},
             'yaxis': {'title': f"{drug2_name} IC50 log µM"}
         }

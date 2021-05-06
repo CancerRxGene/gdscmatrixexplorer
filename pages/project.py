@@ -12,7 +12,7 @@ from utils import get_project_from_url
 
 def layout(url):
     project = get_project_from_url(url)
-
+    print(project)
     if project is None:
         return [
             dbc.Row(className="mt-5", children=

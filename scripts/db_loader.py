@@ -16,7 +16,7 @@ from tqdm import tqdm
 
 from db import engine, Base
 from models import Model, Drug, Combination, MatrixResult, WellResult, \
-    DoseResponseCurve, SingleAgentWellResult, Project
+    DoseResponseCurve, SingleAgentWellResult, Project, AnchorCombi, AnchorSynergy
 
 Session = sessionmaker(bind=engine)
 session = Session()
@@ -33,7 +33,7 @@ def upload_project(combo_matrix_stats_path: str,
     combo_well_stats = pd.read_csv(combo_well_stats_path)
     nlme_stats = pd.read_csv(nlme_stats_path)
 
-    project = get_project(project_name)
+    project = get_project(project_name,'matrix')
 
     add_new_models(combo_matrix_stats)
     models = pd.read_sql(session.query(Model).statement, session.bind)
@@ -42,6 +42,7 @@ def upload_project(combo_matrix_stats_path: str,
 
     drug_matrices = extract_drug_matrices(combo_matrix_stats)
     drug_matrices = add_project_id(drug_matrices, project)
+
     drug_matrices_to_db(drug_matrices)
     matrix_results = extract_matrix_results(combo_matrix_stats, 'MASTER_CELL_ID')
     matrix_results = add_model_id(matrix_results, models, 'master_cell_id')
@@ -64,11 +65,11 @@ def upload_project(combo_matrix_stats_path: str,
     sa_wells_to_db(sa_wells)
 
 
-def get_project(project_name):
+def get_project(project_name, project_type):
     db_p = session.query(Project).filter_by(name=project_name).first()
     if not db_p:
         slug = '-'.join([c.lower() for c in re.split("[, \-!?:_]+", project_name)])
-        db_p = Project(name=project_name, slug=slug)
+        db_p = Project(name=project_name, slug=slug, combination_type = project_type)
         session.add(db_p)
         session.commit()
     return db_p
@@ -335,6 +336,104 @@ def extract_single_agent_wells(nlme_stats):
 def sa_wells_to_db(wells):
     to_db(SingleAgentWellResult, wells)
 
+def upload_anchor(anchor_combi_path: str, anchor_synergy_path: str, project_name: str):
+    anchor_combi = pd.read_csv(anchor_combi_path)
+    anchor_synergy = pd.read_csv(anchor_synergy_path)
+    project = get_project(project_name, 'anchor')
+
+    print(project.id)
+    upload_anchor_new_models(anchor_combi)
+    upload_anchor_new_drugs(anchor_combi)
+    upload_combinations(anchor_combi, project.id)
+
+    #add proejct id to anchor combi df
+    anchor_combi['project_id'] = project.id
+    upload_anchor_combi(anchor_combi)
+
+    #add project id to synergy df
+    anchor_synergy['project_id'] = project.id
+    upload_anchor_synergy(anchor_synergy)
+
+def upload_anchor_new_models(anchor_combi_df):
+    print(f"Uploading models")
+    # get all the models from input, only need relevant columns
+    models_details = anchor_combi_df[
+        ['CELL_LINE_NAME', 'MASTER_CELL_ID', 'COSMIC_ID', 'SIDM', 'tissue', 'cancer_type']].drop_duplicates()
+
+    # get models in db
+    model_q = session.query(Model)
+    model_df = pd.read_sql(model_q.statement, session.bind)
+    models_in_db = model_df['id']
+
+    count = 0
+    for m in models_details['SIDM']:
+        if (m not in models_in_db.values):
+            count = count + 1
+            model = models_details[models_details.SIDM == m]
+
+            # for integer, it is numpy.int64,  need to convert into standard int, add .item() at the end
+            # e.g cosmic id = model.COSMIC_ID.iat[0].item()
+            new_model = Model(id=model.SIDM.iat[0], master_cell_id=model.MASTER_CELL_ID.iat[0].item(),
+                              cosmic_id=model.COSMIC_ID.iat[0].item(), tissue=model.tissue.iat[0],
+                              cancer_type=model.cancer_type.iat[0], cell_line_name=model.CELL_LINE_NAME.iat[0])
+            session.add(new_model)
+            session.commit()
+
+    print('There are ' + str(count) + ' new models')
+
+def upload_anchor_new_drugs(anchor_combi_df):
+    print(f"Uploading drugs")
+    lib_drugs = anchor_combi_df[['LIBRARY_ID','LIBRARY_NAME','LIBRARY_TARGET','LIBRARY_TARGET_PATHWAY']].drop_duplicates()
+
+    # inplace=True to keep the new columns in the df
+    lib_drugs.rename(columns={"LIBRARY_ID":"id",
+                                 "LIBRARY_NAME":"name",
+                                 "LIBRARY_TARGET":"target",
+                                 "LIBRARY_TARGET_PATHWAY":"pathway"
+                                 }
+                        , inplace=True)
+
+    anchor_drugs = anchor_combi_df[['ANCHOR_ID',
+                                    'ANCHOR_NAME',
+	                                'ANCHOR_TARGET',
+                                    'ANCHOR_TARGET_PATHWAY']].drop_duplicates()
+
+    anchor_drugs.rename(columns={ "ANCHOR_ID":"id",
+                                  "ANCHOR_NAME": "name",
+                                  "ANCHOR_TARGET":"target",
+                                  "ANCHOR_TARGET_PATHWAY":"pathway"
+                                  }, inplace=True)
+
+    all_drugs = lib_drugs.append(anchor_drugs).drop_duplicates()
+
+    new_drugs = get_new(Drug, all_drugs)
+    print(new_drugs)
+    upsert(Drug, new_drugs)
+
+def upload_combinations(anchor_combi_df, project_id):
+    print(f"Uploading combinations")
+    combinations  = anchor_combi_df[['LIBRARY_ID','ANCHOR_ID']].drop_duplicates()
+    combinations.rename(columns={
+                    "LIBRARY_ID":"lib1_id",
+                    "ANCHOR_ID":"lib2_id"
+    }, inplace=True)
+
+    combinations['project_id'] = project_id
+
+    for c in combinations.itertuples():
+        new_combination = Combination(
+            project_id = c.project_id,
+            lib1_id = c.lib1_id,
+            lib2_id = c.lib2_id
+        )
+        session.add(new_combination)
+    session.commit()
+
+def upload_anchor_combi(anchor_combi_df):
+    to_db(AnchorCombi,anchor_combi_df)
+
+def upload_anchor_synergy(anchor_synergy_df):
+    to_db(AnchorSynergy,anchor_synergy_df)
 
 if __name__ == '__main__':
     print("!!! Run this program using gdscmatrixexplorer/cli.py !!!")

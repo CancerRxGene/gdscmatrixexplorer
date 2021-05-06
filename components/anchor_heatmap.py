@@ -23,6 +23,7 @@ def layout(display_opt,project_id):
     # create dictionary
     lib_names_ids = {}
     for ID in lib_drugs:
+        print(ID)
         l_drug = session.query(Drug).get(ID)
         lib_names_ids[l_drug.name] = ID
 
