@@ -42,17 +42,17 @@ class Colors:
 matrix_metrics = {
     'bliss_matrix': {
         'label': 'Bliss Excess',
-       # 'description': 'Average Bliss excess',
+        'description': 'Average Bliss excess',
         'value': 'bliss_matrix'
     },
     'bliss_matrix_so': {
         'label': 'Bliss excess synergy',
-       # 'description': 'Average Bliss excess synergistic wells',
+        'description': 'Average Bliss excess synergistic wells',
         'value': 'bliss_matrix_so'
     },
     'bliss_window': {
         'label': 'Bliss excess 3x3 window',
-       # 'description': 'Average Bliss excess of the highest 3x3 window',
+        'description': 'Average Bliss excess of the highest 3x3 window',
         'value': 'bliss_window'
     },
     'bliss_window_so': {
