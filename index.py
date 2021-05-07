@@ -35,13 +35,12 @@ server = app.server
 @app.callback(Output('page-content', 'children'),
               [Input('url', 'pathname')])
 def display_page(pathname):
-    print('from display page')
-    print(pathname)
+    print('page path:' + pathname)
     if pathname is None:
         return ""
 
     page_type = url_parser(pathname)
-    print(page_type)
+    print('page type: ' + page_type)
     if page_type == 'home':
         return home.layout(pathname)
     elif page_type == 'project':

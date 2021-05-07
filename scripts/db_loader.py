@@ -341,7 +341,6 @@ def upload_anchor(anchor_combi_path: str, anchor_synergy_path: str, project_name
     anchor_synergy = pd.read_csv(anchor_synergy_path)
     project = get_project(project_name, 'anchor')
 
-    print(project.id)
     upload_anchor_new_models(anchor_combi)
     upload_anchor_new_drugs(anchor_combi)
     upload_combinations(anchor_combi, project.id)
@@ -407,7 +406,7 @@ def upload_anchor_new_drugs(anchor_combi_df):
     all_drugs = lib_drugs.append(anchor_drugs).drop_duplicates()
 
     new_drugs = get_new(Drug, all_drugs)
-    print(new_drugs)
+
     upsert(Drug, new_drugs)
 
 def upload_combinations(anchor_combi_df, project_id):
