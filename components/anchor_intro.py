@@ -101,6 +101,7 @@ def layout(project,combination):
                      ])
                 ]),
 
-            ])
+            ]),
+
         ]
     )

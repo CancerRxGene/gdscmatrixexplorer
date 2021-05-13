@@ -5,6 +5,7 @@ from components.combination_max_effect import layout as max_effect_analysis
 from components.combination_mm_plot import layout as mm_plot
 from components.anchor_overview import layout as anchor_overview_plot
 from components.anchor_intro import layout as anchor_intro
+from components.anchor_distplot import layout as anchor_distplot
 from components.breadcrumbs import breadcrumb_generator as crumbs
 from utils import get_combination_from_url, get_project_from_url
 
@@ -27,7 +28,8 @@ def layout(url):
             crumbs([("Home", "/"), (combination.project.name, f"/project/{combination.project.slug}"),
                     (f"{combination.lib2.name} + {combination.lib1.name}",)]),
             anchor_intro(project,combination),
-            anchor_overview_plot(combination)
+            anchor_overview_plot(combination),
+            anchor_distplot(project,combination)
         ])
 
 
