@@ -87,4 +87,20 @@ def generate_dist(df,combination,type):
                       yaxis = dict(title='Frequency')
                       )
 
+    if(type == 'synergy_delta_emax'):
+        fig.add_shape(type="line",x0=0.2,y0=0,x1=0.2,y1=5,
+                  line=dict(color="LightGrey", width=3))
+        fig.add_annotation(x=0.2,y=5,
+                           text="Synergy threshold",
+                           showarrow=True,
+                           arrowhead=1)
+
+    if (type == 'synergy_delta_xmid'):
+        fig.add_shape(type="line", x0=3, y0=0, x1=3, y1=0.2,
+                      line=dict(color="LightGrey", width=3),
+                      )
+        fig.add_annotation(x=3, y=0.2,
+                           text="Synergy threshold",
+                           showarrow=True,
+                           arrowhead=1)
     return fig
