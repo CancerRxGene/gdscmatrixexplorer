@@ -186,6 +186,12 @@ def generate_delta_emax_boxplot(anc_df,anc_conc_type):
                    width=250,
                    height=500
                    )
+    fig.add_shape(type="line",x0=-1,y0=20,x1=1,y1=20,
+                  line=dict(color="black", width=3))
+    fig.add_annotation(x=0,y=20,
+                           text="Synergy threshold",
+                           showarrow=True,
+                           arrowhead=1)
     return fig
 
 def generate_delta_ic50_boxplot(anc_df, anc_conc_type):
@@ -213,6 +219,12 @@ def generate_delta_ic50_boxplot(anc_df, anc_conc_type):
                    width=250,
                    height=500
                    )
+    fig.add_shape(type="line", x0=-1, y0=3, x1=1, y1=3,
+                  line=dict(color="black", width=3))
+    fig.add_annotation(x=0, y=3,
+                       text="Synergy threshold",
+                       showarrow=True,
+                       arrowhead=1)
     return fig
 
 def get_emax_df(df,type,col_name):

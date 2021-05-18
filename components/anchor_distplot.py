@@ -58,9 +58,12 @@ def layout(project,combination):
         ])
 
 def generate_dist(df,combination,type):
+    df['synergy_delta_emax'].update(df['synergy_delta_emax'] * 100)
     this_combo_df = df.loc[
         (df['library_id'] == combination.lib1.id) & (df['anchor_id'] == combination.lib2.id)]
 
+
+    #type_emax_df[col_name].update(type_emax_df[col_name] * 100)
     anc_conc = this_combo_df['anchor_conc'].drop_duplicates().sort_values()
 
     anc_low = anc_conc.iat[0]
@@ -73,31 +76,44 @@ def generate_dist(df,combination,type):
     anc_high_df = this_combo_df.loc[this_combo_df['anchor_conc'] == anc_high]
     anc_low_df = this_combo_df.loc[this_combo_df['anchor_conc'] == anc_low ]
 
-    fig = ff.create_distplot(
-        [df[type], anc_high_df[type], anc_low_df[type]],
-        ['All Combinations', 'Anchor High', 'Anchor Low'],
-        show_hist=False,
-        show_rug= False,
-        curve_type = 'normal',
-        bin_size = .2,
+    group_label =  ['All Combinations', 'Anchor High', 'Anchor Low']
+    empty_group_label =  ['', '', '']
 
-    )
+    if(type == 'synergy_obs_emax'):
+        fig = ff.create_distplot(
+            [df[type], anc_high_df[type], anc_low_df[type]],
+            group_label,
+            show_hist=False,
+            show_rug= False,
+            curve_type = 'normal',
+            bin_size = .2,
+        )
+
+    else:
+        fig = ff.create_distplot(
+            [df[type], anc_high_df[type], anc_low_df[type]],
+            empty_group_label,
+            show_hist=False,
+            show_rug=False,
+            curve_type='normal',
+            bin_size=.2,
+        )
     fig.update_layout(
                       xaxis=dict(title=anchor_metrics[type]['label']),
                       yaxis = dict(title='Frequency')
                       )
 
     if(type == 'synergy_delta_emax'):
-        fig.add_shape(type="line",x0=0.2,y0=0,x1=0.2,y1=5,
-                  line=dict(color="LightGrey", width=3))
-        fig.add_annotation(x=0.2,y=5,
+        fig.add_shape(type="line",x0=20,y0=0,x1=20,y1=0.1,
+                  line=dict(color="darkgrey", width=3,dash = 'dash'))
+        fig.add_annotation(x=20,y=0.1,
                            text="Synergy threshold",
                            showarrow=True,
                            arrowhead=1)
 
     if (type == 'synergy_delta_xmid'):
         fig.add_shape(type="line", x0=3, y0=0, x1=3, y1=0.2,
-                      line=dict(color="LightGrey", width=3),
+                      line=dict(color="darkgrey", width=3,dash = 'dash'),
                       )
         fig.add_annotation(x=3, y=0.2,
                            text="Synergy threshold",
