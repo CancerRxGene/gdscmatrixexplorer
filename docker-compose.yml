@@ -3,7 +3,7 @@ services:
   web:
     # replace username/repo:tag with your name and image details
     #image: registry.team215.sanger.ac.uk/matrixexplorer:1.0.8
-    image: registry.team215.sanger.ac.uk/matrixexplorer:anchor_v5.1
+    image: registry.team215.sanger.ac.uk/matrixexplorer:anchor_v6_distplot
     env_file:
       - matrix_env.env
     deploy:
