@@ -131,3 +131,8 @@ a.nav-link.active{
     height: 100px;
     z-index: 2000;
 }
+
+.gdsc-heading {
+    font-size: 1.5rem;
+    color: #FFA500;
+}
