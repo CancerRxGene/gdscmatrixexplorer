@@ -35,12 +35,15 @@ def layout(url):
                            html.Div(className="bg-white pt-3 px-4 pb-2 mb-3 border border shadow-sm", children=[
                                html.H3(f"{project.name}"),
                                html.Hr(),
+                               html.H3("test"),
                                dbc.Tabs([
                                        dbc.Tab(label='Overview', tab_id="tab-overview"),
                                        dbc.Tab(label='FlexiScatter', tab_id="tab-flexiscatter")
                                    ],
                                    id="project-tabs",
-                                   active_tab='tab-overview'),
+                                 #  active_tab='tab-overview'),
+                                   active_tab='tab-flexiscatter'),
+
                                html.Div(id="content")
                            ]),
 
@@ -83,6 +86,7 @@ def layout(url):
     [dash.dependencies.State("url", "pathname")])
 def switch_tab(at, url):
     if at == "tab-overview":
+        print('boxplot')
         return project_boxplot()
     elif at == "tab-flexiscatter":
         project = get_project_from_url(url)

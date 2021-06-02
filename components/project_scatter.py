@@ -233,6 +233,7 @@ def get_scatter(summary, x_axis_field, y_axis_field, color_field):
 def go_to_dot(clicked):
     if clicked:
         p = clicked['points'][0]['customdata']
+        print(clicked['points'])
         return p['to']
     else:
         return "/"

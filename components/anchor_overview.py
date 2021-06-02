@@ -4,9 +4,10 @@ import dash
 import dash_bootstrap_components as dbc
 import dash_html_components as html
 import dash_core_components as dcc
-#import plotly.graph_objs as go
+import plotly.graph_objs as go
 import plotly.express as px
 import pandas as pd
+from utils import anchor_hover_label_for_boxplot
 
 #from app import app
 from db import session
@@ -96,6 +97,8 @@ def layout(combination):
     ])  #html l1
 
 def generate_vialibity_boxplot(anc_df,anc_conc_type):
+    labels = anchor_hover_label_for_boxplot(anc_df)
+
     anchor_conc = anc_df['anchor_conc'].drop_duplicates().sort_values()
 
     # find the low & high conc
@@ -118,20 +121,74 @@ def generate_vialibity_boxplot(anc_df,anc_conc_type):
     bliss_emax_df = get_emax_df(anc_df_per_conc,'Bliss_Emax','synergy_exp_emax')
     combo_emax_df = get_emax_df(anc_df_per_conc,'Combo_Emax','synergy_obs_emax')
     title = 'Anchor '+ anc_conc_type
-    final_df = anc_via_df.append(lib_emax_df).append(bliss_emax_df).append(combo_emax_df)
+    #final_df = anc_via_df.append(lib_emax_df).append(bliss_emax_df).append(combo_emax_df)
 
-    fig = px.strip(final_df, x='type', y='Viability %', title= title,
-                   labels= {'type':' '},
-                  # color = "type",
-                   hover_name = "hover_name",
-                   width=400,
-                   height=500
-     )
+    # fig = px.strip(final_df, x='type', y='Viability %', title= title,
+    #                labels= {'type':' '},
+    #               # color = "type",
+    #                hover_name = "hover_name",
+    #                width=400,
+    #                height=500
+    #  )
+
+    fig = go.Figure(
+                     data = [
+                         go.Box(
+                           name = 'Anc Via',
+                           y=anc_via_df['Viability %'],
+                           text=labels,
+                           boxpoints = 'all',
+                           jitter=0.3,
+                           pointpos=0,
+                           hoveron='points',
+                           hoverinfo='y+text',
+                           ),
+                         go.Box(
+                             name='Lib Emax',
+                             y=lib_emax_df['Viability %'],
+                             text=labels,
+                             boxpoints='all',
+                             jitter=0.3,
+                             pointpos=0,
+                             hoveron='points',
+                             hoverinfo='y+text',
+                         ),
+                         go.Box(
+                             name='Bliss Emax',
+                             y=bliss_emax_df['Viability %'],
+                             text=labels,
+                             boxpoints='all',
+                             jitter=0.3,
+                             pointpos=0,
+                             hoveron='points',
+                             hoverinfo='y+text',
+                         ),
+                         go.Box(
+                             name='Combo Emax',
+                             y=combo_emax_df['Viability %'],
+                             text = labels,
+                             boxpoints='all',
+                             jitter=0.3,
+                             pointpos=0,
+                             hoveron='points',
+                             hoverinfo='y+text',
+                         )
+                     ],
+                    layout = go.Layout(
+                        yaxis={
+                            'title': "Viability %"
+                        },
+                        showlegend=False,
+                        title = title,
+                        width=400,
+                        height=500
+                    )
+                )
     return fig
 
 def generate_ic50_boxplot(anc_df,anc_conc_type):
     anchor_conc = anc_df['anchor_conc'].drop_duplicates().sort_values()
-
+    labels = anchor_hover_label_for_boxplot(anc_df)
     # find the low & high conc
     anchor_low = anchor_conc[0]
     anchor_high = anchor_conc[1]
@@ -149,21 +206,56 @@ def generate_ic50_boxplot(anc_df,anc_conc_type):
 
     lib_ic50_df = get_ic50_df(anc_df_per_conc, 'Lib_IC50', 'library_xmid')
     combo_ic50_df = get_ic50_df(anc_df_per_conc, 'Combo_IC50', 'synergy_xmid')
-    title = 'Anchor ' + anc_conc_type
-    final_df = lib_ic50_df.append(combo_ic50_df)
 
-    fig = px.strip(final_df, x='type', y='Norm. drug conc.',
-                   title = ' ', labels= {'type':' '},
-                  # color = 'type',
-                   hover_name= "hover_name",
-                   width=300,
-                   height=500,
-                   )
+    # title = 'Anchor ' + anc_conc_type
+    # final_df = lib_ic50_df.append(combo_ic50_df)
+    #print(final_df)
+    # fig = px.strip(final_df, x='type', y='Norm. drug conc.',
+    #                title = ' ', labels= {'type':' '},
+    #               # color = 'type',
+    #                hover_name= "hover_name",
+    #                width=300,
+    #                height=500,
+    #                )
+
+    fig = go.Figure(
+            data = [
+               go.Box(
+                   name = 'Lib IC50',
+                   y = lib_ic50_df['Norm. drug conc.'],
+                   text=labels,
+                   boxpoints='all',
+                   jitter=0.3,
+                   pointpos=0,
+                   hoveron='points',
+                   hoverinfo='y+text',
+                ),
+                go.Box(
+                    name = 'Combo IC50',
+                    y = combo_ic50_df['Norm. drug conc.'],
+                    text=labels,
+                    boxpoints='all',
+                    jitter=0.3,
+                    pointpos=0,
+                    hoveron='points',
+                    hoverinfo='y+text',
+                ),
+                ],
+            layout = go.Layout(
+                        yaxis={
+                            'title': "Norm. drug conc."
+                        },
+                        showlegend=False,
+                       # title = title,
+                        width=300,
+                        height=500
+                    )
+        )
     return fig
 
 def generate_delta_emax_boxplot(anc_df,anc_conc_type):
     anchor_conc = anc_df['anchor_conc'].drop_duplicates().sort_values()
-
+    labels = anchor_hover_label_for_boxplot(anc_df)
     # find the low & high conc
     anchor_low = anchor_conc[0]
     anchor_high = anchor_conc[1]
@@ -180,12 +272,39 @@ def generate_delta_emax_boxplot(anc_df,anc_conc_type):
     anc_df_per_conc = anc_df.loc[anc_df['anchor_conc'] == conc]
 
     delta_emax_df = get_delta_emax_df(anc_df_per_conc)
-    fig = px.strip(delta_emax_df,x='type',y='Delta Viability %',
-                   title=' ', labels= {'type':' '},
-                   hover_name="hover_name",
-                   width=250,
-                   height=500
-                   )
+   # print(delta_emax_df)
+    # fig = px.strip(delta_emax_df,x='type',y='Delta Viability %',
+    #                title=' ', labels= {'type':' '},
+    #                hover_name="hover_name",
+    #                width=250,
+    #                height=500
+    #                )
+
+    fig = go.Figure(
+                     data = [
+                         go.Box(
+                             name='Delta Emax',
+                             y=delta_emax_df['Delta Viability %'],
+                             text=labels,
+                             boxpoints='all',
+                             jitter=0.3,
+                             pointpos=0,
+                             hoveron='points',
+                             hoverinfo='y+text',
+                         )
+                     ],
+                    layout = go.Layout(
+                        yaxis={
+                            'title': "Delta Viability %"
+                            },
+                        showlegend=False,
+                       # hover_name="hover_name",
+                        width=250,
+                        height=500
+                        #title = title
+                        )
+    )
+
     fig.add_shape(type="line",x0=-1,y0=20,x1=1,y1=20,
                   line=dict(color="black", width=3))
     fig.add_annotation(x=0,y=20,
@@ -196,7 +315,7 @@ def generate_delta_emax_boxplot(anc_df,anc_conc_type):
 
 def generate_delta_ic50_boxplot(anc_df, anc_conc_type):
     anchor_conc = anc_df['anchor_conc'].drop_duplicates().sort_values()
-
+    labels = anchor_hover_label_for_boxplot(anc_df)
     # find the low & high conc
     anchor_low = anchor_conc[0]
     anchor_high = anchor_conc[1]
@@ -212,13 +331,39 @@ def generate_delta_ic50_boxplot(anc_df, anc_conc_type):
 
     anc_df_per_conc = anc_df.loc[anc_df['anchor_conc'] == conc]
 
-    delta_emax_df = get_delta_ic50_df(anc_df_per_conc)
-    fig = px.strip(delta_emax_df, x='type', y='Delta Norm. drug conc.',
-                   title=' ', labels= {'type':' '},
-                   hover_name="hover_name",
-                   width=250,
-                   height=500
-                   )
+    delta_ic50_df = get_delta_ic50_df(anc_df_per_conc)
+    # fig = px.strip(delta_emax_df, x='type', y='Delta Norm. drug conc.',
+    #                title=' ', labels= {'type':' '},
+    #                hover_name="hover_name",
+    #                width=250,
+    #                height=500
+    #                )
+
+    fig = go.Figure(
+        data=[
+            go.Box(
+                name='Delta IC50',
+                y=delta_ic50_df['Delta Norm. drug conc.'],
+                text=labels,
+                boxpoints='all',
+                jitter=0.3,
+                pointpos=0,
+                hoveron='points',
+                hoverinfo='y+text',
+            )
+        ],
+        layout=go.Layout(
+            yaxis={
+                'title': "Delta Norm. drug conc."
+            },
+            showlegend=False,
+            # hover_name="hover_name",
+            width=250,
+            height=500
+            # title = title
+        )
+    )
+
     fig.add_shape(type="line", x0=-1, y0=3, x1=1, y1=3,
                   line=dict(color="black", width=3))
     fig.add_annotation(x=0, y=3,

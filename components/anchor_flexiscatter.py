@@ -23,7 +23,8 @@ def cached_update_scatter(tissue,cancertype,library,anchor,combintation,color,xa
                                  AnchorCombi.library_name,
                                  AnchorCombi.anchor_name,
                                  AnchorCombi.library_target,
-                                 AnchorCombi.anchor_target
+                                 AnchorCombi.anchor_target,
+                                 AnchorCombi.sidm
                                  ).filter(AnchorCombi.project_id == int(project_id))
 
     #anchor_combi = session.query(AnchorCombi).filter(AnchorCombi.project_id == int(project_id))
@@ -106,7 +107,7 @@ def layout(filtered_df,color,xaxis,yaxis):
             color = color,
 
             labels= anchor_metrics_labels,
-            hover_data=['tissue', 'cancer_type','cell_line_name'],
+            hover_data=['tissue', 'cancer_type','cell_line_name','sidm'],
     ))
 
     fig.update_layout(
@@ -116,8 +117,7 @@ def layout(filtered_df,color,xaxis,yaxis):
                'title': y_title},
         height=900,
         width=1000,
-        # template="plotly_white",
     )
-
     return fig
+
 

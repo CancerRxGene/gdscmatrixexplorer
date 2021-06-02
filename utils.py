@@ -57,52 +57,52 @@ matrix_metrics = {
     },
     'bliss_window_so': {
         'label': 'Bliss excess 3x3 window synergy',
-       # 'description': 'Average Bliss excess of highest 3x3 window counting only synergistic wells',
+        'description': 'Average Bliss excess of highest 3x3 window counting only synergistic wells',
         'value': 'bliss_window_so'
     },
     'hsa_matrix': {
         'label': 'HSA excess',
-       # 'description': 'Average HSA excess',
+        'description': 'Average HSA excess',
         'value': 'hsa_matrix'
     },
     'hsa_matrix_so': {
         'label': 'HSA excess synergy',
-       # 'description': 'Average HSA excess eynergistic wells',
+        'description': 'Average HSA excess eynergistic wells',
         'value': 'hsa_matrix_so'
     },
     'hsa_window': {
         'label': 'HSA excess 3x3 window',
-       # 'description': 'Average HSA Excess of the highest 3x3 window',
+        'description': 'Average HSA Excess of the highest 3x3 window',
         'value': 'hsa_window'
     },
     'hsa_window_so': {
         'label': 'HSA excess 3x3 window synergy',
-       # 'description': 'Average HSA excess of highest 3x3 window counting only synergistic wells',
+        'description': 'Average HSA excess of highest 3x3 window counting only synergistic wells',
         'value': 'hsa_window_so'
     },
     'combo_maxe': {
         'label': 'MaxE combination',
-       # 'description': 'Maximum inhibition observed in combination',
+        'description': 'Maximum inhibition observed in combination',
         'value': 'combo_maxe'
     },
     'lib1_maxe': {
         'label': 'MaxE drug 1',
-       # 'description': 'Maximum inhibition observed in drug 1',
+        'description': 'Maximum inhibition observed in drug 1',
         'value': 'lib1_maxe'
     },
     'lib2_maxe': {
         'label': 'MaxE drug 2',
-       # 'description': 'Maximum inhibition observed in drug 2',
+        'description': 'Maximum inhibition observed in drug 2',
         'value': 'lib2_maxe'
     },
     'delta_maxe_lib1': {
         'label': 'Delta MaxE drug 1',
-       # 'description': 'MaxE combination minus MaxE drug1',
+        'description': 'MaxE combination minus MaxE drug1',
         'value': 'delta_maxe_lib1'
     },
     'delta_maxe_lib2': {
         'label': 'Delta MaxE drug 2',
-       # 'description': 'MaxE combination minus MaxE drug2',
+        'description': 'MaxE combination minus MaxE drug2',
         'value': 'delta_maxe_lib2'
     },
 }
@@ -178,7 +178,8 @@ anchor_metrics_labels = {
     "tissue"             : "Tissue",
     "cancer_type"        : "Cancer Type",
     "cell_line_name"     : "Cell line name",
-    "combo_name"         : "Combination"
+    "combo_name"         : "Combination",
+    "sidm"               : "SIDM ID"
 }
 
 plot_colors = ["rgb(215,150,209)", "rgb(164,250,201)", "rgb(245,167,221)",
@@ -442,5 +443,13 @@ def anchor_hover_label(fig_data):
 def anchor_hover_from_df(a):
     return f"{a.anchor_name}({a.anchor_target}) - {a.library_name}({a.library_target}) <br />"\
            f"Cell line: {a.cell_line_name} <br />"\
+           f"Tissue: {a.tissue} <br />"\
+           f"Cancer Type: {a.cancer_type}"
+
+def anchor_hover_label_for_boxplot(fig_data):
+    return [anchor_hover_for_boxplot_from_df(a) for a in fig_data.itertuples()]
+
+def anchor_hover_for_boxplot_from_df(a):
+    return f"Cell line: {a.cell_line_name} <br />"\
            f"Tissue: {a.tissue} <br />"\
            f"Cancer Type: {a.cancer_type}"

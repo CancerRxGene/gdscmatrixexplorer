@@ -27,7 +27,7 @@ def layout(project,combination):
                                 html.H3("Key metric distributions compared to all combos in project"),
                                 html.Hr(),
                                 dbc.Row([  # row
-                                    dbc.Col(width=4, children=[
+                                    dbc.Col(width=6, children=[
                                         dcc.Loading(className='gdsc-spinner', children=
                                         dcc.Graph(
                                             id='dist1',
@@ -35,7 +35,7 @@ def layout(project,combination):
                                             )
                                         )
                                     ]),
-                                    dbc.Col(width=4, children=[
+                                    dbc.Col(width=6, children=[
                                         dcc.Loading(className='gdsc-spinner', children=
                                         dcc.Graph(
                                             id='dist1',
@@ -43,14 +43,14 @@ def layout(project,combination):
                                             )
                                         )
                                     ]),
-                                    dbc.Col(width=4, children=[
-                                        dcc.Loading(className='gdsc-spinner', children=
-                                        dcc.Graph(
-                                            id='dist1',
-                                            figure=generate_dist(all_combo_df, combination, 'synergy_obs_emax')
-                                            )
-                                        )
-                                    ]),
+                                    # dbc.Col(width=4, children=[
+                                    #     dcc.Loading(className='gdsc-spinner', children=
+                                    #     dcc.Graph(
+                                    #         id='dist1',
+                                    #         figure=generate_dist(all_combo_df, combination, 'synergy_obs_emax')
+                                    #         )
+                                    #     )
+                                    # ]),
                                  ]) # row
                             ]), # html.Div
                 ]), # col
@@ -77,46 +77,44 @@ def generate_dist(df,combination,type):
     anc_low_df = this_combo_df.loc[this_combo_df['anchor_conc'] == anc_low ]
 
     group_label =  ['All Combinations', 'Anchor High', 'Anchor Low']
-    empty_group_label =  ['', '', '']
 
-    if(type == 'synergy_obs_emax'):
-        fig = ff.create_distplot(
-            [df[type], anc_high_df[type], anc_low_df[type]],
-            group_label,
-            show_hist=False,
-            show_rug= False,
-            curve_type = 'normal',
-            bin_size = .2,
-        )
+    fig = ff.create_distplot(
+        [df[type], anc_high_df[type], anc_low_df[type]],
+        group_label,
+        colors=['black','green','blue'],
+        show_hist=False,
+        show_rug= False,
+        curve_type = 'normal',
+        bin_size = .2,
+    )
 
-    else:
-        fig = ff.create_distplot(
-            [df[type], anc_high_df[type], anc_low_df[type]],
-            empty_group_label,
-            show_hist=False,
-            show_rug=False,
-            curve_type='normal',
-            bin_size=.2,
-        )
     fig.update_layout(
                       xaxis=dict(title=anchor_metrics[type]['label']),
-                      yaxis = dict(title='Frequency')
+                      yaxis = dict(title='Density'),
                       )
 
     if(type == 'synergy_delta_emax'):
-        fig.add_shape(type="line",x0=20,y0=0,x1=20,y1=0.1,
+        fig.update_layout(xaxis_range=[-100, 100])
+        fig.add_shape(type="line",x0=20, y0=0,x1=20,y1=0.05,
                   line=dict(color="darkgrey", width=3,dash = 'dash'))
-        fig.add_annotation(x=20,y=0.1,
+        fig.add_annotation(x=20,y=0.05,
+                           text="Synergy threshold",
+                           showarrow=True,
+                           arrowhead=1)
+        #fig.add_vline(x=20, line_dash="dash", line_color="darkgrey", annotation_text="Synergy threshold",
+         #             annotation_position="top")
+
+    if (type == 'synergy_delta_xmid'):
+        fig.add_shape(type="line", x0=3, y0=0, x1=3, y1=0.5,
+                      line=dict(color="darkgrey", width=3, dash = 'dash'),
+                      )
+
+        fig.add_annotation(x=3, y=0.5,
                            text="Synergy threshold",
                            showarrow=True,
                            arrowhead=1)
 
-    if (type == 'synergy_delta_xmid'):
-        fig.add_shape(type="line", x0=3, y0=0, x1=3, y1=0.2,
-                      line=dict(color="darkgrey", width=3,dash = 'dash'),
-                      )
-        fig.add_annotation(x=3, y=0.2,
-                           text="Synergy threshold",
-                           showarrow=True,
-                           arrowhead=1)
+        # fig.add_vline(x=3, line_dash="dash", line_color="darkgrey",
+        #               annotation_text="Synergy threshold",
+        #               annotation_position="top")
     return fig

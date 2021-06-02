@@ -169,6 +169,7 @@ def layout(project):
                                 ]) #col l2
                             ]), # row l2
                         dbc.Row([
+                                dcc.Location('anchor-scatter-url'),
                                 dbc.Col(
                                         children=[
                                             html.Div(
@@ -427,3 +428,18 @@ def load_flexiscatter(tissue,cancertype,library,anchor,combination,color,xaxis,y
         combination = tuple(combination)
     return cached_update_scatter(tissue,cancertype,library,anchor,combination,color,xaxis,yaxis,project_id)
 
+
+@app.callback(
+    dash.dependencies.Output('anchor-scatter-url', 'pathname'),
+    [dash.dependencies.Input('flexiscatter', 'clickData')])
+def go_to_dot(clicked):
+    if clicked:
+        #p = clicked['points'][0]['custom_data']
+        # return p['to']
+        print('you click me')
+        print(clicked['points'][0]['customdata'][3])
+        to = f"https://cellmodelpassports.sanger.ac.uk/passports/{clicked['points'][0]['customdata'][3]}"
+        print(to)
+        #return to
+    else:
+        return "/"

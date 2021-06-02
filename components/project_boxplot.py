@@ -13,7 +13,6 @@ from utils import matrix_metrics, get_all_tissues, get_all_cancer_types, matrix_
 
 
 def layout():
-
     return dbc.Row([
         dcc.Location('project-boxplot-url'),
         dbc.Col(width=6,
