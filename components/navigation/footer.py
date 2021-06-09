@@ -4,7 +4,7 @@ import dash_html_components as html
 footer = dbc.Container(fluid=True, className='mt-5 pt-3 footer-wrapper', children=
             dbc.Container([
                 dbc.Row(className='w-100', children=[
-                    dbc.Col(width=3, children=[
+                    dbc.Col(width=4, children=[
                         html.Div([
                             html.H4("GDSC² Combo Explorer"),
                             html.Ul(className='list-unstyled', children=[
@@ -16,20 +16,34 @@ footer = dbc.Container(fluid=True, className='mt-5 pt-3 footer-wrapper', childre
                         ])
 
                     ]),
-                    dbc.Col(width={'size': 3, 'offset': 3}, children=[
-                        html.Div([
-                            html.H4("Contact"),
-                            html.Ul(className='list-unstyled', children=[
+                    dbc.Col(width={'size': 4}, children=[
+                                            html.Div([
+                                                html.H4("DepMap | Programmes"),
+                                                html.Ul(className='list-unstyled', children=[
+                                                    html.Li(html.A("DepMap | Drugs", href='https://depmap.sanger.ac.uk/programmes/#drugs'),),
+                                                    html.Li(html.A("DepMap | Models", href='https://depmap.sanger.ac.uk/programmes/#models'),),
+                                                    html.Li(html.A("DepMap | Genes", href='https://depmap.sanger.ac.uk/programmes/#genes'),),
+                                                    html.Li(html.A("DepMap | Analytics", href='https://depmap.sanger.ac.uk/programmes/#analytics'),)
+                                                ])
+                                            ])
 
-                                html.Li(html.Span("depmap@sanger.ac.uk"), className='mb-2'),
-                                html.Li(html.Span("Wellcome Sanger Institute")),
-                                html.Li(html.Span("Wellcome Genome Campus")),
-                                html.Li(html.Span("Hinxton, Cambridgeshire")),
-                                html.Li(html.Span("CB10 1SA, UK"))
-                            ])
-                        ])
+                                        ]),
 
-                    ]),
+                  #  dbc.Col(width={'size': 4, 'offset': 3}, children=[
+                  dbc.Col(width={'size': 4, }, children=[
+                                            html.Div([
+                                                html.H4("Contact"),
+                                                html.Ul(className='list-unstyled', children=[
+
+                                                    html.Li(html.Span("depmap@sanger.ac.uk"), className='mb-2'),
+                                                    html.Li(html.Span("Wellcome Sanger Institute")),
+                                                    html.Li(html.Span("Wellcome Genome Campus")),
+                                                    html.Li(html.Span("Hinxton, Cambridgeshire")),
+                                                    html.Li(html.Span("CB10 1SA, UK"))
+                                                ])
+                                            ])
+
+                                        ]),
                     # dbc.Col(width=3, children=[
                     #     html.Div([
                     #         html.H4("Contact AZ"),

@@ -75,19 +75,19 @@ def dropdown_handler(pathname):
                             in_navbar=True,
                             label="Projects",
                         ),
-                        dbc.DropdownMenu(
-                            children=[
-                                dbc.DropdownMenuItem(
-                                    f"{c.lib1.name} + {c.lib2.name} ({p.name})",
-                                    href=f"/project/{p.slug}/combination/{c.lib1_id}+{c.lib2_id}")
-                                for p in all_projects
-                                for c in sorted(p.combinations, key=lambda
-                                    x: f"{x.lib1.name}_{x.lib2.name}")],
-                            nav=True,
-                            in_navbar=True,
-                            label="Combinations",
-                            className="dropdown-combinations"
-                        ),
+                        # dbc.DropdownMenu(
+                        #     children=[
+                        #         dbc.DropdownMenuItem(
+                        #             f"{c.lib1.name} + {c.lib2.name} ({p.name})",
+                        #             href=f"/project/{p.slug}/combination/{c.lib1_id}+{c.lib2_id}")
+                        #         for p in all_projects
+                        #         for c in sorted(p.combinations, key=lambda
+                        #             x: f"{x.lib1.name}_{x.lib2.name}")],
+                        #     nav=True,
+                        #     in_navbar=True,
+                        #     label="Combinations",
+                        #     className="dropdown-combinations"
+                        # ),
                         generate_default_navitem("Documentation",
                                                  page_type),
                         generate_default_navitem("Downloads", page_type)
