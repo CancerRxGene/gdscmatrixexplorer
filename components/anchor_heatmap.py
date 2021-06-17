@@ -40,7 +40,7 @@ def layout(display_opt,project_id):
     # match sorted names with id
     anchor_drugs = [anchor_names_ids[name] for name in anc_name_sorted]
     lib_drugs = [lib_names_ids[name] for name in lib_name_sorted]
-
+    print(len(lib_drugs))
     synergy_counts_list = []
 
     #for anc_drug_id in anchor_drugs:
@@ -87,11 +87,11 @@ def layout(display_opt,project_id):
                 #       },
                 yaxis={'type': 'category',
                        'title': {"text": "Library",
-                                 "font": {"size": 20}
+                                 "font": {"size": 5}
                                  }
                        },
-                width= 800,
-                height=600,
+                # width= 800,
+                # height=1200,
                 # yaxis={'type': 'category',
                 #        'title': {"text": "Anchor",
                 #              "font": { "size": 30}
@@ -121,13 +121,14 @@ def layout(display_opt,project_id):
                 # xaxis={'type': 'category',
                 #        'title': "Library"
                 #        },
+                # width=800,
+                # height=1600,
                 yaxis={'type': 'category',
                        'title': {"text": "Library",
-                                 "font": {"size": 20}
+                                 "font": {"size": 5}
                                  }
                        },
-                width= 800,
-                height=600,
+
                 # yaxis={'type': 'category',
                 #        'title': "Anchor"
                 #        },
@@ -141,4 +142,14 @@ def layout(display_opt,project_id):
         )
     fig.update_xaxes(side="top")
 
+    if(len(lib_drugs) > 30):
+        fig.update_layout(
+            width=800,
+            height=1000,
+        )
+    else:
+        fig.update_layout(
+            width=800,
+            height=600,
+        )
     return fig

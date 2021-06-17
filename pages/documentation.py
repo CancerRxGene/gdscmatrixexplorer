@@ -6,7 +6,44 @@ from components.breadcrumbs import breadcrumb_generator as crumbs
 
 def layout(*args, **kwargs):
     return html.Div([
-        crumbs([("Home", "/"),("/documentation",)]),
-       # matrix_doc(),
-        anchor_doc()
+        dbc.Container([
+            dbc.Row(
+                dbc.Col(
+                    html.Div([
+                        crumbs([("Home", "/"), ("/documentation",)]),
+                       # html.H4(html.Strong("Documentation"), className='display-4 text-center my-4'),
+                    ])
+                )
+            ),
+            dbc.Row(children=[
+                matrix_doc(),
+                html.Br(),
+                html.Br(),
+                anchor_doc()
+            #         dbc.Col(width=3,children=
+            #                 dbc.Nav(
+            #                     [
+            #                         dbc.NavItem(dbc.NavLink("Matrix data", href="#matrix")),
+            #                         dbc.NavItem(dbc.NavLink("Anchor data", href="#anchor"))
+            #                     ],
+            #                     vertical=True
+            #                 )
+            #                 ),
+            #         dbc.Col(width=9,children=[
+            #             dbc.Row(children=
+            #                 dbc.Col([
+            #                     matrix_doc(),
+            #                     html.Br(),
+            #                     html.Br()
+            #                 ])
+            #             ),
+            #             dbc.Row(children=
+            #                 dbc.Col(
+            #                     anchor_doc()
+            #                 )
+            #             )
+            #         ])
+            ]
+            )
+        ])
     ])

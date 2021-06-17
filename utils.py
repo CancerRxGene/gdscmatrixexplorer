@@ -11,7 +11,6 @@ from sqlalchemy import func
 from db import session
 import models
 
-
 class Colors:
     LIGHTGREEN = "rgb(117,171,61)"
     LEAFGREEN = "rgb(85,164,112)"
@@ -453,3 +452,17 @@ def anchor_hover_for_boxplot_from_df(a):
     return f"Cell line: {a.cell_line_name} <br />"\
            f"Tissue: {a.tissue} <br />"\
            f"Cancer Type: {a.cancer_type}"
+
+def matrix_projects():
+    matrix_projects = session.query(models.Project).filter(models.Project.combination_type == 'matrix').all()
+    if(len(matrix_projects) > 0):
+        return True
+    else:
+        return False
+
+def anchor_projects():
+    anchor_projects = session.query(models.Project).filter(models.Project.combination_type == 'anchor').all()
+    if(len(anchor_projects) > 0):
+        return True
+    else:
+        return False

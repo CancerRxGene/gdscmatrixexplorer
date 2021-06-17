@@ -23,8 +23,6 @@ def dynamic_download(project_slug, data_type):
     file_name = f"{project_slug}_{data_type}.csv.gz"
     file_path = STATIC_PATH + "/" + file_name
 
-    print(file_path)
-
     if not os.path.isfile(file_path):
         generate_download_file(project_slug, data_type)
 
@@ -32,5 +30,4 @@ def dynamic_download(project_slug, data_type):
         flask.send_from_directory(STATIC_PATH, file_name, as_attachment=True)
     )
     response.headers['cache-control'] = 'no-store'
-
     return response

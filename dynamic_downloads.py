@@ -5,7 +5,7 @@ from sqlalchemy.orm import aliased
 from sqlalchemy.orm.exc import NoResultFound
 from db import session
 from models import Project, MatrixResult, Drug, Model, Combination, WellResult, \
-    DoseResponseCurve
+    DoseResponseCurve, AnchorCombi, AnchorSynergy
 
 
 def generate_download_file(project_slug, download_type):
@@ -13,6 +13,8 @@ def generate_download_file(project_slug, download_type):
         return generate_well_results(project_slug)
     elif download_type == 'matrix_results':
         return generate_matrix_results(project_slug)
+    elif download_type == 'anchor_combo':
+        return generate_anchor_combi(project_slug)
 
 
 def generate_well_results(project_slug):
@@ -103,3 +105,63 @@ def generate_matrix_results(project_slug):
               compression='gzip', index=False)
 
     return True
+
+def generate_anchor_combi(project_slug):
+    from app import STATIC_PATH
+
+    try:
+        session.query(Project).filter_by(slug=project_slug).one()
+    except NoResultFound:
+        return abort(404)
+
+    drug_alias = aliased(Drug, name='anchor_id')
+    query = session.query(Project, AnchorCombi, Drug, Model, AnchorSynergy) \
+        .join(AnchorCombi, Project.id == AnchorCombi.project_id) \
+        .join(Model, AnchorCombi.sidm == Model.id) \
+        .join(Drug, AnchorCombi.library_id == Drug.id) \
+        .join(drug_alias, AnchorCombi.anchor_id ==  drug_alias.id) \
+        .join(AnchorSynergy, and_(AnchorCombi.project_id == AnchorSynergy.project_id,
+                                  AnchorCombi.library_id == AnchorSynergy.library_id,
+                                  AnchorCombi.anchor_id == AnchorSynergy.anchor_id,
+                                  AnchorCombi.cell_line_name == AnchorSynergy.cell_line_name
+                                  )) \
+        .filter(Project.slug == project_slug) \
+        .with_entities(Model.cell_line_name,
+                       Model.id,
+                       Model.tissue,
+                       Model.cancer_type,
+
+                       drug_alias.name,
+                       drug_alias.target,
+                       drug_alias.pathway,
+                       AnchorCombi.anchor_conc,
+
+                       Drug.name,
+                       Drug.target,
+                       Drug.pathway,
+                       AnchorCombi.maxc,
+
+                       AnchorCombi.library_xmid,
+                       AnchorCombi.synergy_xmid,
+                       AnchorCombi.library_emax,
+                       AnchorCombi.synergy_exp_emax,
+                       AnchorCombi.synergy_obs_emax,
+                       AnchorCombi.synergy_delta_xmid,
+                       AnchorCombi.synergy_delta_emax,
+
+                       AnchorSynergy.synergy
+                       )
+
+    df = pd.read_sql(query.statement, session.get_bind())
+
+    df.columns = \
+        ["Cell Line name","SDIM", "Tissue", "Cancer Type",
+          "Anchor Name", "Anchor Target", "Anchor Pathway","Anchor Conc",
+          "Library Name","library Target"," Library Pathway", "Maxc",
+          "Library IC50", "Combo IC50", "Library Emax", "Bliss Emax","Combo Emax",
+          "Delta Xmid", "Delta Emax",
+          "Synergy?"
+        ]
+
+    df.to_csv(STATIC_PATH + f"/{project_slug}_anchor_combo.csv.gz",
+              compression='gzip', index=False)

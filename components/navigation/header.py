@@ -47,6 +47,7 @@ def dropdown_handler(pathname):
     if pathname is None:
         return ''
     page_type = url_parser(pathname)
+    print(page_type)
     all_projects = session.query(Project).all()
 
     return dbc.Container([
