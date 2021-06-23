@@ -354,7 +354,7 @@ def generate_delta_ic50_boxplot(anc_df, anc_conc_type):
         ],
         layout=go.Layout(
             yaxis={
-                'title': "Delta Norm. drug conc."
+                'title': "Log2 Delta IC50"
             },
             showlegend=False,
             # hover_name="hover_name",

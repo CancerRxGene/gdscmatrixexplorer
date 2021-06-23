@@ -84,7 +84,7 @@ def layout(project):
                         dbc.Row([ # row l2
                             dbc.Col(children=[  #clo l2
                                 html.Div(
-                                    className="bg-white pt-3 px-4 pb-2 mb-3 border shadow-sm",
+                                    className="bg-white pt-3 px-4 pb-2 mb-3 border border-primary shadow-sm",
                                     children=[
                                         html.H3(f"{project.name}"),
                                         html.Hr(),
@@ -372,7 +372,7 @@ def layout(project):
                                    page_action="native",
                                    page_current=0,
                                    page_size=10,
-                                   style_cell={'textAlign': 'center'},
+                                   style_cell={'textAlign': 'left'},
                                    style_header={
                                      'backgroundColor': 'rgb(230, 230, 230)',
                                      'fontWeight': 'bold',

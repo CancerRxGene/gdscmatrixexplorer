@@ -24,7 +24,7 @@ def layout(project,combination):
                 dbc.Col(width=12, children=[
                     html.Div(className="bg-white pt-3 px-4 pb-2 mb-3 border border-primary shadow-sm",
                              children=[
-                                html.H3("Key metric distributions compared to all combos in project"),
+                                html.H3("Synergy metric distributions compared to all combinations in the project"),
                                 html.Hr(),
                                 dbc.Row([  # row
                                     dbc.Col(width=6, children=[
@@ -81,7 +81,7 @@ def generate_dist(df,combination,type):
     fig = ff.create_distplot(
         [df[type], anc_high_df[type], anc_low_df[type]],
         group_label,
-        colors=['black','green','blue'],
+        colors=['black','orange','green'],
         show_hist=False,
         show_rug= False,
         curve_type = 'normal',
