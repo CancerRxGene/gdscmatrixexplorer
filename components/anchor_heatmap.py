@@ -100,9 +100,10 @@ def layout(display_opt,project_id):
                 xaxis={'type': 'category',
                        'title': {"text": "Anchor",
                                  "font": {"size": 20}
-                                 }
+                                 },
                        },
-                margin=dict(t=100, b=50, l=200)
+                margin=dict(t=100, b=50, l=200),
+
             )
         )
     else:
@@ -140,7 +141,10 @@ def layout(display_opt,project_id):
                 margin=dict(t=100, b=50, l=200)
             )
         )
-    fig.update_xaxes(side="top")
+    fig.update_xaxes(
+        side="top",
+        tickangle = -90
+    )
 
     if(len(lib_drugs) > 30):
         fig.update_layout(
