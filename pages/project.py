@@ -35,7 +35,7 @@ def layout(url):
                            html.Div(className="bg-white pt-3 px-4 pb-2 mb-3 border border shadow-sm", children=[
                                html.H3(f"{project.name}"),
                                html.Hr(),
-                               html.H3("test"),
+
                                dbc.Tabs([
                                        dbc.Tab(label='Overview', tab_id="tab-overview"),
                                        dbc.Tab(label='FlexiScatter', tab_id="tab-flexiscatter")
