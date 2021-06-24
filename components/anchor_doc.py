@@ -23,10 +23,15 @@ def layout():
                        "Library drugs were screened at seven concentrations spanning a 1,000-fold range with a discontinuous log2 design of two 4-fold steps followed by four 2-fold dilution steps starting at the highest used concentration (Figure 1). ",
                        "Alternative to μM concentration ranges, drug concentrations and IC50s can be visualised on a normalised log2 scale, with 9 equalling the highest screened concentration. On each plate, all single agents were screened at five and four technical replicates for anchors and libraries, respectively."
                        ]),
+
                     #figure
+                       Center([Img(src="assets/Fig1.png")]),
+                       Br(),
+                       Br(),
+                       H4(Em("Figure 1: layout of the anchored drug combination screening design"),className='text-center'),
 
-
-
+                       Br(),
+                       Br(),
                     H3("Screening"),
                     P(["Cells were transferred into 1536-well plates in 7.5 μL of their respective growth medium using XRD384 (FluidX) dispensers."
                        "The seeding density was optimised to ensure that each cell line was in the exponential growth phase at the end of the assay.",
@@ -54,7 +59,14 @@ def layout():
                        "Using the fitted models, we determined the IC50 and Emax (viability at highest used concentration) parameters for each dose-response curve. These are called library_IC50 and library_Emax or combi_IC50 and combi_Emax for library and combination responses, respectively (Figure 2).",
                     ]),
                     # figure
+                       H4("Curve fitting",className='text-center'),
+                       Center([Img(src="assets/Fig2_curve_fitting.png")]),
+                       Br(),
+                       Br(),
+                       H4(Em("Figure 2: schematic representation of curve fitting with the anchored combination format"),className='text-center'),
 
+                   Br(),
+                   Br(),
                     H3("Detecting synergy"),
                     P(["To detect synergy we compared observed combination responses to expected combination responses.",
                         "For the latter, we used Bliss independence(Bliss 1939) of the response to the anchor and the library drug alone.",
@@ -65,6 +77,13 @@ def layout():
                        "To summarise both anchor concentrations, we considered a ‘combination-cell line’ pair as synergistic if synergy was observed at either anchor concentration. ",
                        ]),
                     # figure
+                       H4("Quantifying synergy",className='text-center'),
+                       Center([Img(src="assets/Fig3_quantifying_synergy.png")]),
+                    Br(),
+                    Br(),
+                       H4(Em("Figure 3: schematic representation of synergy quantification with the anchored combination format"),className='text-center'),
+                   Br(),
+                   Br(),
 
                     H3("Reproducibility"),
                     P(["To assess the reproducibility within a screen, we have generated 2-18 biological replicates for 4-5 cell lines per tissue (breast: 5 (AU565, BT-474, CAL-85-1, HCC1937, MFM-223); colon: 4 (HCT-15, HT-29, SK-CO-1, SW620); pancreas: 5 (KP-1N, KP-4, MZ1-PC, PA-TU-8988T, SUIT-2)).",
