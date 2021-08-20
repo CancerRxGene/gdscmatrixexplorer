@@ -441,5 +441,5 @@ def go_to_dot(clicked):
         to = f"https://cellmodelpassports.sanger.ac.uk/passports/{clicked['points'][0]['customdata'][3]}"
         print(to)
         #return to
-    else:
-        return "/"
+#     else:
+#         return "/"

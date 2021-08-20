@@ -235,5 +235,5 @@ def go_to_dot(clicked):
         p = clicked['points'][0]['customdata']
         print(clicked['points'])
         return p['to']
-    else:
-        return "/"
+    # else:
+    #     return "/"
