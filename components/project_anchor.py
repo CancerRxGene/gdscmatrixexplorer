@@ -53,8 +53,11 @@ def layout(project):
     sorted_combos = sorted(combos, key=lambda combos: combos.lib2.name)
 
     my_table_df = []
+    id = 1
     for c in project.combinations:
+        print(id)
         my_table_df_dic = {}
+        my_table_df_dic['id'] = id
         my_table_df_dic['lib_name'] = c.lib1.name
         my_table_df_dic['lib_target'] = c.lib1.target
         my_table_df_dic['lib_pathway'] = c.lib1.pathway
@@ -63,6 +66,7 @@ def layout(project):
         my_table_df_dic['anc_pathway'] = c.lib2.pathway
         my_table_df_dic['link'] = '['+ c.lib2.name + ' + ' + c.lib1.name + '](' + project.slug + '/combination/' + str(c.lib1.id) + '+' + str(c.lib2.id)+')'
         my_table_df.append(my_table_df_dic)
+        id = id + 1
 
     my_table_df = sorted(my_table_df, key=lambda k: k['anc_name'])
 
@@ -91,42 +95,44 @@ def layout(project):
                                         dbc.Row([
                                             dbc.Col(width=5,children=[
                                                 dbc.Table(borderless=True, size='sm', children=[
-                                                    html.Tr([
-                                                        html.Td(html.Strong("Combinations")),
-                                                        html.Td(project.combinations.count()),
-                                                    ]),
-                                                    html.Tr([
-                                                        html.Td(html.Strong("Library drugs")),
-                                                        html.Td(lib_drugs.size),
-
-                                                    ]),
-                                                    html.Tr([
-                                                        html.Td(html.Strong("Anchor drugs")),
-                                                        html.Td(anchor_drugs.size),
-
-                                                    ]),
+                                                    html.Tbody([
+                                                        html.Tr([
+                                                            html.Td(html.Strong("Combinations")),
+                                                            html.Td(project.combinations.count()),
+                                                        ]),
+                                                        html.Tr([
+                                                            html.Td(html.Strong("Library drugs")),
+                                                            html.Td(lib_drugs.size),
+                                                        ]),
+                                                        html.Tr([
+                                                            html.Td(html.Strong("Anchor drugs")),
+                                                            html.Td(anchor_drugs.size),
+                                                       ])
+                                                    ])
                                                 ])
                                             ]),
                                             dbc.Col(width=1),
                                             dbc.Col(width=6, children=[
                                                 dbc.Table(borderless=True, size='sm', children=[
-                                                    html.Tr([
+                                                    html.Tbody([
+                                                        html.Tr([
 
-                                                        html.Td(html.Strong("Cell lines")),
-                                                        html.Td(celllines.size),
-                                                    ]),
-                                                    html.Tr([
+                                                            html.Td(html.Strong("Cell lines")),
+                                                            html.Td(celllines.size),
+                                                        ]),
+                                                        html.Tr([
 
-                                                        html.Td(html.Strong("Measurements")),
-                                                        html.Td(len(df)),
+                                                            html.Td(html.Strong("Measurements")),
+                                                            html.Td(len(df)),
 
-                                                    ]),
-                                                    html.Tr([
+                                                        ]),
+                                                        html.Tr([
 
-                                                        html.Td(html.Strong("Overall frequency of synergy")),
-                                                        html.Td(str(synergy_frequency) + "%"),
+                                                            html.Td(html.Strong("Overall frequency of synergy")),
+                                                            html.Td(str(synergy_frequency) + "%"),
 
-                                                    ]),
+                                                        ]),
+                                                    ])
                                                 ])
                                             ]),
                                         ]),

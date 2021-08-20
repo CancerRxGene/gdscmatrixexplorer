@@ -102,28 +102,28 @@ def layout(project_id):
         ])
     ])
 
-@app.callback(
-    [dash.dependencies.Output('project-scatter', 'figure'),
-     dash.dependencies.Output('correlation', 'children'),
-     dash.dependencies.Output('cancertype-select', 'options'),
-     ],
-    [dash.dependencies.Input('x-axis-select', 'value'),
-     dash.dependencies.Input('y-axis-select', 'value'),
-     dash.dependencies.Input('color-select', 'value'),
-     dash.dependencies.Input('tissue-select', 'value'),
-     dash.dependencies.Input('cancertype-select', 'value'),
-     dash.dependencies.Input('combination-select', 'value'),
-     dash.dependencies.Input('project-id', 'children')])
-def update_scatter(x_axis_field, y_axis_field, color_field, tissues, cancer_types, combinations, project_id):
-    if isinstance(combinations, list):
-        combinations = tuple(combinations)
-    if isinstance(tissues, list):
-        tissues = tuple(tissues)
-    if isinstance(cancer_types, list):
-        cancer_types = tuple(cancer_types)
-
-    return cached_update_scatter(x_axis_field, y_axis_field, color_field, tissues, cancer_types, combinations, project_id)
-
+# @app.callback(
+#     [dash.dependencies.Output('project-scatter', 'figure'),
+#      dash.dependencies.Output('correlation', 'children'),
+#      dash.dependencies.Output('cancertype-select', 'options'),
+#      ],
+#     [dash.dependencies.Input('x-axis-select', 'value'),
+#      dash.dependencies.Input('y-axis-select', 'value'),
+#      dash.dependencies.Input('color-select', 'value'),
+#      dash.dependencies.Input('tissue-select', 'value'),
+#      dash.dependencies.Input('cancertype-select', 'value'),
+#      dash.dependencies.Input('combination-select', 'value'),
+#      dash.dependencies.Input('project-id', 'children')])
+# def update_scatter(x_axis_field, y_axis_field, color_field, tissues, cancer_types, combinations, project_id):
+#     if isinstance(combinations, list):
+#         combinations = tuple(combinations)
+#     if isinstance(tissues, list):
+#         tissues = tuple(tissues)
+#     if isinstance(cancer_types, list):
+#         cancer_types = tuple(cancer_types)
+#
+#     return cached_update_scatter(x_axis_field, y_axis_field, color_field, tissues, cancer_types, combinations, project_id)
+#
 
 @lru_cache(maxsize=1000)
 def cached_update_scatter(x_axis_field, y_axis_field, color_field, tissues, cancer_types, combinations, project_id):
