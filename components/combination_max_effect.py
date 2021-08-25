@@ -179,5 +179,5 @@ def go_to_dot(p1, p2, p3):
     p = p1 or p2 or p3
     if p:
         return p['points'][0]['customdata']['to']
-    else:
-        return "/"
+    # else:
+    #     return "/"

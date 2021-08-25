@@ -22,6 +22,7 @@ colour_by = {
 def layout(project):
     df_query = session.query(AnchorCombi).filter(AnchorCombi.project_id ==  project.id)
     df = pd.read_sql(df_query.statement, session.bind)
+    #print(df)
     cancer_types = df['cancer_type'].drop_duplicates().sort_values()
     tissues = df['tissue'].drop_duplicates().sort_values()
     celllines = df['cell_line_name'].drop_duplicates()
@@ -31,6 +32,8 @@ def layout(project):
     # get synergy frequency
     synergy_query = session.query(AnchorSynergy).filter(AnchorSynergy.project_id == project.id)
     synergy_df = pd.read_sql(synergy_query.statement,session.bind)
+
+   # print(synergy_df)
     total_count = synergy_df['cell_line_name'].size
     synergy  = synergy_df[synergy_df.synergy == 1]
     synergy_count = synergy['cell_line_name'].size
@@ -55,7 +58,6 @@ def layout(project):
     my_table_df = []
     id = 1
     for c in project.combinations:
-        print(id)
         my_table_df_dic = {}
         my_table_df_dic['id'] = id
         my_table_df_dic['lib_name'] = c.lib1.name
@@ -79,7 +81,7 @@ def layout(project):
         {'name': 'Lib pathway', 'id': 'lib_pathway'},
         {'name':'Link','id':'link', 'presentation': 'markdown'}
     ]
-
+    print('get data ready')
     return [
          crumbs([("Home", "/"), (project.name, "/" + project.slug)]),
                 dbc.Row(className="mt-3 mb-3", children = [ #1

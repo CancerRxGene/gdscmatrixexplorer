@@ -21,7 +21,7 @@ def layout(project_id):
 
     except sa.orm.exc.NoResultFound:
         return html.Div("Project not found")
-
+    print(list(matrix_metrics.values()))
     return dbc.Row([
         dcc.Location('project-scatter-url'),
         dbc.Col(width=12, children=[
@@ -34,9 +34,20 @@ def layout(project_id):
                         dbc.Form(inline=True, className='mb-2', children=dbc.FormGroup([
                             html.Label('X-Axis', className="w-25 justify-content-start"),
                             dcc.Dropdown(
-                                options=list(matrix_metrics.values()),
-                                value='bliss_matrix',
-                                id='x-axis-select'
+                               # options=list(matrix_metrics.values()),
+                                options = [
+                                    {
+                                      'label': 'Bliss Excess',
+                                      'value': 'bliss_matrix'
+                                    },
+                                    {
+                                        'label': 'Bliss excess synergy',
+                                        'value': 'bliss_matrix_so'
+                                    }
+                                ],
+
+                                id='x-axis-select',
+                                value='bliss_matrix'
                             ),
                         ])),
                         dbc.Form(inline=True, className='mb-2', children=dbc.FormGroup([
@@ -102,28 +113,33 @@ def layout(project_id):
         ])
     ])
 
-# @app.callback(
-#     [dash.dependencies.Output('project-scatter', 'figure'),
-#      dash.dependencies.Output('correlation', 'children'),
-#      dash.dependencies.Output('cancertype-select', 'options'),
-#      ],
-#     [dash.dependencies.Input('x-axis-select', 'value'),
-#      dash.dependencies.Input('y-axis-select', 'value'),
-#      dash.dependencies.Input('color-select', 'value'),
-#      dash.dependencies.Input('tissue-select', 'value'),
-#      dash.dependencies.Input('cancertype-select', 'value'),
-#      dash.dependencies.Input('combination-select', 'value'),
-#      dash.dependencies.Input('project-id', 'children')])
-# def update_scatter(x_axis_field, y_axis_field, color_field, tissues, cancer_types, combinations, project_id):
-#     if isinstance(combinations, list):
-#         combinations = tuple(combinations)
-#     if isinstance(tissues, list):
-#         tissues = tuple(tissues)
-#     if isinstance(cancer_types, list):
-#         cancer_types = tuple(cancer_types)
-#
-#     return cached_update_scatter(x_axis_field, y_axis_field, color_field, tissues, cancer_types, combinations, project_id)
-#
+@app.callback(
+    [dash.dependencies.Output('project-scatter', 'figure'),
+     dash.dependencies.Output('correlation', 'children'),
+    # dash.dependencies.Output('cancertype-select', 'options'),
+     ],
+    [
+     dash.dependencies.Input("x-axis-select", "value"),
+     dash.dependencies.Input('y-axis-select', 'value'),
+     dash.dependencies.Input('color-select', 'value'),
+     dash.dependencies.Input('tissue-select', 'value'),
+     dash.dependencies.Input('cancertype-select', 'value'),
+     dash.dependencies.Input('combination-select', 'value'),
+     dash.dependencies.Input('project-id', 'children')
+    ],
+)
+
+#def update_scatter(x_axis_field, y_axis_field, color_field, tissues, cancer_types, combinations, project_id):
+def update_scatter(x_axis_field, y_axis_field, color_field, tissues, cancer_types, combinations, project_id):
+    if isinstance(combinations, list):
+        combinations = tuple(combinations)
+    if isinstance(tissues, list):
+        tissues = tuple(tissues)
+    if isinstance(cancer_types, list):
+        cancer_types = tuple(cancer_types)
+    if(x_axis_field):
+        return cached_update_scatter(x_axis_field, y_axis_field, color_field, tissues, cancer_types, combinations, project_id)
+
 
 @lru_cache(maxsize=1000)
 def cached_update_scatter(x_axis_field, y_axis_field, color_field, tissues, cancer_types, combinations, project_id):
@@ -180,7 +196,8 @@ def cached_update_scatter(x_axis_field, y_axis_field, color_field, tissues, canc
 
     return (get_scatter(summary, x_axis_field, y_axis_field, color_field),
             get_correlation(summary, x_axis_field, y_axis_field),
-            ct_options)
+            #ct_options
+            )
 
 
 def get_correlation(summary, x_axis_field, y_axis_field):

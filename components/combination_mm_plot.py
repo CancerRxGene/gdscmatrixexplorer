@@ -42,9 +42,9 @@ def layout():
                 dcc.Loading(className='gdsc-spinner', children=
                     dcc.Graph(
                       id='intxn-distn',
-                      config={
-                          'displayModeBar': False
-                      }
+                      # config={
+                      #     'displayModeBar': False
+                      # }
                     )
                 )
             ]),

@@ -41,67 +41,67 @@ class Colors:
 matrix_metrics = {
     'bliss_matrix': {
         'label': 'Bliss Excess',
-        'description': 'Average Bliss excess',
+     #   'description': 'Average Bliss excess',
         'value': 'bliss_matrix'
     },
     'bliss_matrix_so': {
         'label': 'Bliss excess synergy',
-        'description': 'Average Bliss excess synergistic wells',
+     #   'description': 'Average Bliss excess synergistic wells',
         'value': 'bliss_matrix_so'
     },
     'bliss_window': {
         'label': 'Bliss excess 3x3 window',
-        'description': 'Average Bliss excess of the highest 3x3 window',
+      #  'description': 'Average Bliss excess of the highest 3x3 window',
         'value': 'bliss_window'
     },
     'bliss_window_so': {
         'label': 'Bliss excess 3x3 window synergy',
-        'description': 'Average Bliss excess of highest 3x3 window counting only synergistic wells',
+      #  'description': 'Average Bliss excess of highest 3x3 window counting only synergistic wells',
         'value': 'bliss_window_so'
     },
     'hsa_matrix': {
         'label': 'HSA excess',
-        'description': 'Average HSA excess',
+     #   'description': 'Average HSA excess',
         'value': 'hsa_matrix'
     },
     'hsa_matrix_so': {
         'label': 'HSA excess synergy',
-        'description': 'Average HSA excess eynergistic wells',
+      #  'description': 'Average HSA excess eynergistic wells',
         'value': 'hsa_matrix_so'
     },
     'hsa_window': {
         'label': 'HSA excess 3x3 window',
-        'description': 'Average HSA Excess of the highest 3x3 window',
+      #  'description': 'Average HSA Excess of the highest 3x3 window',
         'value': 'hsa_window'
     },
     'hsa_window_so': {
         'label': 'HSA excess 3x3 window synergy',
-        'description': 'Average HSA excess of highest 3x3 window counting only synergistic wells',
+      #  'description': 'Average HSA excess of highest 3x3 window counting only synergistic wells',
         'value': 'hsa_window_so'
     },
     'combo_maxe': {
         'label': 'MaxE combination',
-        'description': 'Maximum inhibition observed in combination',
+      #  'description': 'Maximum inhibition observed in combination',
         'value': 'combo_maxe'
     },
     'lib1_maxe': {
         'label': 'MaxE drug 1',
-        'description': 'Maximum inhibition observed in drug 1',
+       # 'description': 'Maximum inhibition observed in drug 1',
         'value': 'lib1_maxe'
     },
     'lib2_maxe': {
         'label': 'MaxE drug 2',
-        'description': 'Maximum inhibition observed in drug 2',
+      #  'description': 'Maximum inhibition observed in drug 2',
         'value': 'lib2_maxe'
     },
     'delta_maxe_lib1': {
         'label': 'Delta MaxE drug 1',
-        'description': 'MaxE combination minus MaxE drug1',
+      #  'description': 'MaxE combination minus MaxE drug1',
         'value': 'delta_maxe_lib1'
     },
     'delta_maxe_lib2': {
         'label': 'Delta MaxE drug 2',
-        'description': 'MaxE combination minus MaxE drug2',
+      #  'description': 'MaxE combination minus MaxE drug2',
         'value': 'delta_maxe_lib2'
     },
 }

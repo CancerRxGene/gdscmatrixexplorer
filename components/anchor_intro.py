@@ -45,55 +45,59 @@ def layout(project,combination):
                                 dbc.Row([
                                     dbc.Col(width=6, children=[
                                         dbc.Table(borderless=True, size='sm', children=[
-                                            html.Tr([
-                                                html.Td(html.Strong("Anchor"))
+                                            html.Tbody([
+                                                html.Tr([
+                                                    html.Td(html.Strong("Anchor"))
 
-                                            ]),
-                                            html.Tr([
-                                                html.Td(html.Strong("Name")),
-                                                html.Td(combination.lib2.name)
-                                            ]),
-                                            html.Tr([
-                                                html.Td(html.Strong("Target")),
-                                                html.Td(combination.lib2.target)
-                                            ]),
-                                            html.Tr([
-                                                html.Td(html.Strong("Pathway")),
-                                                html.Td(combination.lib2.pathway)
-                                            ]),
+                                                ]),
+                                                html.Tr([
+                                                    html.Td(html.Strong("Name")),
+                                                    html.Td(combination.lib2.name)
+                                                ]),
+                                                html.Tr([
+                                                    html.Td(html.Strong("Target")),
+                                                    html.Td(combination.lib2.target)
+                                                ]),
+                                                html.Tr([
+                                                    html.Td(html.Strong("Pathway")),
+                                                    html.Td(combination.lib2.pathway)
+                                                ]),
 
-                                            html.Tr([
-                                                html.Td(html.Strong("Low conc.")),
-                                                html.Td(f"{anchor_low} µM")
-                                            ]),
-                                            html.Tr([
-                                                html.Td(html.Strong("High conc.")),
-                                                html.Td(f"{anchor_high} µM")
+                                                html.Tr([
+                                                    html.Td(html.Strong("Low conc.")),
+                                                    html.Td(f"{anchor_low} µM")
+                                                ]),
+                                                html.Tr([
+                                                    html.Td(html.Strong("High conc.")),
+                                                    html.Td(f"{anchor_high} µM")
+                                                ])
                                             ])
                                         ])
                                     ]),
 
                                     dbc.Col(width=6, children=[
                                         dbc.Table(borderless=True, size='sm', children=[
-                                            html.Tr([
-                                                html.Td(html.Strong("Library"))
+                                            html.Tbody([
+                                                html.Tr([
+                                                    html.Td(html.Strong("Library"))
 
-                                            ]),
-                                            html.Tr([
-                                                html.Td(html.Strong("Name")),
-                                                html.Td(combination.lib1.name)
-                                            ]),
-                                            html.Tr([
-                                                html.Td(html.Strong("Target")),
-                                                html.Td(combination.lib1.target)
-                                            ]),
-                                            html.Tr([
-                                                html.Td(html.Strong("Pathway")),
-                                                html.Td(combination.lib1.pathway)
-                                            ]),
-                                            html.Tr([
-                                                html.Td(html.Strong("Max. conc.")),
-                                                html.Td(f"{maxc[0]} µM")
+                                                ]),
+                                                html.Tr([
+                                                    html.Td(html.Strong("Name")),
+                                                    html.Td(combination.lib1.name)
+                                                ]),
+                                                html.Tr([
+                                                    html.Td(html.Strong("Target")),
+                                                    html.Td(combination.lib1.target)
+                                                ]),
+                                                html.Tr([
+                                                    html.Td(html.Strong("Pathway")),
+                                                    html.Td(combination.lib1.pathway)
+                                                ]),
+                                                html.Tr([
+                                                    html.Td(html.Strong("Max. conc.")),
+                                                    html.Td(f"{maxc[0]} µM")
+                                                ])
                                             ])
                                         ])
                                     ])
