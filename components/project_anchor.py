@@ -22,7 +22,7 @@ colour_by = {
 def layout(project):
     df_query = session.query(AnchorCombi).filter(AnchorCombi.project_id ==  project.id)
     df = pd.read_sql(df_query.statement, session.bind)
-    #print(df)
+
     cancer_types = df['cancer_type'].drop_duplicates().sort_values()
     tissues = df['tissue'].drop_duplicates().sort_values()
     celllines = df['cell_line_name'].drop_duplicates()
@@ -33,7 +33,6 @@ def layout(project):
     synergy_query = session.query(AnchorSynergy).filter(AnchorSynergy.project_id == project.id)
     synergy_df = pd.read_sql(synergy_query.statement,session.bind)
 
-   # print(synergy_df)
     total_count = synergy_df['cell_line_name'].size
     synergy  = synergy_df[synergy_df.synergy == 1]
     synergy_count = synergy['cell_line_name'].size
@@ -52,6 +51,7 @@ def layout(project):
         an_drug = session.query(Drug).get(ac)
         anchor_names[an_drug.name] = ac
 
+    print('get lib name dictionary')
     combos = project.combinations
     sorted_combos = sorted(combos, key=lambda combos: combos.lib2.name)
 
@@ -81,7 +81,7 @@ def layout(project):
         {'name': 'Lib pathway', 'id': 'lib_pathway'},
         {'name':'Link','id':'link', 'presentation': 'markdown'}
     ]
-    print('get data ready')
+
     return [
          crumbs([("Home", "/"), (project.name, "/" + project.slug)]),
                 dbc.Row(className="mt-3 mb-3", children = [ #1
