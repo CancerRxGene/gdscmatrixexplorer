@@ -99,7 +99,6 @@ def combo_links_from_matrix(matrix):
         .filter(MatrixResult.model_id == matrix.model_id)\
         .order_by(MatrixResult.barcode.desc())\
         .all()
-    print(other_combos)
 
     dropdown_items = {f"{c.combination.lib1.name} + {c.combination.lib2.name}": f"{c.barcode}__{c.cmatrix}"
                       for c in other_combos if c not in matrix.all_replicates}
@@ -119,13 +118,15 @@ def url_for_combo(value):
 @app.callback(dash.dependencies.Output('models-dropdown-url', 'pathname'),
               [dash.dependencies.Input('dropdown-models', 'value')])
 def dropdown_handler(dropdown_models_value):
-    return url_from_dropdown_value(dropdown_models_value)
+    if(dropdown_models_value):
+        return url_from_dropdown_value(dropdown_models_value)
 
 
 @app.callback(dash.dependencies.Output('combos-dropdown-url', 'pathname'),
               [dash.dependencies.Input('dropdown-combos', 'value')])
 def dropdown_handler(dropdown_combos_value):
-    return url_from_dropdown_value(dropdown_combos_value)
+    if(dropdown_combos_value):
+        return url_from_dropdown_value(dropdown_combos_value)
 
 @app.callback(dash.dependencies.Output('project_combos-dropdown-url','pathname'),
             [dash.dependencies.Input('project_dropdown-combos','value')])

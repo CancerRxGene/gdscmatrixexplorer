@@ -55,7 +55,7 @@ class DoseResponsePlot:
         graph = dcc.Graph(id=self.id,
                          figure=self.figure,
                          style=self.style,
-                         config={'displayModeBar': False}
+                        # config={'displayModeBar': False}
                          )
         if self.curve.rmse > 0.3:
             return html.Div(graph, style={'borderTop': '5px solid red'})
@@ -68,7 +68,7 @@ class DoseResponsePlot:
     @property
     def figure(self):
         return dict(
-            id=self.id,
+           # id=self.id,
             data=self.figure_data,
             layout=self.figure_layout
         )

@@ -42,14 +42,16 @@ def layout(matrix):
                             id='model-information',
                             className='table',
                             children=[
-                                html.Tr([
-                                    html.Td([
-                                        html.Strong("Tissue "), model.tissue, html.Br(),
-                                        html.Strong("Cancer Type "), model.cancer_type, html.Br(),
-                                        html.Strong("Estimated doubling time "), f"{round(matrix.doubling_time, 1)} hours" if matrix.doubling_time is not None else None,
-                                        html.Br(),
-                                        html.Em("Loading more information from Cell Model Passports...")],
-                                        className="pl-0")
+                                html.Tbody([
+                                    html.Tr([
+                                        html.Td([
+                                            html.Strong("Tissue "), model.tissue, html.Br(),
+                                            html.Strong("Cancer Type "), model.cancer_type, html.Br(),
+                                            html.Strong("Estimated doubling time "), f"{round(matrix.doubling_time, 1)} hours" if matrix.doubling_time is not None else None,
+                                            html.Br(),
+                                            html.Em("Loading more information from Cell Model Passports...")],
+                                            className="pl-0")
+                                    ])
                                 ])
                             ]
                         )
@@ -86,30 +88,35 @@ def layout(matrix):
                     html.Strong("Max. observed inhibition"),
                     html.Hr(),
                     html.Table(className='table table-borderless table-sm', children=[
-                        html.Tr([
-                            html.Td(["Combination"], className='w-75'),
-                            html.Td(html.Strong(round(matrix.combo_maxe, 3)), className='w-25')
+                        html.Tbody([
+                            html.Tr([
+                                html.Td(["Combination"], className='w-75'),
+                                html.Td(html.Strong(round(matrix.combo_maxe, 3)), className='w-25')
+                                ]),
+                            html.Tr([
+                                html.Td([drug1.name]),
+                                html.Td([html.Strong(round(matrix.lib1_maxe, 3))])
                             ]),
-                        html.Tr([
-                            html.Td([drug1.name]),
-                            html.Td([html.Strong(round(matrix.lib1_maxe, 3))])
-                        ]),
-                        html.Tr([
-                            html.Td([drug2.name]),
-                            html.Td([html.Strong(round(matrix.lib2_maxe, 3))])
-                        ]),
+                            html.Tr([
+                                html.Td([drug2.name]),
+                                html.Td([html.Strong(round(matrix.lib2_maxe, 3))])
+                            ]),
+                        ])
                     ]),
+
                     html.Strong("Max. observed interaction"),
                     html.Hr(),
                     html.Table(className='table table-borderless table-sm',
                                    children=[
-                        html.Tr([
-                            html.Td("Max excess over HSA", className='w-75'),
-                            html.Td([html.Strong(round(max_hsa, 3))], className='w-25')
-                        ]),
-                        html.Tr([
-                            html.Td(["Max excess over Bliss"]),
-                            html.Td([html.Strong(round(max_bliss, 3))])
+                        html.Tbody([
+                            html.Tr([
+                                html.Td("Max excess over HSA", className='w-75'),
+                                html.Td([html.Strong(round(max_hsa, 3))], className='w-25')
+                            ]),
+                            html.Tr([
+                                html.Td(["Max excess over Bliss"]),
+                                html.Td([html.Strong(round(max_bliss, 3))])
+                            ])
                         ])
                     ]),
                 ]),
@@ -211,24 +218,25 @@ def model_information(model_id, passport_data, gr_data, current_model_informatio
         driver_genes_block = []
 
 
-    return html.Tr([
-            html.Td(
-                [html.Strong("Tissue "), model.tissue, html.Br(),
-                 html.Strong("Cancer Type "), model.cancer_type, html.Br()] +
-                 model_attribute_section(cmp_data['model_information'], 'Sample Site', 'sample_site', from_sample=True) +
-                 model_attribute_section(cmp_data['model_information'], 'Sample Tissue Status', 'tissue_status', from_sample=True) +
-                [html.Strong("Estimated doubling time "), round(gr_data['doubling_time'], 1), 'hours (on this plate)' if gr_data['doubling_time'] else None],
-                 className="pl-0", style={"width": "50%"}),
-            html.Td(
-                driver_genes_block +
-                model_attribute_section(cmp_data['model_information'], 'MSI Status', 'msi_status') +
-                model_attribute_section(cmp_data['model_information'], 'Ploidy','ploidy') +
-                model_attribute_section(cmp_data['model_information'], 'Mutations per Mb', 'mutations_per_mb') +
-                [html.Br(), html.Br(),
-                 html.A(children=f"View {model.cell_line_name} on Cell Model Passports",
-                        href=f"https://cellmodelpassports.sanger.ac.uk/passports/{model.id}",
-                        target="_blank")
-                 ]
-            )
+    return html.Tbody([ html.Tr([
+                html.Td(
+                    [html.Strong("Tissue "), model.tissue, html.Br(),
+                     html.Strong("Cancer Type "), model.cancer_type, html.Br()] +
+                     model_attribute_section(cmp_data['model_information'], 'Sample Site', 'sample_site', from_sample=True) +
+                     model_attribute_section(cmp_data['model_information'], 'Sample Tissue Status', 'tissue_status', from_sample=True) +
+                    [html.Strong("Estimated doubling time "), round(gr_data['doubling_time'], 1), 'hours (on this plate)' if gr_data['doubling_time'] else None],
+                     className="pl-0", style={"width": "50%"}),
+                html.Td(
+                    driver_genes_block +
+                    model_attribute_section(cmp_data['model_information'], 'MSI Status', 'msi_status') +
+                    model_attribute_section(cmp_data['model_information'], 'Ploidy','ploidy') +
+                    model_attribute_section(cmp_data['model_information'], 'Mutations per Mb', 'mutations_per_mb') +
+                    [html.Br(), html.Br(),
+                     html.A(children=f"View {model.cell_line_name} on Cell Model Passports",
+                            href=f"https://cellmodelpassports.sanger.ac.uk/passports/{model.id}",
+                            target="_blank")
+                     ]
+                )
 
+            ])
         ])

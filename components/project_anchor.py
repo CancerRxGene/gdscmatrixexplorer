@@ -22,6 +22,7 @@ colour_by = {
 def layout(project):
     df_query = session.query(AnchorCombi).filter(AnchorCombi.project_id ==  project.id)
     df = pd.read_sql(df_query.statement, session.bind)
+
     cancer_types = df['cancer_type'].drop_duplicates().sort_values()
     tissues = df['tissue'].drop_duplicates().sort_values()
     celllines = df['cell_line_name'].drop_duplicates()
@@ -31,6 +32,7 @@ def layout(project):
     # get synergy frequency
     synergy_query = session.query(AnchorSynergy).filter(AnchorSynergy.project_id == project.id)
     synergy_df = pd.read_sql(synergy_query.statement,session.bind)
+
     total_count = synergy_df['cell_line_name'].size
     synergy  = synergy_df[synergy_df.synergy == 1]
     synergy_count = synergy['cell_line_name'].size
@@ -49,12 +51,15 @@ def layout(project):
         an_drug = session.query(Drug).get(ac)
         anchor_names[an_drug.name] = ac
 
+    print('get lib name dictionary')
     combos = project.combinations
     sorted_combos = sorted(combos, key=lambda combos: combos.lib2.name)
 
     my_table_df = []
+    id = 1
     for c in project.combinations:
         my_table_df_dic = {}
+        my_table_df_dic['id'] = id
         my_table_df_dic['lib_name'] = c.lib1.name
         my_table_df_dic['lib_target'] = c.lib1.target
         my_table_df_dic['lib_pathway'] = c.lib1.pathway
@@ -63,6 +68,7 @@ def layout(project):
         my_table_df_dic['anc_pathway'] = c.lib2.pathway
         my_table_df_dic['link'] = '['+ c.lib2.name + ' + ' + c.lib1.name + '](' + project.slug + '/combination/' + str(c.lib1.id) + '+' + str(c.lib2.id)+')'
         my_table_df.append(my_table_df_dic)
+        id = id + 1
 
     my_table_df = sorted(my_table_df, key=lambda k: k['anc_name'])
 
@@ -91,42 +97,44 @@ def layout(project):
                                         dbc.Row([
                                             dbc.Col(width=5,children=[
                                                 dbc.Table(borderless=True, size='sm', children=[
-                                                    html.Tr([
-                                                        html.Td(html.Strong("Combinations")),
-                                                        html.Td(project.combinations.count()),
-                                                    ]),
-                                                    html.Tr([
-                                                        html.Td(html.Strong("Library drugs")),
-                                                        html.Td(lib_drugs.size),
-
-                                                    ]),
-                                                    html.Tr([
-                                                        html.Td(html.Strong("Anchor drugs")),
-                                                        html.Td(anchor_drugs.size),
-
-                                                    ]),
+                                                    html.Tbody([
+                                                        html.Tr([
+                                                            html.Td(html.Strong("Combinations")),
+                                                            html.Td(project.combinations.count()),
+                                                        ]),
+                                                        html.Tr([
+                                                            html.Td(html.Strong("Library drugs")),
+                                                            html.Td(lib_drugs.size),
+                                                        ]),
+                                                        html.Tr([
+                                                            html.Td(html.Strong("Anchor drugs")),
+                                                            html.Td(anchor_drugs.size),
+                                                       ])
+                                                    ])
                                                 ])
                                             ]),
                                             dbc.Col(width=1),
                                             dbc.Col(width=6, children=[
                                                 dbc.Table(borderless=True, size='sm', children=[
-                                                    html.Tr([
+                                                    html.Tbody([
+                                                        html.Tr([
 
-                                                        html.Td(html.Strong("Cell lines")),
-                                                        html.Td(celllines.size),
-                                                    ]),
-                                                    html.Tr([
+                                                            html.Td(html.Strong("Cell lines")),
+                                                            html.Td(celllines.size),
+                                                        ]),
+                                                        html.Tr([
 
-                                                        html.Td(html.Strong("Measurements")),
-                                                        html.Td(len(df)),
+                                                            html.Td(html.Strong("Measurements")),
+                                                            html.Td(len(df)),
 
-                                                    ]),
-                                                    html.Tr([
+                                                        ]),
+                                                        html.Tr([
 
-                                                        html.Td(html.Strong("Overall frequency of synergy")),
-                                                        html.Td(str(synergy_frequency) + "%"),
+                                                            html.Td(html.Strong("Overall frequency of synergy")),
+                                                            html.Td(str(synergy_frequency) + "%"),
 
-                                                    ]),
+                                                        ]),
+                                                    ])
                                                 ])
                                             ]),
                                         ]),
@@ -441,5 +449,5 @@ def go_to_dot(clicked):
         to = f"https://cellmodelpassports.sanger.ac.uk/passports/{clicked['points'][0]['customdata'][3]}"
         print(to)
         #return to
-    else:
-        return "/"
+#     else:
+#         return "/"

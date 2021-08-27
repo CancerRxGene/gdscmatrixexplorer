@@ -86,7 +86,6 @@ def layout(url):
     [dash.dependencies.State("url", "pathname")])
 def switch_tab(at, url):
     if at == "tab-overview":
-        print('boxplot')
         return project_boxplot()
     elif at == "tab-flexiscatter":
         project = get_project_from_url(url)

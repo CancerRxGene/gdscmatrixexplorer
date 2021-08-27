@@ -7,7 +7,8 @@ def project_block(project):
     return dbc.Col(
         dbc.Card(
             dbc.CardBody([
-                dbc.CardTitle(dcc.Link(children=project.name, href=f"/project/{project.slug}")),
+                html.H4(dcc.Link(children=project.name, href=f"/project/{project.slug}"), className="card-title"),
+                #dbc.CardTitle(dcc.Link(children=project.name, href=f"/project/{project.slug}")),
                 html.P(f"{len(project.models)} Cell Lines"),
                 html.P(f"{project.combinations.count()} Combinations"),
                 dcc.Link(f"View Project", className='btn btn-primary shadow-sm',

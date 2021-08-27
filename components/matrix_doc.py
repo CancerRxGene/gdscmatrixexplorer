@@ -70,111 +70,121 @@ def layout(*args, **kwargs):
 
             H4("Screen-related metrics"),
             Table(className='table table-sm', children=[
-                Tr([
-                    Th("Metric name", className='w-25'),
-                    Th("Explanation")
-                ]),
-                Tr([
-                    Td("BARCODE"),
-                    Td("Barcode of the assay plate")
-                ]),
-                Tr([
-                    Td("DRUGSET_ID"),
-                    Td(["ID of the drug set used for the assay plate", Br(),
-                        "(Drug set describes the individual plate layout & drug composition)"])
-                ]),
-                Tr([
-                    Td("cmatrix"),
-                    Td("Identifier for a combination matrix within a drug set")
-                ]),
-                Tr([
-                    Td("well_treatments"),
-                    Td("Combination of drug set library tags")
-                ])
+                Tbody([
+                    Tr([
+                        Th("Metric name", className='w-25'),
+                        Th("Explanation")
+                    ]),
+                    Tr([
+                        Td("BARCODE"),
+                        Td("Barcode of the assay plate")
+                    ]),
+                    Tr([
+                        Td("DRUGSET_ID"),
+                        Td(["ID of the drug set used for the assay plate", Br(),
+                            "(Drug set describes the individual plate layout & drug composition)"])
+                    ]),
+                    Tr([
+                        Td("cmatrix"),
+                        Td("Identifier for a combination matrix within a drug set")
+                    ]),
+                    Tr([
+                        Td("well_treatments"),
+                        Td("Combination of drug set library tags")
+                    ])
+                  ])
             ]),
 
             H4("Cell line-related metrics"),
             Table(className='table table-sm', children=[
-                Tr([
-                    Th("Metric name", className='w-25'),
-                    Th("Explanation")
-                ]),
-                Tr([
-                    Td("CL"),
-                    Td("Cell line identifier used in the curve fit")
-                ]),
-                Tr([
-                    Td("CELL_LINE_NAME"),
-                    Td(["Name of the cell line"])
-                ]),
-                Tr([
-                    Td("COSMIC_ID"),
-                    Td("COSMIC database identifie")
-                ]),
-                Tr([
-                    Td("TISSUE"),
-                    Td("Sanger tissue classification")
-                ]),
-                Tr([
-                    Td("CANCER_TYPE"),
-                    Td("Sanger cancer type classification")
-                ])
+                Tbody([
+                    Tr([
+                        Th("Metric name", className='w-25'),
+                        Th("Explanation")
+                    ]),
+                    Tr([
+                        Td("CL"),
+                        Td("Cell line identifier used in the curve fit")
+                    ]),
+                    Tr([
+                        Td("CELL_LINE_NAME"),
+                        Td(["Name of the cell line"])
+                    ]),
+                    Tr([
+                        Td("COSMIC_ID"),
+                        Td("COSMIC database identifie")
+                    ]),
+                    Tr([
+                        Td("TISSUE"),
+                        Td("Sanger tissue classification")
+                    ]),
+                    Tr([
+                        Td("CANCER_TYPE"),
+                        Td("Sanger cancer type classification")
+                    ])
+                  ])
             ]),
 
             H4("Library drug-related metrics"),
             P("The two drugs used in the matrices are called \"lib1\" and \"lib2\", with lib1 being the first drug listed in the combination. All metrics below are available for both drugs."),
             Table(className='table table-sm', children=[
-                Tr([Th("Metric name", className='w-25'), Th("Explanation")]),
-                Tr([Td("lib1"), Td("Drug set library tag identifier")]),
-                Tr([Td("lib1_ID"), Td("Sanger database identifier of drug")]),
-                Tr([Td("lib1_name"), Td("Drug name")]),
-                Tr([Td("lib1_conc"), Td("Highest screened concentration (in μM)")]),
-                Tr([Td("lib1_RMSE"), Td(["RMSE: root mean square error", Br(), "Describes how far the data points are from the single agent curve fit"])]),
-                Tr([Td("lib1_MaxE"), Td("Fitted inhibition value at the highest used concentration")]),
-                Tr([Td("lib1_IC50_ln"), Td("Natural log of IC50")]),
-                Tr([Td("lib1_IC50_uM"), Td("IC50 in μM")]),
-                Tr([Td("lib1_target"), Td("Protein target(s)")]),
-                Tr([Td("lib1_pathway"), Td("Pathway of protein target(s)")]),
-                Tr([Td("lib1_owner"), Td("Sanger database drug owner")]),
+                Tbody([
+                    Tr([Th("Metric name", className='w-25'), Th("Explanation")]),
+                    Tr([Td("lib1"), Td("Drug set library tag identifier")]),
+                    Tr([Td("lib1_ID"), Td("Sanger database identifier of drug")]),
+                    Tr([Td("lib1_name"), Td("Drug name")]),
+                    Tr([Td("lib1_conc"), Td("Highest screened concentration (in μM)")]),
+                    Tr([Td("lib1_RMSE"), Td(["RMSE: root mean square error", Br(), "Describes how far the data points are from the single agent curve fit"])]),
+                    Tr([Td("lib1_MaxE"), Td("Fitted inhibition value at the highest used concentration")]),
+                    Tr([Td("lib1_IC50_ln"), Td("Natural log of IC50")]),
+                    Tr([Td("lib1_IC50_uM"), Td("IC50 in μM")]),
+                    Tr([Td("lib1_target"), Td("Protein target(s)")]),
+                    Tr([Td("lib1_pathway"), Td("Pathway of protein target(s)")]),
+                    Tr([Td("lib1_owner"), Td("Sanger database drug owner")]),
+                ])
             ]),
             H4("Combination response-related metrics"),
             Table(className='table table-sm', children=[
-                Tr([Th("Metric name", className='w-25'), Th("Explanation")]),
-                Tr([Td("matrix_size"), Td("Number of wells treated with the combination e.g. 49 for a 7x7 matrix")]),
-                Tr([Td("combo_MaxE"), Td("Maximum inhibitory effect of the combination within the matrixBased on the 2nd highest data point in the matrix")]),
-                Tr([Td("Delta_MaxE_lib1"), Td("combo_MaxE - lib1_MaxE")]),
-                Tr([Td("Delta_MaxE_lib2"), Td("combo_MaxE - lib2_MaxE")]),
-                Tr([Td("Delta_combo_MaxE_day1"), Td("combo_MaxE - day1_inhibition_scale_")]),
+                Tbody([
+                    Tr([Th("Metric name", className='w-25'), Th("Explanation")]),
+                    Tr([Td("matrix_size"), Td("Number of wells treated with the combination e.g. 49 for a 7x7 matrix")]),
+                    Tr([Td("combo_MaxE"), Td("Maximum inhibitory effect of the combination within the matrixBased on the 2nd highest data point in the matrix")]),
+                    Tr([Td("Delta_MaxE_lib1"), Td("combo_MaxE - lib1_MaxE")]),
+                    Tr([Td("Delta_MaxE_lib2"), Td("combo_MaxE - lib2_MaxE")]),
+                    Tr([Td("Delta_combo_MaxE_day1"), Td("combo_MaxE - day1_inhibition_scale_")]),
+                ])
             ]),
 
             H4("Synergy-related metrics"),
             P("All metrics below have been derived for two synergy reference models: Bliss excess and HSA excess. The used placeholder \"X\" thereby stands either for \"Bliss\" or for \"HSA\"."),
             Table(className='table table-sm', children=[
-                Tr([Th("Metric name", className='w-25'), Th("Explanation")]),
-                Tr([Td("X_synergistic_wells"), Td("Number of wells with a response in excess of that expected by the synergy reference model")]),
-                Tr([Td("X_matrix"), Td("Mean excess effect over X across the matrixCalculated by _sum all wells_ / _number of wells_")]),
-                Tr([Td("X_matrix_SO"), Td("Mean excess effect over X across the matrix (synergistic wells only)Calculated by _sum synergistic wells_ / _number of synergistic wells_")]),
-                Tr([Td("X_window_size"), Td("Local sub-matrix size in one dimension e.g. \"3\" = 3x3 matrix")]),
-                Tr([Td("X_window"), Td("Mean excess effect over X across the windowCalculated by _sum all wells_ / _number of wells_")]),
-                Tr([Td("X_window_dose1"), Td("Locator of upper right corner of window (library 1)D1-D7 with D1 being the highest screened concentration")]),
-                Tr([Td("X_window_dose2"), Td("Locator of upper right corner of window (library 2)D1-D7 with D1 being the highest screened concentration")]),
-                Tr([Td("X_window_SO_size"), Td("Local synergy only sub-matrix size in one dimension e.g. \"3\" = 3x3 matrix")]),
-                Tr([Td("X_window_SO"), Td(["Mean excess effect over X across the window (synergistic wells only)", Br(), "Calculated by ", Em("sum synergistic wells / number of synergistic wells")])]),
-                Tr([Td("X_window_SO_dose1"), Td("Locator of upper right corner of synergy only window (library 1)D1-D7 with D1 being the highest screened concentration")]),
-                Tr([Td("X_window_SO_dose2"), Td("Locator of upper right corner of synergy only window (library 2)D1-D7 with D1 being the highest screened concentration")]),
-
+                Tbody([
+                    Tr([Th("Metric name", className='w-25'), Th("Explanation")]),
+                    Tr([Td("X_synergistic_wells"), Td("Number of wells with a response in excess of that expected by the synergy reference model")]),
+                    Tr([Td("X_matrix"), Td("Mean excess effect over X across the matrixCalculated by _sum all wells_ / _number of wells_")]),
+                    Tr([Td("X_matrix_SO"), Td("Mean excess effect over X across the matrix (synergistic wells only)Calculated by _sum synergistic wells_ / _number of synergistic wells_")]),
+                    Tr([Td("X_window_size"), Td("Local sub-matrix size in one dimension e.g. \"3\" = 3x3 matrix")]),
+                    Tr([Td("X_window"), Td("Mean excess effect over X across the windowCalculated by _sum all wells_ / _number of wells_")]),
+                    Tr([Td("X_window_dose1"), Td("Locator of upper right corner of window (library 1)D1-D7 with D1 being the highest screened concentration")]),
+                    Tr([Td("X_window_dose2"), Td("Locator of upper right corner of window (library 2)D1-D7 with D1 being the highest screened concentration")]),
+                    Tr([Td("X_window_SO_size"), Td("Local synergy only sub-matrix size in one dimension e.g. \"3\" = 3x3 matrix")]),
+                    Tr([Td("X_window_SO"), Td(["Mean excess effect over X across the window (synergistic wells only)", Br(), "Calculated by ", Em("sum synergistic wells / number of synergistic wells")])]),
+                    Tr([Td("X_window_SO_dose1"), Td("Locator of upper right corner of synergy only window (library 1)D1-D7 with D1 being the highest screened concentration")]),
+                    Tr([Td("X_window_SO_dose2"), Td("Locator of upper right corner of synergy only window (library 2)D1-D7 with D1 being the highest screened concentration")]),
+                ])
             ]),
             H4("Day1 & growth-related metrics", className='mt-4'),
             Table(className='table table-sm', children=[
-                Tr([Th("Metric name", className='w-25'), Th("Explanation")]),
-                Tr([Td("day1_intensity_mean"), Td("Mean observed luminescent intensity of Day1 plate")]),
-                Tr([Td("day1_intensity_sd"), Td("Standard deviation of observed luminescent intensities across Day1 plate")]),
-                Tr([Td("day1_viability_mean"), Td(["Mean viability of Day1 plate, scale: 0-1 with 1 = full viability", Br(), "Calculated with respect to Day4 controls"])]),
-                Tr([Td("day1_viability_sd"), Td("Standard deviation of Day1 plate viabilities")]),
-                Tr([Td("day1_inhibition_scale"), Td(["Mean viability of Day1 plate converted to inhibition scale, scale: 0-1 with 1 = full inhibition", Br(), Em("1 - day1_viability_mean")])]),
-                Tr([Td("growth_rate"), Td([Em(["log", Sub("2"), "((NC) / day1_intensity_mean)"]), Br(), "Where NC is the mean intensity of negative controls for the Day4 plate"])]),
-                Tr([Td("doubling_time"), Td(["Doubling time in hours", Br(), Em(["72* log", Sub("2"), "(2) / (log", Sub("2"), ", (NC) - log", Sub("2"), " (day1_intensity_mean))"])])]),
-
+                Tbody([
+                    Tr([Th("Metric name", className='w-25'), Th("Explanation")]),
+                    Tr([Td("day1_intensity_mean"), Td("Mean observed luminescent intensity of Day1 plate")]),
+                    Tr([Td("day1_intensity_sd"), Td("Standard deviation of observed luminescent intensities across Day1 plate")]),
+                    Tr([Td("day1_viability_mean"), Td(["Mean viability of Day1 plate, scale: 0-1 with 1 = full viability", Br(), "Calculated with respect to Day4 controls"])]),
+                    Tr([Td("day1_viability_sd"), Td("Standard deviation of Day1 plate viabilities")]),
+                    Tr([Td("day1_inhibition_scale"), Td(["Mean viability of Day1 plate converted to inhibition scale, scale: 0-1 with 1 = full inhibition", Br(), Em("1 - day1_viability_mean")])]),
+                    Tr([Td("growth_rate"), Td([Em(["log", Sub("2"), "((NC) / day1_intensity_mean)"]), Br(), "Where NC is the mean intensity of negative controls for the Day4 plate"])]),
+                    Tr([Td("doubling_time"), Td(["Doubling time in hours", Br(), Em(["72* log", Sub("2"), "(2) / (log", Sub("2"), ", (NC) - log", Sub("2"), " (day1_intensity_mean))"])])]),
+                ])
             ]),
        ])
     )

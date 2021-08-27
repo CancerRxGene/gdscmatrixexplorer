@@ -41,12 +41,22 @@ def layout():
                 ]),
 
                 dbc.Row([
-                    dbc.Col(width=2,className='align-top', children=[dcc.Graph(id='lib2-viability-heatmap',config={'displayModeBar': False}), ]),
+                    dbc.Col(width=2,className='align-top', children=[
+                        dcc.Graph(
+                            id='lib2-viability-heatmap',
+                            #config={'displayModeBar': False}
+                        ),
+                    ]),
                     dbc.Col(width=6, children=[
                         dbc.Row(
-                            children=dcc.Loading(dcc.Graph(id='viability-heatmap'), className='gdsc-spinner')
+                            children=dcc.Loading(dcc.Graph(
+                                id='viability-heatmap'), className='gdsc-spinner')
                         ),
-                        dbc.Row(children=dcc.Graph(id='lib1-viability-heatmap',config={'displayModeBar': False})),
+                        dbc.Row(
+                            children=dcc.Graph(
+                                id='lib1-viability-heatmap',
+                                #config={'displayModeBar': False}
+                            )),
                     ]),
 
                     dbc.Col(width=4, children=
@@ -244,8 +254,8 @@ def single_agent_heatmap(metric, tag, drug_name, barcode, orientation):
                margin={'t': 30, 'l': 5}
             ),
 
-        'config': {
-            'displayModeBar': False
-        }
+        # 'config': {
+        #     'displayModeBar': False
+        # }
 
     }
