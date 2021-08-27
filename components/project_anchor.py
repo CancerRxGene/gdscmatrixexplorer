@@ -51,7 +51,6 @@ def layout(project):
         an_drug = session.query(Drug).get(ac)
         anchor_names[an_drug.name] = ac
 
-    print('get lib name dictionary')
     combos = project.combinations
     sorted_combos = sorted(combos, key=lambda combos: combos.lib2.name)
 

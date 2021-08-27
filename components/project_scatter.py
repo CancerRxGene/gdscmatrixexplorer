@@ -21,7 +21,7 @@ def layout(project_id):
 
     except sa.orm.exc.NoResultFound:
         return html.Div("Project not found")
-    print(list(matrix_metrics.values()))
+
     return dbc.Row([
         dcc.Location('project-scatter-url'),
         dbc.Col(width=12, children=[
