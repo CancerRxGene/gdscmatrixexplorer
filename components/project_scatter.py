@@ -34,18 +34,7 @@ def layout(project_id):
                         dbc.Form(inline=True, className='mb-2', children=dbc.FormGroup([
                             html.Label('X-Axis', className="w-25 justify-content-start"),
                             dcc.Dropdown(
-                               # options=list(matrix_metrics.values()),
-                                options = [
-                                    {
-                                      'label': 'Bliss Excess',
-                                      'value': 'bliss_matrix'
-                                    },
-                                    {
-                                        'label': 'Bliss excess synergy',
-                                        'value': 'bliss_matrix_so'
-                                    }
-                                ],
-
+                                options=list(matrix_metrics.values()),
                                 id='x-axis-select',
                                 value='bliss_matrix'
                             ),
