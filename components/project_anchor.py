@@ -114,9 +114,9 @@ def layout(project):
                                                 children= html.Div(
                                                     id='flex-session',
                                                 ),
+                                                loading_state={'is_loading': True}
 
-
-                                            )
+                                            ),
                                             # dbc.Row([
                                             #     dbc.Col(
                                             #         width=6,
@@ -308,7 +308,8 @@ def layout(project):
                                 ])
                     )
                 ]), #1 row
-        html.Div(className="d-none", id='project-id', children=project.id)
+        html.Div(className="d-none", id='project-id', children=project.id),
+
     ] #return
 
 
@@ -330,9 +331,10 @@ def load_heatmap(display_opt, url):
     dash.dependencies.Input('color', 'value'),
     dash.dependencies.Input('xaxis','value'),
     dash.dependencies.Input('yaxis','value'),
-    dash.dependencies.Input('project-id', 'children')]
+    dash.dependencies.Input('project-id-1', 'children')]
 )
 def load_flexiscatter(tissue,cancertype,library,anchor,combination,color,xaxis,yaxis,project_id):
+    print("load flexi scatter")
     if isinstance(tissue, list):
         tissue = tuple(tissue)
     if isinstance(cancertype, list):
@@ -785,6 +787,7 @@ def load_flexiscatter():
     [dash.dependencies.Input('project-id', 'children')]
 )
 def load_flexi_session(project_id):
+    print("callback to load flexi session")
     project = session.query(Project).get(project_id)
     df = get_anchor_combi_data(project_id)
     cancer_types = df['cancer_type'].drop_duplicates().sort_values()
@@ -970,6 +973,7 @@ def load_flexi_session(project_id):
                 ]
             )
         ]),
+        html.Div(className="d-none", id='project-id-1', children=project.id),
         dcc.Loading(
             className='gdsc-spinner',
             children=dcc.Graph(
