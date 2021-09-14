@@ -268,6 +268,8 @@ def url_parser(url):
         return 'documentation'
     elif re.fullmatch('/downloads', url):
         return 'downloads'
+    elif re.fullmatch('/volcano',url):
+        return 'volcano'
     elif re.fullmatch("/", url):
         return 'home'
 

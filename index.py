@@ -9,7 +9,7 @@ import os
 from app import app
 from components.navigation.header import generate_header
 from components.navigation.footer import footer
-from pages import project, home, matrix, combinations, documentation, downloads
+from pages import project, home, matrix, combinations, documentation, downloads, volcano
 from utils import url_parser
 
 # user = os.getenv('MATRIXEXPLORER_USER')
@@ -56,6 +56,8 @@ def display_page(pathname):
         return documentation.layout(pathname)
     elif page_type == 'downloads':
         return downloads.layout(pathname)
+    elif page_type == 'volcano':
+        return volcano.layout()
 
     else:
         return '404'
