@@ -26,6 +26,7 @@ class Project(ToDictMixin, Base):
     anchor = relationship("AnchorCombi", back_populates='project')
     dose_responses = relationship("DoseResponseCurve")
     combinations = relationship("Combination", lazy='dynamic', back_populates='project')
+    anchor_project_stats = relationship("AnchorProjectStats", lazy='dynamic',  back_populates='project')
 
     @property
     def models(self):
@@ -448,6 +449,7 @@ class AnchorCombi(ToDictMixin, Base):
 class AnchorSynergy(ToDictMixin, Base):
     __tablename__ = 'synergy'
     project_id = sa.Column(sa.Integer, sa.ForeignKey(Project.id),primary_key=True, index= True)
+
     cell_line_name = sa.Column(sa.String, primary_key=True, index=True)
     anchor_id = sa.Column(sa.Integer, sa.ForeignKey(Drug.id), primary_key=True, index=True)
     library_id = sa.Column(sa.Integer, sa.ForeignKey(Drug.id), primary_key=True, index=True)
@@ -455,3 +457,16 @@ class AnchorSynergy(ToDictMixin, Base):
     synergy = sa.Column(sa.Integer)
 
     project = relationship("Project")
+
+
+@generic_repr
+class AnchorProjectStats(ToDictMixin, Base):
+    __tablename__ = 'anchor_project_stats'
+    project_id = sa.Column(sa.Integer, sa.ForeignKey(Project.id), primary_key=True, index=True)
+
+    project = relationship("Project", back_populates='anchor_project_stats')
+    combinations_count = sa.Column(sa.Integer)
+    lib_drugs_count = sa.Column(sa.Integer)
+    anchor_drugs_count = sa.Column(sa.Integer)
+    cell_lines_count = sa.Column(sa.Integer)
+    measurements = sa.Column(sa.Integer)

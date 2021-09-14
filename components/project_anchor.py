@@ -6,7 +6,7 @@ import dash_table
 from app import app
 from db import session
 import pandas as pd
-from models import Drug, AnchorCombi, AnchorSynergy, Project
+from models import Drug, AnchorCombi, AnchorSynergy, Project, AnchorProjectStats
 from components.anchor_heatmap import layout as anchor_heatmap
 from components.anchor_flexiscatter import cached_update_scatter
 from components.breadcrumbs import breadcrumb_generator as crumbs
@@ -20,6 +20,20 @@ colour_by = {
 }
 
 def layout(project):
+    # print(project)
+    # df_query = session.query(AnchorProjectStats).filter(AnchorProjectStats.project_id ==  project.id)
+    # df = pd.read_sql(df_query.statement, session.bind)
+    # print(df)
+    # combination = df['combinations_count']
+    # print(combination)
+
+
+    # combinations_count =  project.anchor_project_stats.combinations_count
+    # print(combinations_count)
+
+    # combination = project.combinations
+    # for c in combination:
+    #     print(c.lib2_id)
     # df_query = session.query(AnchorCombi).filter(AnchorCombi.project_id ==  project.id)
     # df = pd.read_sql(df_query.statement, session.bind)
     #
@@ -352,13 +366,17 @@ def load_flexiscatter(tissue,cancertype,library,anchor,combination,color,xaxis,y
     [dash.dependencies.Input('project-id', 'children')]
 )
 def load_project_info(project_id):
+    df_query = session.query(AnchorProjectStats).filter(AnchorProjectStats.project_id == project_id)
+    df = pd.read_sql(df_query.statement, session.bind)
+    # combination = df['combinations_count']
+
     project = session.query(Project).get(project_id)
-    df = get_anchor_combi_data(project_id)
-    cancer_types = df['cancer_type'].drop_duplicates().sort_values()
-    tissues = df['tissue'].drop_duplicates().sort_values()
-    celllines = df['cell_line_name'].drop_duplicates()
-    lib_drugs = df['library_id'].drop_duplicates()
-    anchor_drugs = df['anchor_id'].drop_duplicates()
+    # anchor_project_stats = session.query(AnchorProjectStats).get(project_id)
+    celllines_count = df['cell_lines_count']
+    lib_drugs_count = df['lib_drugs_count']
+    anchor_drugs_count = df['anchor_drugs_count']
+    combination_counts = df['combinations_count']
+    measurements = df['measurements']
 
     (synergy_count, synergy_frequency) = get_syngergy_data(project)
 
@@ -369,15 +387,15 @@ def load_project_info(project_id):
                     html.Tbody([
                         html.Tr([
                             html.Td(html.Strong("Combinations")),
-                            html.Td(project.combinations.count()),
+                            html.Td(combination_counts),
                         ]),
                         html.Tr([
                             html.Td(html.Strong("Library drugs")),
-                            html.Td(lib_drugs.size),
+                            html.Td(lib_drugs_count),
                         ]),
                         html.Tr([
                             html.Td(html.Strong("Anchor drugs")),
-                            html.Td(anchor_drugs.size),
+                            html.Td(anchor_drugs_count),
                        ])
                     ])
                 ])
@@ -389,12 +407,12 @@ def load_project_info(project_id):
                         html.Tr([
 
                             html.Td(html.Strong("Cell lines")),
-                            html.Td(celllines.size),
+                            html.Td(celllines_count),
                         ]),
                         html.Tr([
 
                             html.Td(html.Strong("Measurements")),
-                            html.Td(len(df)),
+                            html.Td(measurements),
 
                         ]),
                         html.Tr([
@@ -429,17 +447,6 @@ def get_anchor_combi_data(project_id):
     df_query = session.query(AnchorCombi).filter(AnchorCombi.project_id == project_id)
     df = pd.read_sql(df_query.statement, session.bind)
 
-    # print('get df')
-    # cancer_types = df['cancer_type'].drop_duplicates().sort_values()
-    # tissues = df['tissue'].drop_duplicates().sort_values()
-    # celllines = df['cell_line_name'].drop_duplicates()
-    # lib_drugs = df['library_id'].drop_duplicates()
-    # anchor_drugs = df['anchor_id'].drop_duplicates()
-
-    # print('get options')
-    #
-    #
-    # print('get combination')
     return df
 
 def get_syngergy_data(project):
