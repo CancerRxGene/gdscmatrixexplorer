@@ -60,6 +60,15 @@ def layout(project):
     combos = project.combinations
     sorted_combos = sorted(combos, key=lambda combos: combos.lib2.name)
 
+    lib_names = {}
+    anchor_names = {}
+    for c in sorted_combos:
+        lib_names[c.lib1.name] = c.lib1_id
+        anchor_names[c.lib2.name] = c.lib2_id
+
+    print(len(lib_names))
+    print(len(anchor_names))
+
 
     return [
          crumbs([("Home", "/"), (project.name, "/" + project.slug)]),
@@ -178,7 +187,7 @@ def layout(project):
                                                                 dbc.Label('Anchor', html_for='anchor', className='mr-2'),
                                                                 dcc.Dropdown(
                                                                     options=[
-                                                                     #   {'label': c, 'value': anchor_names[c]} for c in sorted(anchor_names.keys())
+                                                                        {'label': c, 'value': anchor_names[c]} for c in sorted(anchor_names.keys())
                                                                     ],
                                                                     id='anchor',
                                                                     className='flex-grow-1',
@@ -193,7 +202,7 @@ def layout(project):
                                                                           className='mr-2'),
                                                                 dcc.Dropdown(
                                                                     options=[
-                                                                      #  {'label': c, 'value': lib_names[c]} for c in sorted(lib_names.keys())
+                                                                        {'label': c, 'value': lib_names[c]} for c in sorted(lib_names.keys())
                                                                     ],
                                                                     id='library',
                                                                     className='flex-grow-1',
