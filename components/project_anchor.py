@@ -57,8 +57,8 @@ def layout(project):
     #     an_drug = session.query(Drug).get(ac)
     #     anchor_names[an_drug.name] = ac
     #
-    # combos = project.combinations
-    # sorted_combos = sorted(combos, key=lambda combos: combos.lib2.name)
+    combos = project.combinations
+    sorted_combos = sorted(combos, key=lambda combos: combos.lib2.name)
 
 
     return [
@@ -123,182 +123,183 @@ def layout(project):
                                                 children=[
                                             html.H3("Flexiscatter"),
                                             html.Hr(),
-                                            dcc.Loading(
-                                                className='gdsc-spinner',
-                                                children= html.Div(
-                                                    id='flex-session',
-                                                ),
-                                                loading_state={'is_loading': True}
-
-                                            ),
-                                            # dbc.Row([
-                                            #     dbc.Col(
-                                            #         width=6,
-                                            #         className="mt-2 mb-4",
-                                            #         children=[
-                                            #             dbc.Form(
-                                            #                # inline=True,
-                                            #                 children=dbc.FormGroup([
-                                            #                     dbc.Label('Tissue', html_for='tissue', className='mr-2'),
-                                            #                     dcc.Dropdown(
-                                            #                         options=[
-                                            #                             {'label': c, 'value': c} for c in tissues
-                                            #                         ],
-                                            #                         id='tissue',
-                                            #                         className='flex-grow-1',
-                                            #                         multi=True
-                                            #                     )
-                                            #                 ])
-                                            #             ),
-                                            #             dbc.Form(
-                                            #               #  inline=True,
-                                            #                 children=dbc.FormGroup([
-                                            #                     dbc.Label('Cancer type', className="w-25 justify-content-start"),
-                                            #                     dcc.Dropdown(
-                                            #                         options=[
-                                            #                             {'label': c, 'value': c} for c in cancer_types
-                                            #
-                                            #                         ],
-                                            #                         id='cancertype-select',
-                                            #                         className='flex-grow-1',
-                                            #                         multi=True
-                                            #                     )
-                                            #                 ])
-                                            #             )
-                                            #         ]
-                                            #     ),
-                                            #     dbc.Col(
-                                            #         width=6,
-                                            #         className="mt-2 mb-4",
-                                            #         children=[
-                                            #             dbc.Form(
-                                            #                # inline=True,
-                                            #                 children=dbc.FormGroup([
-                                            #                     dbc.Label('Anchor', html_for='anchor', className='mr-2'),
-                                            #                     dcc.Dropdown(
-                                            #                         options=[
-                                            #                             {'label': c, 'value': anchor_names[c]} for c in sorted(anchor_names.keys())
-                                            #                         ],
-                                            #                         id='anchor',
-                                            #                         className='flex-grow-1',
-                                            #                         multi=True
-                                            #                     )
-                                            #                 ])
-                                            #             ),
-                                            #             dbc.Form(
-                                            #               #  inline=True,
-                                            #                 children=dbc.FormGroup([
-                                            #                     dbc.Label('Library', html_for='library',
-                                            #                               className='mr-2'),
-                                            #                     dcc.Dropdown(
-                                            #                         options=[
-                                            #                             {'label': c, 'value': lib_names[c]} for c in sorted(lib_names.keys())
-                                            #                         ],
-                                            #                         id='library',
-                                            #                         className='flex-grow-1',
-                                            #                         multi=True
-                                            #                     )
-                                            #                 ])
-                                            #             ),
-                                            #             html.H5("OR"),
-                                            #             dbc.Form(
-                                            #                 inline=True,
-                                            #                 children=dbc.FormGroup([
-                                            #                     dbc.Label('Combination', html_for='combination',
-                                            #                               className='mr-2'),
-                                            #                     dcc.Dropdown(
-                                            #                         options=[
-                                            #                             { 'label': f" {c.lib2.name} + {c.lib1.name}",
-                                            #                                 'value': f"{c.lib2_id} + {c.lib1_id}"} for c in sorted_combos
-                                            #                         ],
-                                            #                         id='combination',
-                                            #                         className='flex-grow-1',
-                                            #                         multi=True
-                                            #                     )
-                                            #                 ])
-                                            #             )
-                                            #         ]
-                                            #     )
-                                            # ]),
-                                            # dbc.Row([
-                                            #     dbc.Col(
-                                            #             width=6,
-                                            #             className="mt-2 mb-4",
-                                            #             children=[
-                                            #                 dbc.Form(
-                                            #                     #  inline=True,
-                                            #                     children=dbc.FormGroup([
-                                            #                         dbc.Label('x-Axis', html_for='xaxis',
-                                            #                                   className='mr-2'),
-                                            #                         dcc.Dropdown(
-                                            #                             options=[
-                                            #                                 {'label': anchor_metrics[c]['label'], 'value': anchor_metrics[c]['value'] } for c in
-                                            #                                    anchor_metrics
-                                            #                             ],
-                                            #                             id='xaxis',
-                                            #                             value = 'synergy_delta_xmid',
-                                            #                             className='flex-grow-1'
-                                            #                         )
-                                            #                     ])
-                                            #                 )
-                                            #             ]
-                                            #         ###
-                                            #     ),
-                                            #     dbc.Col(
-                                            #         className="mt-2 mb-4",
-                                            #         children=[
-                                            #             dbc.Form(
-                                            #                 #  inline=True,
-                                            #                 children=dbc.FormGroup([
-                                            #                     dbc.Label('y-Axis', html_for='yaxis',
-                                            #                               className='mr-2'),
-                                            #                     dcc.Dropdown(
-                                            #                         options=[
-                                            #                             {'label': anchor_metrics[c]['label'],
-                                            #                              'value': anchor_metrics[c]['value']} for c in
-                                            #                                 anchor_metrics
-                                            #                         ],
-                                            #                         id='yaxis',
-                                            #                         value = 'synergy_delta_emax',
-                                            #                         className='flex-grow-1'
-                                            #
-                                            #                     )
-                                            #                 ])
-                                            #             )
-                                            #         ]
-                                            #     )
-                                            # ]),
-                                            # dbc.Row([
-                                            #     dbc.Col(
-                                            #         className="mt-2 mb-4",
-                                            #         children=[
-                                            #             dbc.Form(
-                                            #                 inline=True,
-                                            #                 children=dbc.FormGroup([
-                                            #                     dbc.Label('Colour by', html_for='color',
-                                            #                               className='mr-2'),
-                                            #                     dcc.Dropdown(
-                                            #                         options=[
-                                            #                             {'label': c, 'value': colour_by[c]} for c in
-                                            #                               colour_by
-                                            #                         ],
-                                            #                         id='color',
-                                            #                         value='tissue',
-                                            #                         className='flex-grow-1',
-                                            #
-                                            #                     )
-                                            #                 ])
-                                            #             )
-                                            #         ]
-                                            #     )
-                                            # ]),
                                             # dcc.Loading(
                                             #     className='gdsc-spinner',
-                                            #     children=dcc.Graph(
-                                            #         id='flexiscatter',
-                                            #        # figure=[]
-                                            #     )
-                                            #  )
+                                            #     children= html.Div(
+                                            #         id='flex-session',
+                                            #     ),
+                                            #     loading_state={'is_loading': True}
+                                            #
+                                            # ),
+
+                                            dbc.Row([
+                                                dbc.Col(
+                                                    width=6,
+                                                    className="mt-2 mb-4",
+                                                    children=[
+                                                        dbc.Form(
+                                                           # inline=True,
+                                                            children=dbc.FormGroup([
+                                                                dbc.Label('Tissue', html_for='tissue', className='mr-2'),
+                                                                dcc.Dropdown(
+                                                                    options=[
+                                                                       # {'label': c, 'value': c} for c in tissues
+                                                                    ],
+                                                                    id='tissue',
+                                                                    className='flex-grow-1',
+                                                                    multi=True
+                                                                )
+                                                            ])
+                                                        ),
+                                                        dbc.Form(
+                                                          #  inline=True,
+                                                            children=dbc.FormGroup([
+                                                                dbc.Label('Cancer type', className="w-25 justify-content-start"),
+                                                                dcc.Dropdown(
+                                                                    options=[
+                                                                     #   {'label': c, 'value': c} for c in cancer_types
+
+                                                                    ],
+                                                                    id='cancertype-select',
+                                                                    className='flex-grow-1',
+                                                                    multi=True
+                                                                )
+                                                            ])
+                                                        )
+                                                    ]
+                                                ),
+                                                dbc.Col(
+                                                    width=6,
+                                                    className="mt-2 mb-4",
+                                                    children=[
+                                                        dbc.Form(
+                                                           # inline=True,
+                                                            children=dbc.FormGroup([
+                                                                dbc.Label('Anchor', html_for='anchor', className='mr-2'),
+                                                                dcc.Dropdown(
+                                                                    options=[
+                                                                     #   {'label': c, 'value': anchor_names[c]} for c in sorted(anchor_names.keys())
+                                                                    ],
+                                                                    id='anchor',
+                                                                    className='flex-grow-1',
+                                                                    multi=True
+                                                                )
+                                                            ])
+                                                        ),
+                                                        dbc.Form(
+                                                          #  inline=True,
+                                                            children=dbc.FormGroup([
+                                                                dbc.Label('Library', html_for='library',
+                                                                          className='mr-2'),
+                                                                dcc.Dropdown(
+                                                                    options=[
+                                                                      #  {'label': c, 'value': lib_names[c]} for c in sorted(lib_names.keys())
+                                                                    ],
+                                                                    id='library',
+                                                                    className='flex-grow-1',
+                                                                    multi=True
+                                                                )
+                                                            ])
+                                                        ),
+                                                        html.H5("OR"),
+                                                        dbc.Form(
+                                                            inline=True,
+                                                            children=dbc.FormGroup([
+                                                                dbc.Label('Combination', html_for='combination',
+                                                                          className='mr-2'),
+                                                                dcc.Dropdown(
+                                                                    options=[
+                                                                        { 'label': f" {c.lib2.name} + {c.lib1.name}",
+                                                                            'value': f"{c.lib2_id} + {c.lib1_id}"} for c in sorted_combos
+                                                                    ],
+                                                                    id='combination',
+                                                                    className='flex-grow-1',
+                                                                    multi=True
+                                                                )
+                                                            ])
+                                                        )
+                                                    ]
+                                                )
+                                            ]),
+                                            dbc.Row([
+                                                dbc.Col(
+                                                        width=6,
+                                                        className="mt-2 mb-4",
+                                                        children=[
+                                                            dbc.Form(
+                                                                #  inline=True,
+                                                                children=dbc.FormGroup([
+                                                                    dbc.Label('x-Axis', html_for='xaxis',
+                                                                              className='mr-2'),
+                                                                    dcc.Dropdown(
+                                                                        options=[
+                                                                            {'label': anchor_metrics[c]['label'], 'value': anchor_metrics[c]['value'] } for c in
+                                                                               anchor_metrics
+                                                                        ],
+                                                                        id='xaxis',
+                                                                        value = 'synergy_delta_xmid',
+                                                                        className='flex-grow-1'
+                                                                    )
+                                                                ])
+                                                            )
+                                                        ]
+                                                    ###
+                                                ),
+                                                dbc.Col(
+                                                    className="mt-2 mb-4",
+                                                    children=[
+                                                        dbc.Form(
+                                                            #  inline=True,
+                                                            children=dbc.FormGroup([
+                                                                dbc.Label('y-Axis', html_for='yaxis',
+                                                                          className='mr-2'),
+                                                                dcc.Dropdown(
+                                                                    options=[
+                                                                        {'label': anchor_metrics[c]['label'],
+                                                                         'value': anchor_metrics[c]['value']} for c in
+                                                                            anchor_metrics
+                                                                    ],
+                                                                    id='yaxis',
+                                                                    value = 'synergy_delta_emax',
+                                                                    className='flex-grow-1'
+
+                                                                )
+                                                            ])
+                                                        )
+                                                    ]
+                                                )
+                                            ]),
+                                            dbc.Row([
+                                                dbc.Col(
+                                                    className="mt-2 mb-4",
+                                                    children=[
+                                                        dbc.Form(
+                                                            inline=True,
+                                                            children=dbc.FormGroup([
+                                                                dbc.Label('Colour by', html_for='color',
+                                                                          className='mr-2'),
+                                                                dcc.Dropdown(
+                                                                    options=[
+                                                                        {'label': c, 'value': colour_by[c]} for c in
+                                                                          colour_by
+                                                                    ],
+                                                                    id='color',
+                                                                    value='tissue',
+                                                                    className='flex-grow-1',
+
+                                                                )
+                                                            ])
+                                                        )
+                                                    ]
+                                                )
+                                            ]),
+                                            dcc.Loading(
+                                                className='gdsc-spinner',
+                                                children=dcc.Graph(
+                                                    id='flexiscatter',
+                                                   # figure=[]
+                                                )
+                                             )
                                 ]) #html
                             ]) #col
                             ]), #row
@@ -345,7 +346,7 @@ def load_heatmap(display_opt, url):
     dash.dependencies.Input('color', 'value'),
     dash.dependencies.Input('xaxis','value'),
     dash.dependencies.Input('yaxis','value'),
-    dash.dependencies.Input('project-id-1', 'children')]
+    dash.dependencies.Input('project-id', 'children')]
 )
 def load_flexiscatter(tissue,cancertype,library,anchor,combination,color,xaxis,yaxis,project_id):
     print("load flexi scatter")
@@ -615,7 +616,10 @@ def load_combination_table(project_id):
         ),
     )
 
-def load_flexiscatter():
+def load_flexiscatter(project):
+    combos = project.combinations
+    sorted_combos = sorted(combos, key=lambda combos: combos.lib2.name)
+
     return (
         dbc.Row([
             dbc.Col(
@@ -628,7 +632,7 @@ def load_flexiscatter():
                             dbc.Label('Tissue', html_for='tissue', className='mr-2'),
                             dcc.Dropdown(
                                 options=[
-                                    {'label': c, 'value': c} for c in tissues
+                                  #  {'label': c, 'value': c} for c in tissues
                                 ],
                                 id='tissue',
                                 className='flex-grow-1',
@@ -642,7 +646,7 @@ def load_flexiscatter():
                             dbc.Label('Cancer type', className="w-25 justify-content-start"),
                             dcc.Dropdown(
                                 options=[
-                                    {'label': c, 'value': c} for c in cancer_types
+                                 #   {'label': c, 'value': c} for c in cancer_types
 
                                 ],
                                 id='cancertype-select',
@@ -663,7 +667,7 @@ def load_flexiscatter():
                             dbc.Label('Anchor', html_for='anchor', className='mr-2'),
                             dcc.Dropdown(
                                 options=[
-                                    {'label': c, 'value': anchor_names[c]} for c in sorted(anchor_names.keys())
+                                 #   {'label': c, 'value': anchor_names[c]} for c in sorted(anchor_names.keys())
                                 ],
                                 id='anchor',
                                 className='flex-grow-1',
@@ -678,7 +682,7 @@ def load_flexiscatter():
                                       className='mr-2'),
                             dcc.Dropdown(
                                 options=[
-                                    {'label': c, 'value': lib_names[c]} for c in sorted(lib_names.keys())
+                                  #  {'label': c, 'value': lib_names[c]} for c in sorted(lib_names.keys())
                                 ],
                                 id='library',
                                 className='flex-grow-1',
@@ -785,7 +789,8 @@ def load_flexiscatter():
                # figure=[]
             )
          )
-    )
+)
+
 
 
 
