@@ -19,8 +19,97 @@ colour_by = {
     'Combination': 'combo_name'
 }
 
+#pre-coded the tissues & cancer_types instead of query DB on the fly to increase the performance
+tissues = {
+    'Pan-Cancer': [
+        'Adrenal Gland',
+        'Biliary Tract',
+        'Bladder',
+        'Bone',
+        'Breast',
+        'Central Nervous System',
+        'Cervix',
+        'Endometrium',
+        'Esophagus',
+        'Haematopoietic and Lymphoid',
+        'Head and Neck',
+        'Kidney',
+        'Large Intestine',
+        'Liver',
+        'Lung',
+        'Ovary',
+        'Pancreas',
+        'Peripheral Nervous System',
+        'Prostate',
+        'Skin',
+        'Soft Tissue',
+        'Stomach',
+        'Testis',
+        'Thyroid',
+        'Uterus',
+        'Vulva'
+    ],
+    'Breast': ['Breast'],
+    'Colon': ['Large Intestine'],
+    'Pancreas': ['Pancreas']
+}
+
+cancer_types = {
+    'Pan-Cancer':[
+        'Acute Myeloid Leukemia',
+        "B-Cell Non-Hodgkin's Lymphoma",
+        'B-Lymphoblastic Leukemia',
+        'Biliary Tract Carcinoma',
+        'Bladder Carcinoma',
+        'Breast Carcinoma',
+        "Burkitt's Lymphoma",
+        'Cervical Carcinoma',
+        'Chondrosarcoma',
+        'Chronic Myelogenous Leukemia',
+        'Colorectal Carcinoma',
+        'Endometrial Carcinoma',
+        'Esophageal Carcinoma',
+        'Esophageal Squamous Cell Carcinoma',
+        "Ewing's Sarcoma",
+        'Gastric Carcinoma',
+        'Glioblastoma',
+        'Glioma',
+        'Head and Neck Carcinoma',
+        'Hepatocellular Carcinoma',
+        "Hodgkin's Lymphoma",
+        'Kidney Carcinoma',
+        'Melanoma',
+        'Mesothelioma',
+        'Neuroblastoma',
+        'Non-Cancerous',
+        'Non-Small Cell Lung Carcinoma',
+        'Oral Cavity Carcinoma',
+        'Osteosarcoma',
+        'Other Blood Carcinomas',
+        'Other Solid Carcinomas',
+        'Ovarian Carcinoma',
+        'Pancreatic Carcinoma',
+        'Plasma Cell Myeloma',
+        'Prostate Carcinoma',
+        'Rhabdomyosarcoma',
+        'Small Cell Lung Carcinoma',
+        'Squamous Cell Lung Carcinoma',
+        "T-Cell Non-Hodgkin's Lymphoma",
+        'T-Lymphoblastic Leukemia',
+        'Thyroid Gland Carcinoma'
+
+    ],
+    'Breast': ['Breast Carcinoma'],
+    'Colon': ['Colorectal Carcinoma'],
+    'Pancreas': ['Pancreatic Carcinoma']
+}
+
 def layout(project):
-    # print(project)
+    print('project name: ' + project.name)
+    # for t in  tissues[project.name]:
+    #     print('tissue: ' + t)
+    # for c in  cancer_types[project.name]:
+    #     print('cancer type: ' + c )
     # df_query = session.query(AnchorProjectStats).filter(AnchorProjectStats.project_id ==  project.id)
     # df = pd.read_sql(df_query.statement, session.bind)
     # print(df)
@@ -34,12 +123,13 @@ def layout(project):
     # combination = project.combinations
     # for c in combination:
     #     print(c.lib2_id)
-    # df_query = session.query(AnchorCombi).filter(AnchorCombi.project_id ==  project.id)
-    # df = pd.read_sql(df_query.statement, session.bind)
-    #
-    # print('get df')
-    # cancer_types = df['cancer_type'].drop_duplicates().sort_values()
-    # tissues = df['tissue'].drop_duplicates().sort_values()
+   #  df_query = session.query(AnchorCombi).filter(AnchorCombi.project_id ==  project.id)
+   #  df = pd.read_sql(df_query.statement, session.bind)
+   #  #
+   #  # print('get df')
+   #  cancer_types = df['cancer_type'].drop_duplicates().sort_values()
+   # # t = df['tissue'].drop_duplicates().sort_values()
+   #  print(cancer_types)
     # celllines = df['cell_line_name'].drop_duplicates()
     # lib_drugs = df['library_id'].drop_duplicates()
     # anchor_drugs = df['anchor_id'].drop_duplicates()
@@ -57,6 +147,8 @@ def layout(project):
     #     an_drug = session.query(Drug).get(ac)
     #     anchor_names[an_drug.name] = ac
     #
+
+    # get data for flexiscatter options
     combos = project.combinations
     sorted_combos = sorted(combos, key=lambda combos: combos.lib2.name)
 
@@ -65,10 +157,6 @@ def layout(project):
     for c in sorted_combos:
         lib_names[c.lib1.name] = c.lib1_id
         anchor_names[c.lib2.name] = c.lib2_id
-
-    print(len(lib_names))
-    print(len(anchor_names))
-
 
     return [
          crumbs([("Home", "/"), (project.name, "/" + project.slug)]),
@@ -152,7 +240,7 @@ def layout(project):
                                                                 dbc.Label('Tissue', html_for='tissue', className='mr-2'),
                                                                 dcc.Dropdown(
                                                                     options=[
-                                                                       # {'label': c, 'value': c} for c in tissues
+                                                                        {'label': c, 'value': c} for c in tissues[project.name]
                                                                     ],
                                                                     id='tissue',
                                                                     className='flex-grow-1',
@@ -166,8 +254,7 @@ def layout(project):
                                                                 dbc.Label('Cancer type', className="w-25 justify-content-start"),
                                                                 dcc.Dropdown(
                                                                     options=[
-                                                                     #   {'label': c, 'value': c} for c in cancer_types
-
+                                                                        {'label': c, 'value': c} for c in cancer_types[project.name]
                                                                     ],
                                                                     id='cancertype-select',
                                                                     className='flex-grow-1',
@@ -518,7 +605,6 @@ def get_combination_drugs(project_id):
     return (my_table_df, columns)
 
 def project_info(project):
-    #print('get df')
     df = get_anchor_combi_data(project)
     cancer_types = df['cancer_type'].drop_duplicates().sort_values()
     tissues = df['tissue'].drop_duplicates().sort_values()
