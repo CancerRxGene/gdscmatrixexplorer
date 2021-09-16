@@ -106,48 +106,6 @@ cancer_types = {
 
 def layout(project):
     print('project name: ' + project.name)
-    # for t in  tissues[project.name]:
-    #     print('tissue: ' + t)
-    # for c in  cancer_types[project.name]:
-    #     print('cancer type: ' + c )
-    # df_query = session.query(AnchorProjectStats).filter(AnchorProjectStats.project_id ==  project.id)
-    # df = pd.read_sql(df_query.statement, session.bind)
-    # print(df)
-    # combination = df['combinations_count']
-    # print(combination)
-
-
-    # combinations_count =  project.anchor_project_stats.combinations_count
-    # print(combinations_count)
-
-    # combination = project.combinations
-    # for c in combination:
-    #     print(c.lib2_id)
-   #  df_query = session.query(AnchorCombi).filter(AnchorCombi.project_id ==  project.id)
-   #  df = pd.read_sql(df_query.statement, session.bind)
-   #  #
-   #  # print('get df')
-   #  cancer_types = df['cancer_type'].drop_duplicates().sort_values()
-   # # t = df['tissue'].drop_duplicates().sort_values()
-   #  print(cancer_types)
-    # celllines = df['cell_line_name'].drop_duplicates()
-    # lib_drugs = df['library_id'].drop_duplicates()
-    # anchor_drugs = df['anchor_id'].drop_duplicates()
-    #
-    #
-    # # create lib names dictionary
-    # lib_names = {}
-    # for l in lib_drugs:
-    #     l_drug = session.query(Drug).get(l)
-    #     lib_names[l_drug.name] = l
-    #
-    # # create anchor names dictionary
-    # anchor_names = {}
-    # for ac in anchor_drugs:
-    #     an_drug = session.query(Drug).get(ac)
-    #     anchor_names[an_drug.name] = ac
-    #
-
     # get data for flexiscatter options
     combos = project.combinations
     sorted_combos = sorted(combos, key=lambda combos: combos.lib2.name)
@@ -198,14 +156,12 @@ def layout(project):
                                                 ],
                                                 id='display_opt',
                                                 value='count',
-
                                             ),
 
                                             dcc.Loading(
                                                 className='gdsc-spinner',
                                                 children = dcc.Graph(
                                                     id='synergy_heatmap',
-                                                    #figure=[]
                                                 )
                                             )
                                     ])  # html l3
@@ -220,14 +176,6 @@ def layout(project):
                                                 children=[
                                             html.H3("Flexiscatter"),
                                             html.Hr(),
-                                            # dcc.Loading(
-                                            #     className='gdsc-spinner',
-                                            #     children= html.Div(
-                                            #         id='flex-session',
-                                            #     ),
-                                            #     loading_state={'is_loading': True}
-                                            #
-                                            # ),
 
                                             dbc.Row([
                                                 dbc.Col(
@@ -235,7 +183,6 @@ def layout(project):
                                                     className="mt-2 mb-4",
                                                     children=[
                                                         dbc.Form(
-                                                           # inline=True,
                                                             children=dbc.FormGroup([
                                                                 dbc.Label('Tissue', html_for='tissue', className='mr-2'),
                                                                 dcc.Dropdown(
@@ -249,7 +196,6 @@ def layout(project):
                                                             ])
                                                         ),
                                                         dbc.Form(
-                                                          #  inline=True,
                                                             children=dbc.FormGroup([
                                                                 dbc.Label('Cancer type', className="w-25 justify-content-start"),
                                                                 dcc.Dropdown(
@@ -269,7 +215,6 @@ def layout(project):
                                                     className="mt-2 mb-4",
                                                     children=[
                                                         dbc.Form(
-                                                           # inline=True,
                                                             children=dbc.FormGroup([
                                                                 dbc.Label('Anchor', html_for='anchor', className='mr-2'),
                                                                 dcc.Dropdown(
@@ -283,7 +228,6 @@ def layout(project):
                                                             ])
                                                         ),
                                                         dbc.Form(
-                                                          #  inline=True,
                                                             children=dbc.FormGroup([
                                                                 dbc.Label('Library', html_for='library',
                                                                           className='mr-2'),
@@ -323,7 +267,6 @@ def layout(project):
                                                         className="mt-2 mb-4",
                                                         children=[
                                                             dbc.Form(
-                                                                #  inline=True,
                                                                 children=dbc.FormGroup([
                                                                     dbc.Label('x-Axis', html_for='xaxis',
                                                                               className='mr-2'),
@@ -345,7 +288,6 @@ def layout(project):
                                                     className="mt-2 mb-4",
                                                     children=[
                                                         dbc.Form(
-                                                            #  inline=True,
                                                             children=dbc.FormGroup([
                                                                 dbc.Label('y-Axis', html_for='yaxis',
                                                                           className='mr-2'),
@@ -393,7 +335,6 @@ def layout(project):
                                                 className='gdsc-spinner',
                                                 children=dcc.Graph(
                                                     id='flexiscatter',
-                                                   # figure=[]
                                                 )
                                              )
                                 ]) #html
@@ -463,12 +404,11 @@ def load_flexiscatter(tissue,cancertype,library,anchor,combination,color,xaxis,y
     [dash.dependencies.Input('project-id', 'children')]
 )
 def load_project_info(project_id):
+    project = session.query(Project).get(project_id)
+
     df_query = session.query(AnchorProjectStats).filter(AnchorProjectStats.project_id == project_id)
     df = pd.read_sql(df_query.statement, session.bind)
-    # combination = df['combinations_count']
 
-    project = session.query(Project).get(project_id)
-    # anchor_project_stats = session.query(AnchorProjectStats).get(project_id)
     celllines_count = df['cell_lines_count']
     lib_drugs_count = df['lib_drugs_count']
     anchor_drugs_count = df['anchor_drugs_count']
@@ -531,7 +471,6 @@ def go_to_dot(clicked):
     if clicked:
         #p = clicked['points'][0]['custom_data']
         # return p['to']
-        print('you click me')
         print(clicked['points'][0]['customdata'][3])
         to = f"https://cellmodelpassports.sanger.ac.uk/passports/{clicked['points'][0]['customdata'][3]}"
         print(to)
@@ -543,7 +482,6 @@ def go_to_dot(clicked):
 def get_anchor_combi_data(project_id):
     df_query = session.query(AnchorCombi).filter(AnchorCombi.project_id == project_id)
     df = pd.read_sql(df_query.statement, session.bind)
-
     return df
 
 def get_syngergy_data(project):
@@ -604,76 +542,6 @@ def get_combination_drugs(project_id):
 
     return (my_table_df, columns)
 
-def project_info(project):
-    df = get_anchor_combi_data(project)
-    cancer_types = df['cancer_type'].drop_duplicates().sort_values()
-    tissues = df['tissue'].drop_duplicates().sort_values()
-    celllines = df['cell_line_name'].drop_duplicates()
-    lib_drugs = df['library_id'].drop_duplicates()
-    anchor_drugs = df['anchor_id'].drop_duplicates()
-
-    (synergy_count, synergy_frequency) = get_syngergy_data(project)
-    return (
-        dbc.Row([ # row l2
-            dbc.Col(children=[  #clo l2
-                html.Div(
-                    className="bg-white pt-3 px-4 pb-2 mb-3 border border-primary shadow-sm",
-                    children=[
-                        html.H3(f"{project.name}"),
-                        html.Hr(),
-                        dbc.Row([
-                            dbc.Col(width=5,children=[
-                                dbc.Table(borderless=True, size='sm', children=[
-                                    html.Tbody([
-                                        html.Tr([
-                                            html.Td(html.Strong("Combinations")),
-                                            html.Td(project.combinations.count()),
-                                        ]),
-                                        html.Tr([
-                                            html.Td(html.Strong("Library drugs")),
-                                            html.Td(lib_drugs.size),
-                                        ]),
-                                        html.Tr([
-                                            html.Td(html.Strong("Anchor drugs")),
-                                            html.Td(anchor_drugs.size),
-                                       ])
-                                    ])
-                                ])
-                            ]),
-                            dbc.Col(width=1),
-                            dbc.Col(width=6, children=[
-                                dbc.Table(borderless=True, size='sm', children=[
-                                    html.Tbody([
-                                        html.Tr([
-
-                                            html.Td(html.Strong("Cell lines")),
-                                            html.Td(celllines.size),
-                                        ]),
-                                        html.Tr([
-
-                                            html.Td(html.Strong("Measurements")),
-                                            html.Td(len(df)),
-
-                                        ]),
-                                        html.Tr([
-
-                                            html.Td(html.Strong("Overall frequency of synergy")),
-                                            html.Td(str(synergy_frequency) + "%"),
-
-                                        ]),
-                                    ])
-                                ])
-                            ]),
-                        ]),
-
-                    ]
-                ),
-
-
-            ]) #col l2
-        ]),  # row l2
-    )
-
 @app.callback(
      dash.dependencies.Output('combination_table','children'),
     [dash.dependencies.Input('project-id', 'children')]
@@ -709,382 +577,4 @@ def load_combination_table(project_id):
                  },
                  ]
         ),
-    )
-
-def load_flexiscatter(project):
-    combos = project.combinations
-    sorted_combos = sorted(combos, key=lambda combos: combos.lib2.name)
-
-    return (
-        dbc.Row([
-            dbc.Col(
-                width=6,
-                className="mt-2 mb-4",
-                children=[
-                    dbc.Form(
-                       # inline=True,
-                        children=dbc.FormGroup([
-                            dbc.Label('Tissue', html_for='tissue', className='mr-2'),
-                            dcc.Dropdown(
-                                options=[
-                                  #  {'label': c, 'value': c} for c in tissues
-                                ],
-                                id='tissue',
-                                className='flex-grow-1',
-                                multi=True
-                            )
-                        ])
-                    ),
-                    dbc.Form(
-                      #  inline=True,
-                        children=dbc.FormGroup([
-                            dbc.Label('Cancer type', className="w-25 justify-content-start"),
-                            dcc.Dropdown(
-                                options=[
-                                 #   {'label': c, 'value': c} for c in cancer_types
-
-                                ],
-                                id='cancertype-select',
-                                className='flex-grow-1',
-                                multi=True
-                            )
-                        ])
-                    )
-                ]
-            ),
-            dbc.Col(
-                width=6,
-                className="mt-2 mb-4",
-                children=[
-                    dbc.Form(
-                       # inline=True,
-                        children=dbc.FormGroup([
-                            dbc.Label('Anchor', html_for='anchor', className='mr-2'),
-                            dcc.Dropdown(
-                                options=[
-                                 #   {'label': c, 'value': anchor_names[c]} for c in sorted(anchor_names.keys())
-                                ],
-                                id='anchor',
-                                className='flex-grow-1',
-                                multi=True
-                            )
-                        ])
-                    ),
-                    dbc.Form(
-                      #  inline=True,
-                        children=dbc.FormGroup([
-                            dbc.Label('Library', html_for='library',
-                                      className='mr-2'),
-                            dcc.Dropdown(
-                                options=[
-                                  #  {'label': c, 'value': lib_names[c]} for c in sorted(lib_names.keys())
-                                ],
-                                id='library',
-                                className='flex-grow-1',
-                                multi=True
-                            )
-                        ])
-                    ),
-                    html.H5("OR"),
-                    dbc.Form(
-                        inline=True,
-                        children=dbc.FormGroup([
-                            dbc.Label('Combination', html_for='combination',
-                                      className='mr-2'),
-                            dcc.Dropdown(
-                                options=[
-                                    { 'label': f" {c.lib2.name} + {c.lib1.name}",
-                                        'value': f"{c.lib2_id} + {c.lib1_id}"} for c in sorted_combos
-                                ],
-                                id='combination',
-                                className='flex-grow-1',
-                                multi=True
-                            )
-                        ])
-                    )
-                ]
-            )
-        ]),
-        dbc.Row([
-            dbc.Col(
-                    width=6,
-                    className="mt-2 mb-4",
-                    children=[
-                        dbc.Form(
-                            #  inline=True,
-                            children=dbc.FormGroup([
-                                dbc.Label('x-Axis', html_for='xaxis',
-                                          className='mr-2'),
-                                dcc.Dropdown(
-                                    options=[
-                                        {'label': anchor_metrics[c]['label'], 'value': anchor_metrics[c]['value'] } for c in
-                                           anchor_metrics
-                                    ],
-                                    id='xaxis',
-                                    value = 'synergy_delta_xmid',
-                                    className='flex-grow-1'
-                                )
-                            ])
-                        )
-                    ]
-                ###
-            ),
-            dbc.Col(
-                className="mt-2 mb-4",
-                children=[
-                    dbc.Form(
-                        #  inline=True,
-                        children=dbc.FormGroup([
-                            dbc.Label('y-Axis', html_for='yaxis',
-                                      className='mr-2'),
-                            dcc.Dropdown(
-                                options=[
-                                    {'label': anchor_metrics[c]['label'],
-                                     'value': anchor_metrics[c]['value']} for c in
-                                        anchor_metrics
-                                ],
-                                id='yaxis',
-                                value = 'synergy_delta_emax',
-                                className='flex-grow-1'
-
-                            )
-                        ])
-                    )
-                ]
-            )
-        ]),
-        dbc.Row([
-            dbc.Col(
-                className="mt-2 mb-4",
-                children=[
-                    dbc.Form(
-                        inline=True,
-                        children=dbc.FormGroup([
-                            dbc.Label('Colour by', html_for='color',
-                                      className='mr-2'),
-                            dcc.Dropdown(
-                                options=[
-                                    {'label': c, 'value': colour_by[c]} for c in
-                                      colour_by
-                                ],
-                                id='color',
-                                value='tissue',
-                                className='flex-grow-1',
-
-                            )
-                        ])
-                    )
-                ]
-            )
-        ]),
-        dcc.Loading(
-            className='gdsc-spinner',
-            children=dcc.Graph(
-                id='flexiscatter',
-               # figure=[]
-            )
-         )
-)
-
-
-
-
-@app.callback(
-     dash.dependencies.Output('flex-session','children'),
-    [dash.dependencies.Input('project-id', 'children')]
-)
-def load_flexi_session(project_id):
-    print("callback to load flexi session")
-    project = session.query(Project).get(project_id)
-    df = get_anchor_combi_data(project_id)
-    cancer_types = df['cancer_type'].drop_duplicates().sort_values()
-    tissues = df['tissue'].drop_duplicates().sort_values()
-    celllines = df['cell_line_name'].drop_duplicates()
-    lib_drugs = df['library_id'].drop_duplicates()
-    anchor_drugs = df['anchor_id'].drop_duplicates()
-
-    # create lib names dictionary
-    lib_names = {}
-    for l in lib_drugs:
-        l_drug = session.query(Drug).get(l)
-        lib_names[l_drug.name] = l
-
-    # create anchor names dictionary
-    anchor_names = {}
-    for ac in anchor_drugs:
-        an_drug = session.query(Drug).get(ac)
-        anchor_names[an_drug.name] = ac
-
-    combos = project.combinations
-    sorted_combos = sorted(combos, key=lambda combos: combos.lib2.name)
-
-    return (
-        dbc.Row([
-            dbc.Col(
-                width=6,
-                className="mt-2 mb-4",
-                children=[
-                    dbc.Form(
-                       # inline=True,
-                        children=dbc.FormGroup([
-                            dbc.Label('Tissue', html_for='tissue', className='mr-2'),
-                            dcc.Dropdown(
-                                options=[
-                                    {'label': c, 'value': c} for c in tissues
-                                ],
-                                id='tissue',
-                                className='flex-grow-1',
-                                multi=True
-                            )
-                        ])
-                    ),
-                    dbc.Form(
-                      #  inline=True,
-                        children=dbc.FormGroup([
-                            dbc.Label('Cancer type', className="w-25 justify-content-start"),
-                            dcc.Dropdown(
-                                options=[
-                                    {'label': c, 'value': c} for c in cancer_types
-
-                                ],
-                                id='cancertype-select',
-                                className='flex-grow-1',
-                                multi=True
-                            )
-                        ])
-                    )
-                ]
-            ),
-            dbc.Col(
-                width=6,
-                className="mt-2 mb-4",
-                children=[
-                    dbc.Form(
-                       # inline=True,
-                        children=dbc.FormGroup([
-                            dbc.Label('Anchor', html_for='anchor', className='mr-2'),
-                            dcc.Dropdown(
-                                options=[
-                                    {'label': c, 'value': anchor_names[c]} for c in sorted(anchor_names.keys())
-                                ],
-                                id='anchor',
-                                className='flex-grow-1',
-                                multi=True
-                            )
-                        ])
-                    ),
-                    dbc.Form(
-                      #  inline=True,
-                        children=dbc.FormGroup([
-                            dbc.Label('Library', html_for='library',
-                                      className='mr-2'),
-                            dcc.Dropdown(
-                                options=[
-                                    {'label': c, 'value': lib_names[c]} for c in sorted(lib_names.keys())
-                                ],
-                                id='library',
-                                className='flex-grow-1',
-                                multi=True
-                            )
-                        ])
-                    ),
-                    html.H5("OR"),
-                    dbc.Form(
-                        inline=True,
-                        children=dbc.FormGroup([
-                            dbc.Label('Combination', html_for='combination',
-                                      className='mr-2'),
-                            dcc.Dropdown(
-                                options=[
-                                    { 'label': f" {c.lib2.name} + {c.lib1.name}",
-                                        'value': f"{c.lib2_id} + {c.lib1_id}"} for c in sorted_combos
-                                ],
-                                id='combination',
-                                className='flex-grow-1',
-                                multi=True
-                            )
-                        ])
-                    )
-                ]
-            )
-        ]),
-        dbc.Row([
-            dbc.Col(
-                    width=6,
-                    className="mt-2 mb-4",
-                    children=[
-                        dbc.Form(
-                            #  inline=True,
-                            children=dbc.FormGroup([
-                                dbc.Label('x-Axis', html_for='xaxis',
-                                          className='mr-2'),
-                                dcc.Dropdown(
-                                    options=[
-                                        {'label': anchor_metrics[c]['label'], 'value': anchor_metrics[c]['value'] } for c in
-                                           anchor_metrics
-                                    ],
-                                    id='xaxis',
-                                    value = 'synergy_delta_xmid',
-                                    className='flex-grow-1'
-                                )
-                            ])
-                        )
-                    ]
-                ###
-            ),
-            dbc.Col(
-                className="mt-2 mb-4",
-                children=[
-                    dbc.Form(
-                        #  inline=True,
-                        children=dbc.FormGroup([
-                            dbc.Label('y-Axis', html_for='yaxis',
-                                      className='mr-2'),
-                            dcc.Dropdown(
-                                options=[
-                                    {'label': anchor_metrics[c]['label'],
-                                     'value': anchor_metrics[c]['value']} for c in
-                                        anchor_metrics
-                                ],
-                                id='yaxis',
-                                value = 'synergy_delta_emax',
-                                className='flex-grow-1'
-
-                            )
-                        ])
-                    )
-                ]
-            )
-        ]),
-        dbc.Row([
-            dbc.Col(
-                className="mt-2 mb-4",
-                children=[
-                    dbc.Form(
-                        inline=True,
-                        children=dbc.FormGroup([
-                            dbc.Label('Colour by', html_for='color',
-                                      className='mr-2'),
-                            dcc.Dropdown(
-                                options=[
-                                    {'label': c, 'value': colour_by[c]} for c in
-                                      colour_by
-                                ],
-                                id='color',
-                                value='tissue',
-                                className='flex-grow-1',
-
-                            )
-                        ])
-                    )
-                ]
-            )
-        ]),
-        html.Div(className="d-none", id='project-id-1', children=project.id),
-        dcc.Loading(
-            className='gdsc-spinner',
-            children=dcc.Graph(
-                id='flexiscatter',
-            )
-         )
     )

@@ -94,7 +94,13 @@ def generate_volcano(df,type):
             'title': 'Effect size'},
         yaxis={
             'title': '-log10 p value'},
-        title='Significant molecular associations with delta IC50'
+        title={
+            'text':'Significant molecular associations with delta IC50',
+            'y': 0.9,
+            'x': 0.5,
+            'xanchor': 'center',
+            'yanchor': 'top'
+        }
     )
 
     return fig

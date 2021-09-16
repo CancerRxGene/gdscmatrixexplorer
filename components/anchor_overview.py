@@ -36,59 +36,59 @@ def layout(combination):
                         dbc.Col(width=2, children=[
                             dcc.Loading(className='gdsc-spinner', children=
                             dcc.Graph(
-                                id='box3',
-                                figure=generate_delta_emax_boxplot(anc_df, 'low')
-                            )
+                                    id='box3',
+                                    figure=generate_delta_emax_boxplot(anc_df, 'low')
+                                )
                                         )
                         ]),
 
                         dbc.Col(width=3, children=[
                             dcc.Loading(className='gdsc-spinner', children=
-                            dcc.Graph(
-                                    id='box2',
-                                    figure = generate_ic50_boxplot(anc_df,'low')
+                                dcc.Graph(
+                                        id='box2',
+                                        figure = generate_ic50_boxplot(anc_df,'low')
+                                    )
                                 )
-                            )
                         ]),
 
                         dbc.Col(width=2, children=[
                              dcc.Loading(className='gdsc-spinner', children=
-                             dcc.Graph(
-                                 id='box4',
-                                 figure=generate_delta_ic50_boxplot(anc_df, 'low')
-                             )
+                                 dcc.Graph(
+                                     id='box4',
+                                     figure=generate_delta_ic50_boxplot(anc_df, 'low')
+                                 )
                                          )
                          ])
                     ]),  #row l21
                     dbc.Row([  #row l22
                         dbc.Col(width=4, children=[
                             dcc.Loading(className='gdsc-spinner', children=
-                            dcc.Graph(
-                                id='box5',
-                                figure=generate_vialibity_boxplot(anc_df,'high')
-                            ))
+                                dcc.Graph(
+                                    id='box5',
+                                    figure=generate_vialibity_boxplot(anc_df,'high')
+                                ))
                         ]),
 
                         dbc.Col(width=2, children=[
                             dcc.Loading(className='gdsc-spinner', children=
-                            dcc.Graph(
-                                id='box7',
-                                figure=generate_delta_emax_boxplot(anc_df, 'high')
-                            ))
+                                dcc.Graph(
+                                    id='box7',
+                                    figure=generate_delta_emax_boxplot(anc_df, 'high')
+                                ))
                         ]),
                         dbc.Col(width=3, children=[
                             dcc.Loading(className='gdsc-spinner', children=
-                            dcc.Graph(
-                                id='box6',
-                                figure=generate_ic50_boxplot(anc_df, 'high')
-                            ))
+                                dcc.Graph(
+                                    id='box6',
+                                    figure=generate_ic50_boxplot(anc_df, 'high')
+                                ))
                         ]),
                         dbc.Col(width=2, children=[
                             dcc.Loading(className='gdsc-spinner', children=
-                            dcc.Graph(
-                                id='box8',
-                                figure=generate_delta_ic50_boxplot(anc_df, 'high')
-                            ))
+                                dcc.Graph(
+                                    id='box8',
+                                    figure=generate_delta_ic50_boxplot(anc_df, 'high')
+                                ))
                         ]),
                     ]),  #row l22
                 ]) #html l2
@@ -121,15 +121,6 @@ def generate_vialibity_boxplot(anc_df,anc_conc_type):
     bliss_emax_df = get_emax_df(anc_df_per_conc,'Bliss_Emax','synergy_exp_emax')
     combo_emax_df = get_emax_df(anc_df_per_conc,'Combo_Emax','synergy_obs_emax')
     title = 'Anchor '+ anc_conc_type
-    #final_df = anc_via_df.append(lib_emax_df).append(bliss_emax_df).append(combo_emax_df)
-
-    # fig = px.strip(final_df, x='type', y='Viability %', title= title,
-    #                labels= {'type':' '},
-    #               # color = "type",
-    #                hover_name = "hover_name",
-    #                width=400,
-    #                height=500
-    #  )
 
     fig = go.Figure(
                      data = [
@@ -206,17 +197,6 @@ def generate_ic50_boxplot(anc_df,anc_conc_type):
 
     lib_ic50_df = get_ic50_df(anc_df_per_conc, 'Lib_IC50', 'library_xmid')
     combo_ic50_df = get_ic50_df(anc_df_per_conc, 'Combo_IC50', 'synergy_xmid')
-
-    # title = 'Anchor ' + anc_conc_type
-    # final_df = lib_ic50_df.append(combo_ic50_df)
-    #print(final_df)
-    # fig = px.strip(final_df, x='type', y='Norm. drug conc.',
-    #                title = ' ', labels= {'type':' '},
-    #               # color = 'type',
-    #                hover_name= "hover_name",
-    #                width=300,
-    #                height=500,
-    #                )
 
     fig = go.Figure(
             data = [
@@ -332,12 +312,6 @@ def generate_delta_ic50_boxplot(anc_df, anc_conc_type):
     anc_df_per_conc = anc_df.loc[anc_df['anchor_conc'] == conc]
 
     delta_ic50_df = get_delta_ic50_df(anc_df_per_conc)
-    # fig = px.strip(delta_emax_df, x='type', y='Delta Norm. drug conc.',
-    #                title=' ', labels= {'type':' '},
-    #                hover_name="hover_name",
-    #                width=250,
-    #                height=500
-    #                )
 
     fig = go.Figure(
         data=[

@@ -91,7 +91,16 @@ def dropdown_handler(pathname):
                         # ),
                         generate_default_navitem("Documentation",
                                                  page_type),
-                        generate_default_navitem("Downloads", page_type)
+                        generate_default_navitem("Downloads", page_type),
+                        dbc.DropdownMenu(
+                            children=
+                            [dbc.DropdownMenuItem("Interactive volcano plots",
+                                                  href=f"/volcano")
+                             ],
+                            nav=True,
+                            in_navbar=True,
+                            label="Publication",
+                        ),
                     ])
                 ]
             )
