@@ -1,3 +1,5 @@
+from typing import Any, Union
+
 import pandas as pd
 import numpy as np
 import plotly.express as px
@@ -8,6 +10,25 @@ import dash_core_components as dcc
 import dash_html_components as dbc
 import dash_html_components as html
 from dash.dependencies import Input, Output
+from pandas import DataFrame
+from pandas.io.parsers import TextFileReader
+
+labels = {
+        "y": "-log10 p value",
+        "FEATURE_delta_MEAN_IC50": "Effect size",
+        "DRUG_NAME":"Drug Name",
+        "ANOVA_FEATURE_pval": "P Value"
+    }
+
+color_discrete_map = {
+    'Breast': 'rgb(249,55,14)',
+    'Colon': 'rgb(162,132,126)',
+    'Pan-tissue': 'rgb(93,173,226)',
+    'Pancreas': 'rgb(233,96,160)',
+    'Pan-tissue molecular basket': 'rgb(52,152,219)',
+    'Intra-tissue molecular basket': 'rgb(125,206,160)'
+}
+
 
 def layout():
     df = pd.read_csv("data/Overall_ANOVA_results_significant_large_effect_results_5_FDR_without_proteomics.csv")
@@ -22,62 +43,29 @@ def layout():
     df.loc[(df["Tissue"] == "all") & (df["Genotype"] != "all"), "Analysis"] = "Pan-tissue molecular basket"
     df.loc[(df["Tissue"] != "all") & (df["Genotype"] != "all"), "Analysis"] = "Intra-tissue molecular basket"
 
-    # subset = df.loc[df['Input'] == "delta IC50"]
-
-    # x = subset['FEATURE_delta_MEAN_IC50']
-    # y = -np.log10(subset['ANOVA_FEATURE_pval'])
-    # Analysis = subset['Analysis']
-    # print(Analysis)
     return html.Div([
-        #  dcc.Graph(
-        #     id='volcano', figure=
-        #         go.Figure(
-        #             data=px.scatter(
-        #                 subset,
-        #                 x=x,
-        #                 y=y,
-        #                 color=Analysis
-        #     )
-        # )),
          dcc.Graph(
              id='volcano', figure=
                 generate_volcano(df,'delta IC50')
          ),
-        # dcc.Graph(
-        #     id='volcano', figure=
-        #     generate_volcano(df, 'combo Emax', Analysis)
-        # ),
-        # dcc.Graph(
-        #     id='volcano', figure=
-        #     generate_volcano(df, 'delta Emax', Analysis)
-        # ),
-        # dcc.Graph(
-        #     id='volcano', figure=
-        #     generate_volcano(df, 'library IC50')
-        # ),
+        dcc.Graph(
+            id='volcano', figure=
+                generate_volcano(df, 'combo Emax')
+        ),
+        dcc.Graph(
+            id='volcano', figure=
+                generate_volcano(df, 'delta Emax')
+        ),
+        dcc.Graph(
+            id='volcano', figure=generate_lib_volcano()
+        ),
 
 ])
 
 def generate_volcano(df,type):
     data = df.loc[df['Input'] == type]
 
-    if(type == 'delta IC50'):
-        column = 'FEATURE_delta_MEAN_IC50'
-    elif (type == 'library IC50'):
-        column = 'FEATURE_IC50_effect_size'
-
-    color_discrete_map = {
-        'Breast': 'rgb(249,55,14)',
-        'Colon': 'rgb(162,132,126)',
-        'Pan-tissue': 'rgb(93,173,226)',
-        'Pancreas':'rgb(233,96,160)',
-        'Pan-tissue molecular basket':'rgb(52,152,219)',
-        'Intra-tissue molecular basket':'rgb(125,206,160)'
-    }
-
-    labels = {
-
-    }
+    column = 'FEATURE_delta_MEAN_IC50'
 
     fig = go.Figure(
         data=px.scatter(
@@ -86,7 +74,8 @@ def generate_volcano(df,type):
             y=-np.log10(data['ANOVA_FEATURE_pval']),
             color=data['Analysis'],
             color_discrete_map = color_discrete_map,
-            hover_data=['FEATURE', 'DRUG_NAME','Tissue'],
+            hover_data=['Analysis', 'ANOVA_FEATURE_pval','Tissue','Genotype', 'DRUG_NAME', 'FEATURE'],
+            labels = labels
         ))
 
     fig.update_layout(
@@ -96,10 +85,60 @@ def generate_volcano(df,type):
             'title': '-log10 p value'},
         title={
             'text':'Significant molecular associations with delta IC50',
-            'y': 0.9,
-            'x': 0.5,
-            'xanchor': 'center',
-            'yanchor': 'top'
+            # 'y': 0.9,
+            # 'x': 0.5,
+            # 'xanchor': 'center',
+            # 'yanchor': 'top'
+        }
+    )
+
+    return fig
+
+def generate_lib_volcano():
+    df_lib: Union[Union[TextFileReader, DataFrame], Any] = pd.read_csv("data/Lib_IC50_sign_large_effect_results_for_Wendy.csv")
+
+    df_lib['DRUG_NAME_ANCHOR'], df_lib['DRUG_NAME_LIB'] = map(list, zip(*(s.split("_") for s in df_lib['DRUG_NAME'])))
+
+    # add column label
+    df_lib['Label'] = 'NaN'
+
+    df_lib.loc[(df_lib['DRUG_NAME_LIB'] == 'Dabrafenib') & (df_lib['FEATURE'] == 'BRAFmut'), 'Label'] = "BRAF mutation and dabrafenib sensitivity"
+    df_lib.loc[(df_lib['DRUG_NAME_LIB'] == "Nutlin-3a (-)") & (df_lib['FEATURE'] == "TP53_mut"), 'Label'] = "TP53 mutation and nutlin-3a resistance"
+    df_lib.loc[(df_lib['DRUG_NAME_LIB'] == "Taselisib") & (df_lib['FEATURE'] == "PIK3CA_mut"), 'Label'] = "PIK3CA mutation and taselisib sensitivity"
+    df_lib.loc[(df_lib['DRUG_NAME_LIB'] == "Afatinib") & (df_lib['FEATURE'] == "gain:cnaPANCAN301 (CDK12,ERBB2,MED24)"), 'Label'] = "ERBB2 amplification and afatinib sensitivity"
+
+    #print(df_lib[['DRUG_NAME', 'DRUG_NAME_ANCHOR','DRUG_NAME_LIB','FEATURE','Label']])
+    column = 'FEATURE_delta_MEAN_IC50'
+    color_map = {
+        'BRAF mutation and dabrafenib sensitivity': 'rgb(97, 99, 233)',
+        'TP53 mutation and nutlin-3a resistance': 'rgb(249, 229, 169)',
+        'PIK3CA mutation and taselisib sensitivity': 'rgb(241, 168, 120)',
+        'ERBB2 amplification and afatinib sensitivity': 'rgb(169, 229, 249)',
+        'NaN':'rgb(201, 205, 205)'
+    }
+
+    fig = go.Figure(
+        data=px.scatter(
+            df_lib,
+            x=df_lib[column],
+            y=-np.log10(df_lib['ANOVA_FEATURE_pval']),
+            color=df_lib['Label'],
+            color_discrete_map=color_map,
+            hover_data=[ 'ANOVA_FEATURE_pval', 'Tissue', 'Genotype', 'DRUG_NAME', 'FEATURE'],
+            labels=labels
+        ))
+
+    fig.update_layout(
+        xaxis={
+            'title': 'Effect size'},
+        yaxis={
+            'title': '-log10 p value'},
+        title={
+            'text': 'Significant molecular associations with delta IC50',
+            # 'y': 0.9,
+            # 'x': 0.5,
+            # 'xanchor': 'center',
+            # 'yanchor': 'top'
         }
     )
 
