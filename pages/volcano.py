@@ -21,12 +21,12 @@ labels = {
     }
 
 color_discrete_map = {
-    'Breast': 'rgb(249,55,14)',
-    'Colon': 'rgb(162,132,126)',
+    'Breast': 'rgb(247, 95, 57)',
+    'Colon': 'rgb(218, 166, 94)',
     'Pan-tissue': 'rgb(93,173,226)',
     'Pancreas': 'rgb(233,96,160)',
-    'Pan-tissue molecular basket': 'rgb(52,152,219)',
-    'Intra-tissue molecular basket': 'rgb(125,206,160)'
+    'Pan-tissue molecular basket': 'rgb(10, 147, 247)',
+    'Intra-tissue molecular basket': 'rgb(55, 186, 41)'
 }
 
 
@@ -110,11 +110,11 @@ def generate_lib_volcano():
     #print(df_lib[['DRUG_NAME', 'DRUG_NAME_ANCHOR','DRUG_NAME_LIB','FEATURE','Label']])
     column = 'FEATURE_delta_MEAN_IC50'
     color_map = {
-        'BRAF mutation and dabrafenib sensitivity': 'rgb(97, 99, 233)',
-        'TP53 mutation and nutlin-3a resistance': 'rgb(249, 229, 169)',
+        'BRAF mutation and dabrafenib sensitivity': 'rgb(158,67,162)',
+        'TP53 mutation and nutlin-3a resistance': 'rgb(255, 215, 0)',
         'PIK3CA mutation and taselisib sensitivity': 'rgb(241, 168, 120)',
-        'ERBB2 amplification and afatinib sensitivity': 'rgb(169, 229, 249)',
-        'NaN':'rgb(201, 205, 205)'
+        'ERBB2 amplification and afatinib sensitivity': 'rgb(32,178,170)',
+        'NaN':'rgb(211,211,211)'
     }
 
     fig = go.Figure(
