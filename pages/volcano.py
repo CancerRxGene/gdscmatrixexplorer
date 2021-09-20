@@ -4,12 +4,10 @@ import pandas as pd
 import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
-
-import dash
+import dash_bootstrap_components as dbc
 import dash_core_components as dcc
-import dash_html_components as dbc
+from components.breadcrumbs import breadcrumb_generator as crumbs
 import dash_html_components as html
-from dash.dependencies import Input, Output
 from pandas import DataFrame
 from pandas.io.parsers import TextFileReader
 
@@ -44,21 +42,50 @@ def layout():
     df.loc[(df["Tissue"] != "all") & (df["Genotype"] != "all"), "Analysis"] = "Intra-tissue molecular basket"
 
     return html.Div([
-         dcc.Graph(
-             id='volcano', figure=
-                generate_volcano(df,'delta IC50')
-         ),
-        dcc.Graph(
-            id='volcano', figure=
-                generate_volcano(df, 'combo Emax')
-        ),
-        dcc.Graph(
-            id='volcano', figure=
-                generate_volcano(df, 'delta Emax')
-        ),
-        dcc.Graph(
-            id='volcano', figure=generate_lib_volcano()
-        ),
+        crumbs([("Home", "/"), ("volcano",)]),
+        dbc.Row([
+            dbc.Col(width=12, children=[
+                html.Div(className="bg-white pt-3 px-4 pb-3 mb-3 border border-primary shadow-sm",
+                         children=[
+                             dcc.Graph(
+                                 id='volcano', figure=
+                                    generate_volcano(df,'delta IC50')
+                             ),
+                         ])
+                ])
+            ]),
+        dbc.Row([
+            dbc.Col(width=12, children=[
+                html.Div(className="bg-white pt-3 px-4 pb-3 mb-3 border border-primary shadow-sm",
+                         children=[
+                             dcc.Graph(
+                                id='volcano', figure=
+                                    generate_volcano(df, 'combo Emax')
+                            ),
+                         ])
+                ])
+            ]),
+        dbc.Row([
+            dbc.Col(width=12, children=[
+                html.Div(className="bg-white pt-3 px-4 pb-3 mb-3 border border-primary shadow-sm",
+                         children=[
+                            dcc.Graph(
+                                id='volcano', figure=
+                                    generate_volcano(df, 'delta Emax')
+                            ),
+                ])
+            ])
+        ]),
+        dbc.Row([
+            dbc.Col(width=12, children=[
+                html.Div(className="bg-white pt-3 px-4 pb-3 mb-3 border border-primary shadow-sm",
+                         children=[
+                            dcc.Graph(
+                                id='volcano', figure=generate_lib_volcano()
+                            ),
+                ])
+            ])
+        ])
 
 ])
 
