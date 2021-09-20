@@ -84,11 +84,11 @@ def generate_volcano(df,type):
         yaxis={
             'title': '-log10 p value'},
         title={
-            'text':'Significant molecular associations with delta IC50',
-            # 'y': 0.9,
-            # 'x': 0.5,
-            # 'xanchor': 'center',
-            # 'yanchor': 'top'
+            'text':'Significant molecular associations with ' + type,
+            'font': {
+                'size': 20,
+                'color': 'black'
+            },
         }
     )
 
@@ -134,12 +134,14 @@ def generate_lib_volcano():
         yaxis={
             'title': '-log10 p value'},
         title={
-            'text': 'Significant molecular associations with delta IC50',
-            # 'y': 0.9,
-            # 'x': 0.5,
-            # 'xanchor': 'center',
-            # 'yanchor': 'top'
-        }
+            'text': 'Significant molecular associations with library IC50',
+            'font':{
+                'size':20,
+                'color': 'black'
+            },
+            'pad':{'t': 10}
+        },
+
     )
 
     return fig
