@@ -76,9 +76,6 @@ def cached_update_scatter(tissue,cancertype,library,anchor,combintation,color,xa
 
 
 def layout(filtered_df,color,xaxis,yaxis):
-    xaxis_data = filtered_df[xaxis]
-    yaxis_data =  filtered_df[yaxis]
-
     x_title = anchor_metrics[xaxis]['label']
     y_title = anchor_metrics[yaxis]['label']
 
@@ -86,11 +83,18 @@ def layout(filtered_df,color,xaxis,yaxis):
     viability_values = ['synergy_obs_emax','library_emax','anchor_viability']
 
     if(xaxis in viability_values):
-        filtered_df[xaxis] = filtered_df[xaxis].apply(lambda x: "{:.2%}".format(x))
+        #filtered_df[xaxis] = filtered_df[xaxis].apply(lambda x: "{:.2%}".format(x))
+        filtered_df[xaxis] = 100 * filtered_df[xaxis]
         x_title = x_title + " %"
+        print(filtered_df[xaxis])
+
 
     if(yaxis in viability_values):
-        filtered_df[yaxis] = filtered_df[yaxis].apply(lambda x: "{:.2%}".format(x))
+        #filtered_df[yaxis] = filtered_df[yaxis].apply(lambda x: "{:.2%}".format(x))
+        # viability values use percentage rather than decimal,
+        #  so each value  multiply 100, but not adding '%' as it will turn the value to string
+        # and can not sort properly
+        filtered_df[yaxis] = 100 * filtered_df[yaxis]
         y_title = y_title + " %"
 
     color_values = {}
@@ -99,7 +103,6 @@ def layout(filtered_df,color,xaxis,yaxis):
         color_values[v] = plot_colors[i % len(plot_colors)]
 
     fig = go.Figure(
-        #data=go.Scatter(
         data = px.scatter(
             filtered_df,
             x = xaxis,
@@ -107,7 +110,7 @@ def layout(filtered_df,color,xaxis,yaxis):
             color = color,
 
             labels= anchor_metrics_labels,
-            hover_data=['tissue', 'cancer_type','cell_line_name','sidm'],
+            hover_data=['tissue', 'cancer_type','combo_name', 'cell_line_name','sidm'],
     ))
 
     fig.update_layout(

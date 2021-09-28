@@ -168,10 +168,10 @@ anchor_metrics = {
 anchor_metrics_labels = {
     "synergy_delta_xmid" : "Delta IC50",
     "synergy_delta_emax" : "Delta Emax",
-    "synergy_obs_emax"   : "Combo Emax",
+    "synergy_obs_emax"   : "Combo Emax%",
     "library_xmid"       : "Library IC50",
-    "library_emax"       : "Library Emax",
-    "anchor_viability"   : "Anchor Viability",
+    "library_emax"       : "Library Emax%",
+    "anchor_viability"   : "Anchor Viability%",
     "synergy_exp_xmid"   : "Bliss IC50",
     "synergy_exp_emax"   : "Bliss Emax",
     "tissue"             : "Tissue",

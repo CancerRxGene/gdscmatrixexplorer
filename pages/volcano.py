@@ -14,7 +14,7 @@ from pandas.io.parsers import TextFileReader
 labels = {
         "y": "-log10 p value",
         "FEATURE_delta_MEAN_IC50": "Effect size",
-        "DRUG_NAME":"Drug Name",
+        "DRUG_NAME":"Combination Name",
         "ANOVA_FEATURE_pval": "P Value"
     }
 
