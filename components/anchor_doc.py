@@ -5,7 +5,7 @@ import dash_html_components as html
 from utils import anchor_projects
 
 def layout():
-    if(anchor_projects):
+    if(anchor_projects()):
         return html.Div(id="anchor", children=
                dbc.Col(
                    width=12,

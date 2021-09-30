@@ -15,7 +15,7 @@ def project_data_link(project):
         ])
 
 def layout(*args, **kwargs):
-    if(matrix_projects):
+    if(matrix_projects()):
         all_projects = session.query(Project).all()
 
         project_data_links = [project_data_link(p) for p in all_projects]

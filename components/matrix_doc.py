@@ -15,7 +15,7 @@ x1 = sub("x", 1)
 x2 = sub("x", 2)
 
 def layout(*args, **kwargs):
-    if(matrix_projects):
+    if(matrix_projects()):
         return html.Div(id="matrix", children=
             dbc.Col(className='text-justify',
                # width=8,
