@@ -16,7 +16,7 @@ from tqdm import tqdm
 
 from db import engine, Base
 from models import Model, Drug, Combination, MatrixResult, WellResult, \
-    DoseResponseCurve, SingleAgentWellResult, Project, AnchorCombi, AnchorSynergy
+    DoseResponseCurve, SingleAgentWellResult, Project, AnchorCombi, AnchorSynergy, AnchorProjectStats
 
 Session = sessionmaker(bind=engine)
 session = Session()
@@ -337,9 +337,9 @@ def sa_wells_to_db(wells):
     to_db(SingleAgentWellResult, wells)
 
 def upload_anchor(anchor_combi_path: str, anchor_synergy_path: str, project_name: str):
+    project = get_project(project_name, 'anchor')
     anchor_combi = pd.read_csv(anchor_combi_path)
     anchor_synergy = pd.read_csv(anchor_synergy_path)
-    project = get_project(project_name, 'anchor')
 
     upload_anchor_new_models(anchor_combi)
     upload_anchor_new_drugs(anchor_combi)
@@ -352,6 +352,8 @@ def upload_anchor(anchor_combi_path: str, anchor_synergy_path: str, project_name
     #add project id to synergy df
     anchor_synergy['project_id'] = project.id
     upload_anchor_synergy(anchor_synergy)
+
+    upload_anchor_project_stats(project.id)
 
 def upload_anchor_new_models(anchor_combi_df):
     print(f"Uploading models")
@@ -433,6 +435,35 @@ def upload_anchor_combi(anchor_combi_df):
 
 def upload_anchor_synergy(anchor_synergy_df):
     to_db(AnchorSynergy,anchor_synergy_df)
+
+def upload_anchor_project_stats(project_id):
+    print(f"Uploading project stats")
+
+    lib_drugs = session.query(AnchorCombi.library_id).filter(AnchorCombi.project_id == project_id).distinct().all()
+    lib_drugs_count = len(lib_drugs)
+
+    anchor_drugs = session.query(AnchorCombi.anchor_id).filter(AnchorCombi.project_id == project_id).distinct().all()
+    anchor_drugs_count = len(anchor_drugs)
+
+    celllines = session.query(AnchorCombi.cell_line_name).filter(AnchorCombi.project_id == project_id).distinct().all()
+    celllines_count = len(celllines)
+
+    measurements = session.query(AnchorCombi).filter(AnchorCombi.project_id == project_id).all()
+    measurements_count = len(measurements)
+
+    combination = session.query(Combination).filter(Combination.project_id == project_id).all()
+    combinations_count = len(combination)
+
+    stats = AnchorProjectStats(
+        project_id = project_id,
+        lib_drugs_count = lib_drugs_count,
+        anchor_drugs_count = anchor_drugs_count,
+        cell_lines_count = celllines_count,
+        measurements = measurements_count,
+        combinations_count = combinations_count
+    )
+    session.add(stats)
+    session.commit()
 
 if __name__ == '__main__':
     print("!!! Run this program using gdscmatrixexplorer/cli.py !!!")
