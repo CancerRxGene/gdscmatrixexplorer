@@ -77,7 +77,7 @@ def get_project(project_name):
 def add_new_models(combo_matrix_stats):
     models = extract_models(combo_matrix_stats)
     new_models = get_new(Model, models)
-    new_models = add_sidms(new_models, 'MASTER_CELL_ID', 'master_cell_id')
+    new_models = add_sidms(new_models, 'MASTER_CELL_ID', 'master_cell_id', verbose=True)
     new_models = new_models[pd.notna(new_models.id)]
     if not new_models.empty:
         models_to_db(new_models)
@@ -88,7 +88,8 @@ def extract_models(combo_matrix_stats):
     for c in ["TISSUE", "CANCER_TYPE", 'MASTER_CELL_ID', 'COSMIC_ID']:
         if c in combo_matrix_stats.columns:
             if c.endswith("ID"):
-                models[c] = combo_matrix_stats[c].astype(int)
+                models[c] = combo_matrix_stats[c].fillna(0)
+                models[c] = models[c].astype(int)
             else:
                 models[c] = combo_matrix_stats[c]
 
