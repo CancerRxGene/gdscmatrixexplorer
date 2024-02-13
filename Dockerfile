@@ -6,6 +6,8 @@ WORKDIR /home/matrixexplorer
 
 COPY --chown=matrixexplorer:matrixexplorer . /home/matrixexplorer/
 
+RUN pip install --upgrade pip
+
 RUN pip install --no-cache-dir -r requirements.txt && \
     find /usr/local/lib/python3.7 -name '*.c' -delete && \
     find /usr/local/lib/python3.7 -name '*.pxd' -delete && \
