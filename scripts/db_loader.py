@@ -43,6 +43,8 @@ def upload_project(combo_matrix_stats_path: str,
     drug_matrices = extract_drug_matrices(combo_matrix_stats)
     drug_matrices = add_project_id(drug_matrices, project)
     drug_matrices_to_db(drug_matrices)
+    # matrix_results = extract_matrix_results(combo_matrix_stats, 'MASTER_CELL_ID')
+    # matrix_results = add_model_id(matrix_results, models, 'master_cell_id')
     matrix_results = extract_matrix_results(combo_matrix_stats, 'MASTER_CELL_ID')
     matrix_results = add_model_id(matrix_results, models, 'master_cell_id')
     matrix_results = add_project_id(matrix_results, project)
@@ -78,6 +80,7 @@ def add_new_models(combo_matrix_stats):
     models = extract_models(combo_matrix_stats)
     new_models = get_new(Model, models)
     new_models = add_sidms(new_models, 'MASTER_CELL_ID', 'master_cell_id', verbose=True)
+    new_models = set_models_id(new_models, 'master_cell_id')
     new_models = new_models[pd.notna(new_models.id)]
     if not new_models.empty:
         models_to_db(new_models)
@@ -130,7 +133,8 @@ def add_sidms(models: pd.DataFrame, identifier_type: str, identifier_column: str
         sidms.append(get_sidm(getattr(m, identifier_column), identifier_type))
 
     del pbar
-    models['id'] = sidms
+    # models['id'] = sidms
+    models['sidm'] = sidms
 
     return models
 
@@ -161,6 +165,10 @@ def get_sidm(identifier: int, identifier_type:str, retries: int = 3):
 
     print(f"Max retries exceeded for {identifier}")
     return None
+
+def set_models_id(models: pd.DataFrame, identifier_column: str):
+    models['id'] = models[identifier_column]
+    return models
 
 
 def models_to_db(models):

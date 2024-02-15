@@ -38,6 +38,7 @@ class Model(ToDictMixin, Base):
     id = sa.Column(sa.String, primary_key=True)
     cell_line_name = sa.Column(sa.String)
     master_cell_id = sa.Column(sa.Integer)
+    sidm = sa.Column(sa.String)
     cosmic_id = sa.Column(sa.Integer)
     tissue = sa.Column(sa.String)
     cancer_type = sa.Column(sa.String)
@@ -64,8 +65,8 @@ class Combination(ToDictMixin, Base):
     lib1 = relationship(Drug, foreign_keys=[lib1_id])
     lib2 = relationship(Drug, foreign_keys=[lib2_id])
 
-    matrices = relationship("MatrixResult", lazy='dynamic', back_populates='combination')
-    project = relationship("Project", back_populates='combinations')
+    matrices = relationship("MatrixResult", lazy='dynamic', back_populates='combination', overlaps="matrices")
+    project = relationship("Project", back_populates='combinations') 
 
     @property
     def replicates_query(self):
@@ -166,9 +167,10 @@ class MatrixResult(ToDictMixin, Base):
                                primaryjoin="and_(Combination.project_id == MatrixResult.project_id, "
                                            "Combination.lib1_id == MatrixResult.lib1_id, "
                                            "Combination.lib2_id == MatrixResult.lib2_id)",
-                               viewonly=True)
+                               viewonly=True, 
+                               overlaps="matrices")
 
-    project = relationship("Project", back_populates='matrices')
+    project = relationship("Project", back_populates='matrices', overlaps="matrices")
 
     well_results = relationship("WellResult", lazy='dynamic')
     model = relationship("Model")
